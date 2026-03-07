@@ -4,6 +4,8 @@ import { motion } from 'framer-motion';
 import GoldButton from '../components/GoldButton';
 import Badge from '../components/Badge';
 import CountdownTimer from '../components/CountdownTimer';
+import { dispatchNotification, NotificationTypes } from '../utils/notificationDispatcher';
+import { getData, updateData } from '../utils/storageService';
 
 const relicData = {
     1: {
@@ -77,6 +79,36 @@ export default function RelicDetailPage() {
     const navigate = useNavigate();
     const relic = relicData[id];
     const [bidAmount, setBidAmount] = useState('');
+    const [localBids, setLocalBids] = useState(relic ? relic.bids : []);
+    const [currentBid, setCurrentBid] = useState(relic ? relic.currentBid : 0);
+
+    const handlePlaceBid = () => {
+        const amount = Number(bidAmount);
+        const nextBid = currentBid + relic.minimumIncrement;
+        if (!amount || amount < nextBid) {
+            dispatchNotification(NotificationTypes.ERROR, 'Bid To Low', `Minimum bid is ${formatPrice(nextBid)}`);
+            return;
+        }
+
+        // Local state update
+        setCurrentBid(amount);
+        setLocalBids([{ name: 'You', amount: amount, time: 'Just now', avatar: '🔥' }, ...localBids]);
+        setBidAmount('');
+
+        // Store bid globally for profile
+        updateData('user_bids', (bids = []) => {
+            return [{
+                id: `bid_${Date.now()}`,
+                relicId: id,
+                relicName: relic.name,
+                amount: amount,
+                timestamp: Date.now()
+            }, ...bids];
+        });
+
+        // Show success
+        dispatchNotification(NotificationTypes.SUCCESS, 'Bid Placed!', `Successfully bid ${formatPrice(amount)} on ${relic.name}`);
+    };
 
     if (!relic) {
         return (
@@ -86,7 +118,7 @@ export default function RelicDetailPage() {
         );
     }
 
-    const nextBid = relic.currentBid + relic.minimumIncrement;
+    const nextBid = currentBid + relic.minimumIncrement;
 
     return (
         <div className="min-h-screen pb-4">
@@ -155,7 +187,7 @@ export default function RelicDetailPage() {
                     <div className="card-luxury p-5">
                         <p className="text-gray-400 text-xs uppercase tracking-wider mb-1">Current Bid</p>
                         <p className="text-gold font-serif font-bold text-2xl mb-4">
-                            {formatPrice(relic.currentBid)}
+                            {formatPrice(currentBid)}
                         </p>
 
                         <label className="block text-gray-400 text-xs uppercase tracking-wider mb-2">
@@ -169,7 +201,7 @@ export default function RelicDetailPage() {
                             className="w-full px-4 py-3 bg-navy-800/80 border border-navy-600/50 rounded-lg text-gray-200 placeholder-gray-500 focus:outline-none focus:border-gold/40 focus:shadow-glow-gold transition-all duration-300 mb-4"
                         />
 
-                        <GoldButton className="w-full text-center justify-center" size="lg">
+                        <GoldButton onClick={handlePlaceBid} className="w-full text-center justify-center" size="lg">
                             PLACE BID {formatPrice(nextBid)}
                         </GoldButton>
                         <p className="text-gray-500 text-xs text-center mt-2">
@@ -186,7 +218,7 @@ export default function RelicDetailPage() {
                 >
                     <h2 className="font-serif text-xl text-gold font-bold mb-3">Latest Bids</h2>
                     <div className="space-y-3">
-                        {relic.bids.map((bid, index) => (
+                        {localBids.map((bid, index) => (
                             <motion.div
                                 key={index}
                                 initial={{ opacity: 0, y: 10 }}

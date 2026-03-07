@@ -86,7 +86,7 @@ export default function ProfilePage() {
     // Derived Data
     const userPosts = useMemo(() => {
         if (!profileUser) return [];
-        const groups = getData('communities', []);
+        const groups = getData('communities_v2') || [];
         let posts = [];
         groups.forEach(g => {
             (g.posts || []).forEach(p => {
@@ -164,14 +164,24 @@ export default function ProfilePage() {
         userPosts.forEach(p => {
             history.push({ id: p.id, action: `Posted in ${p.groupName}`, target: p.content.substring(0, 30) + '...', date: p.timestamp });
         });
-        orders.forEach(o => {
-            history.push({ id: o.orderId, action: `Purchased Merchandise`, target: `${o.items.length} items`, date: new Date(o.date).getTime() });
-        });
-        coins.forEach(c => {
-            history.push({ id: `coin-${c.id}-${c.date}`, action: `Acquired Collectible Coin`, target: c.name, date: c.date });
-        });
+
+        if (isOwnProfile) {
+            orders.forEach(o => {
+                history.push({ id: o.orderId, action: `Purchased Merchandise`, target: `${o.items.length} items`, date: new Date(o.date).getTime() });
+            });
+            coins.forEach(c => {
+                history.push({ id: `coin-${c.id}-${c.date}`, action: `Acquired Collectible Coin`, target: c.name, date: c.date });
+            });
+
+            // Render placed bids globally found from localStorage
+            const bids = getData('user_bids') || [];
+            bids.forEach(b => {
+                history.push({ id: b.id, action: `Placed Bid`, target: `${b.relicName} (₹${b.amount.toLocaleString('en-IN')})`, date: b.timestamp });
+            });
+        }
+
         return history.sort((a, b) => b.date - a.date);
-    }, [userPosts, orders, coins]);
+    }, [userPosts, orders, coins, isOwnProfile]);
 
     return (
         <div className="min-h-screen pb-4">

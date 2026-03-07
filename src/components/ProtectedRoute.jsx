@@ -12,9 +12,8 @@ export default function ProtectedRoute({ children }) {
                 </div>
                 <h2 className="font-serif text-2xl font-bold text-gold mb-2">Access Denied</h2>
                 <p className="text-gray-400 mb-8 max-w-sm">
-                    You must be logged in to access your luxury profile and collection shelf.
+                    You must be logged in to access secure endpoints.
                 </p>
-                <Navigate to="/" replace />
             </div>
         );
     }
