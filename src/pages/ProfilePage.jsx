@@ -1,8 +1,9 @@
 import { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
+import { mockUsers } from '../mock/mockUsers';
 import StatsCard from '../components/StatsCard';
 import RoleGuard from '../components/RoleGuard';
 import { getData, setData } from '../utils/storageService';
@@ -203,6 +204,58 @@ export default function ProfilePage() {
         return history.sort((a, b) => b.date - a.date);
     }, [userPosts, orders, coins, isOwnProfile]);
 
+    const [coverScroll, setCoverScroll] = useState(0);
+    useEffect(() => {
+        const onScroll = () => setCoverScroll(Math.min(window.scrollY, 120));
+        window.addEventListener('scroll', onScroll, { passive: true });
+        return () => window.removeEventListener('scroll', onScroll);
+    }, []);
+
+    const { login } = useAuth();
+    const overlayOpacity = 1 - (coverScroll / 120) * 0.4;
+
+    if (!profileUser) {
+        return (
+            <div className="min-h-screen flex items-center justify-center p-6 text-center bg-navy-950">
+                <motion.div
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="card-luxury p-8 max-w-sm w-full border border-navy-700 shadow-2xl"
+                >
+                    <div className="w-20 h-20 rounded-full bg-gradient-to-br from-teal-800 to-navy-700 mx-auto flex items-center justify-center text-3xl mb-6 shadow-glow-rare border border-gold/20">
+                        👤
+                    </div>
+                    <h2 className="font-serif text-2xl font-bold text-white mb-2 tracking-wide">GUEST PROFILE</h2>
+                    <p className="text-gray-400 text-sm mb-8 leading-relaxed">Access the Film Cultural Universe by selecting a profile below.</p>
+
+                    <div className="space-y-3">
+                        {mockUsers.map(u => (
+                            <button
+                                key={u.id}
+                                onClick={() => login(u.id)}
+                                className="w-full flex items-center gap-3 px-4 py-3 bg-navy-800/80 border border-navy-700/50 rounded-xl hover:border-gold/30 hover:bg-navy-800 transition-all text-left group"
+                            >
+                                <div className="w-10 h-10 rounded-full border border-gold/10 group-hover:border-gold/30 flex items-center justify-center text-lg bg-navy-900 transition-colors">{u.avatar}</div>
+                                <div>
+                                    <p className="text-sm font-bold text-gray-200 group-hover:text-gold transition-colors">{u.name}</p>
+                                    <p className="text-[10px] text-gold uppercase tracking-widest opacity-80">{u.role}</p>
+                                </div>
+                            </button>
+                        ))}
+                    </div>
+
+                    <Link
+                        to="/"
+                        className="block mt-8 text-gray-500 hover:text-white text-xs font-bold uppercase tracking-widest transition-colors flex items-center justify-center gap-2"
+                    >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+                        Return Home
+                    </Link>
+                </motion.div>
+            </div>
+        );
+    }
+
     return (
         <div className="min-h-screen pb-4">
             {/* Cover + Avatar */}
@@ -215,7 +268,13 @@ export default function ProfilePage() {
                 >
                     <img src='/images/profile_cover.png' alt="Cover" className="w-full h-full object-cover opacity-60" />
                     <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-navy-900" />
-                    <div className="absolute inset-0" style={{ backgroundColor: activeTheme.coverOverlay }} />
+                    <div
+                        className="absolute inset-0 transition-opacity duration-200"
+                        style={{
+                            backgroundColor: activeTheme.coverOverlay,
+                            opacity: overlayOpacity,
+                        }}
+                    />
                 </motion.div>
 
                 <motion.div
@@ -294,7 +353,7 @@ export default function ProfilePage() {
                     <div className="mt-5 flex items-center gap-4">
                         <motion.div
                             whileHover={{ scale: 1.05 }}
-                            className="px-4 py-1.5 rounded-full bg-navy-800 text-white text-xs font-bold border border-navy-600 shadow-sm"
+                            className={`px-4 py-1.5 rounded-full text-xs font-bold border shadow-sm ${activeTheme.badgeClass}`}
                         >
                             {profileUser?.totalPosts || 0} CONTRIBUTIONS
                         </motion.div>
@@ -347,7 +406,7 @@ export default function ProfilePage() {
                     {displayRoles.map((role) => (
                         <span
                             key={role}
-                            className="px-4 py-1.5 rounded-lg text-sm font-medium bg-navy-800/80 border border-navy-600/50 text-gray-300 hover:border-gold/30 hover:text-gold transition-all duration-200"
+                            className={`px-4 py-1.5 rounded-lg text-sm font-medium border transition-all duration-200 hover:opacity-90 ${activeTheme.cardClass}`}
                         >
                             {role}
                         </span>
@@ -359,7 +418,8 @@ export default function ProfilePage() {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.5 }}
-                    className={`mt-8 p-6 md:p-8 rounded-xl relative overflow-hidden flex flex-col md:flex-row gap-6 md:gap-10 items-center justify-between ${activeTheme.cardClass}`}
+                    whileHover={{ transition: { duration: 0.2 } }}
+                    className={`mt-8 p-6 md:p-8 rounded-xl relative overflow-hidden flex flex-col md:flex-row gap-6 md:gap-10 items-center justify-between ${activeTheme.cardClass} hover:shadow-lg transition-shadow duration-200`}
                 >
                     <div className="absolute top-0 right-0 w-64 h-64 bg-gold/5 rounded-full blur-[80px] pointer-events-none" />
 
@@ -429,8 +489,13 @@ export default function ProfilePage() {
                                     ) : (
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                             {premiumItems.map((item, idx) => (
-                                                <div key={idx} className="bg-zinc-900 border border-gold/20 flex flex-col sm:flex-row gap-6 p-4 rounded-xl relative overflow-hidden group">
-                                                    <div className="absolute inset-0 bg-gradient-to-r from-transparent to-gold/5 pointer-events-none" />
+                                                <motion.div
+                                                    key={idx}
+                                                    whileHover={{ scale: 1.02 }}
+                                                    transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+                                                    className={`flex flex-col sm:flex-row gap-6 p-4 rounded-xl relative overflow-hidden group ${activeTheme.cardClass}`}
+                                                >
+                                                    <div className="absolute inset-0 bg-gradient-to-r from-transparent to-gold/5 pointer-events-none opacity-50" />
                                                     <div className="w-full sm:w-1/3 aspect-square bg-zinc-950 rounded-lg p-4 flex items-center justify-center shrink-0 border border-zinc-800 relative z-10">
                                                         <img src={item.image} alt={item.name} className="w-full h-full object-contain filter group-hover:scale-110 transition-transform duration-500" />
                                                     </div>
@@ -457,7 +522,7 @@ export default function ProfilePage() {
                                                             </div>
                                                         </div>
                                                     </div>
-                                                </div>
+                                                </motion.div>
                                             ))}
                                         </div>
                                     )}
@@ -469,11 +534,16 @@ export default function ProfilePage() {
                                         <span className="text-lg text-blue-500">※</span> Daily Wear <span className="text-zinc-500 font-sans text-xs uppercase tracking-widest">/ OURS</span>
                                     </h3>
                                     {dailyItems.length === 0 ? (
-                                        <p className="text-gray-500 text-center py-8 bg-zinc-900/30 rounded-xl border border-dashed border-zinc-800 text-sm uppercase tracking-widest">No daily items acquired.</p>
+                                        <p className={`text-gray-500 text-center py-8 rounded-xl border border-dashed text-sm uppercase tracking-widest ${activeTheme.cardClass}`}>No daily items acquired.</p>
                                     ) : (
                                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                             {dailyItems.map((item, idx) => (
-                                                <div key={idx} className="bg-zinc-900 border border-zinc-700/50 flex items-center gap-4 p-3 rounded-lg hover:border-blue-500/50 transition-colors">
+                                                <motion.div
+                                                    key={idx}
+                                                    whileHover={{ scale: 1.02 }}
+                                                    transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+                                                    className={`flex items-center gap-4 p-3 rounded-lg transition-colors ${activeTheme.cardClass}`}
+                                                >
                                                     <div className="w-16 h-16 rounded-md p-1 shrink-0 bg-white shadow-sm flex items-center justify-center overflow-hidden">
                                                         <img src={item.image} alt={item.name} className="w-full h-full object-contain filter mix-blend-multiply drop-shadow-sm" />
                                                     </div>
@@ -481,7 +551,7 @@ export default function ProfilePage() {
                                                         <h4 className="font-bold text-white text-sm line-clamp-1 mb-1">{item.name}</h4>
                                                         <button className="text-blue-400 text-[10px] uppercase font-bold tracking-wider hover:text-white">View Story</button>
                                                     </div>
-                                                </div>
+                                                </motion.div>
                                             ))}
                                         </div>
                                     )}
@@ -492,22 +562,23 @@ export default function ProfilePage() {
                                     <h3 className="text-white font-serif text-xl mb-6">Virtual Inventory</h3>
                                     <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 gap-4">
                                         {otherItems.length === 0 ? (
-                                            <p className="col-span-full text-gray-500 text-center py-8 bg-zinc-900/30 rounded-xl border border-dashed border-zinc-800 text-sm uppercase tracking-widest">Shelf is empty.</p>
+                                            <p className={`col-span-full text-gray-500 text-center py-8 rounded-xl border border-dashed text-sm uppercase tracking-widest ${activeTheme.cardClass}`}>Shelf is empty.</p>
                                         ) : (
-                                            otherItems.map((item, index) => (
+                                            otherItems.map((shelfItem, index) => (
                                                 <motion.div
                                                     key={index}
                                                     variants={item}
-                                                    whileHover={{ scale: 1.05, zIndex: 10 }}
-                                                    className="group relative rounded-xl overflow-hidden bg-navy-800 border border-navy-600/30 hover:border-gold/30 hover:shadow-glow-rare transition-all duration-300 cursor-pointer aspect-square flex flex-col items-center justify-center p-2"
+                                                    whileHover={{ scale: 1.02, zIndex: 10 }}
+                                                    transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+                                                    className={`group relative rounded-xl overflow-hidden transition-all duration-300 cursor-pointer aspect-square flex flex-col items-center justify-center p-2 ${activeTheme.cardClass}`}
                                                 >
                                                     <div className="absolute top-2 left-2 px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-navy-900/80 text-teal-400 border border-teal-500/40 z-10">
-                                                        {item.type}
+                                                        {shelfItem.type}
                                                     </div>
-                                                    <img src={item.image} alt={item.name} className="w-full h-full object-cover absolute inset-0 opacity-80 group-hover:opacity-100 transition-opacity" />
+                                                    <img src={shelfItem.image} alt={shelfItem.name} className="w-full h-full object-cover absolute inset-0 opacity-80 group-hover:opacity-100 transition-opacity" />
                                                     {/* Gradient overlay for text visibility */}
                                                     <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-navy-950 to-transparent pt-12 pb-3 px-3">
-                                                        <p className="text-white font-bold text-xs truncate drop-shadow-md">{item.name}</p>
+                                                        <p className="text-white font-bold text-xs truncate drop-shadow-md">{shelfItem.name}</p>
                                                     </div>
                                                 </motion.div>
                                             ))
@@ -526,10 +597,15 @@ export default function ProfilePage() {
                                 className="space-y-4"
                             >
                                 {userPosts.length === 0 ? (
-                                    <p className="text-gray-500 text-center py-12 bg-navy-900/40 rounded-xl border border-dashed border-navy-700">No community posts yet.</p>
+                                    <p className={`text-gray-500 text-center py-12 rounded-xl border border-dashed ${activeTheme.cardClass}`}>No community posts yet.</p>
                                 ) : (
                                     userPosts.map(post => (
-                                        <div key={post.id} className="bg-navy-800/50 p-4 rounded-xl border border-navy-700">
+                                        <motion.div
+                                            key={post.id}
+                                            whileHover={{ scale: 1.01 }}
+                                            transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+                                            className={`p-4 rounded-xl border ${activeTheme.cardClass}`}
+                                        >
                                             <div className="flex justify-between items-center mb-2">
                                                 <span className="text-xs text-teal-400 font-bold uppercase tracking-wider">{post.groupName}</span>
                                                 <span className="text-xs text-gray-500">{new Date(post.timestamp).toLocaleDateString()}</span>
@@ -538,7 +614,7 @@ export default function ProfilePage() {
                                             <div className="mt-3 flex gap-4 text-xs text-gray-500">
                                                 <span>💬 {post.comments?.length || 0} Replies</span>
                                             </div>
-                                        </div>
+                                        </motion.div>
                                     ))
                                 )}
                             </motion.div>
@@ -550,7 +626,8 @@ export default function ProfilePage() {
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
                                 exit={{ opacity: 0 }}
-                                className="bg-navy-800/50 rounded-xl border border-navy-700 p-6"
+                                whileHover={{ transition: { duration: 0.2 } }}
+                                className={`rounded-xl border p-6 transition-shadow duration-200 ${activeTheme.cardClass}`}
                             >
                                 {activityHistory.length === 0 ? (
                                     <p className="text-gray-500 text-center py-6">No recent activity.</p>
@@ -602,13 +679,12 @@ export default function ProfilePage() {
                                             disabled={disabled}
                                             title={disabled ? 'Own a plot or win to unlock' : undefined}
                                             onClick={() => !disabled && setProfileTheme(t.id)}
-                                            className={`w-full text-left px-4 py-3 rounded-xl border transition-colors flex items-center justify-between ${
-                                                disabled
-                                                    ? 'border-navy-700 bg-navy-800/50 text-gray-500 cursor-not-allowed'
-                                                    : isActive
-                                                        ? `${activeTheme.buttonClass} border-current`
-                                                        : 'border-navy-600 bg-navy-800/80 text-gray-200 hover:border-gold/30'
-                                            }`}
+                                            className={`w-full text-left px-4 py-3 rounded-xl border transition-colors flex items-center justify-between ${disabled
+                                                ? 'border-navy-700 bg-navy-800/50 text-gray-500 cursor-not-allowed'
+                                                : isActive
+                                                    ? `${activeTheme.buttonClass} border-current`
+                                                    : 'border-navy-600 bg-navy-800/80 text-gray-200 hover:border-gold/30'
+                                                }`}
                                         >
                                             <span className="font-medium">{t.name}</span>
                                             {t.premium && <span className="text-xs opacity-80">{disabled ? '🔒' : '✨'}</span>}

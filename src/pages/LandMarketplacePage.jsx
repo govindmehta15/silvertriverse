@@ -1,13 +1,30 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import { plotsService } from '../services/plotsService';
-import { PRICE_PER_PLOT, COLS, ROWS, indexToRowCol, rowColToIndex } from '../data/plotsData';
+import { getData } from '../utils/storageService';
+import { PRICE_PER_PLOT, COLS, ROWS, indexToRowCol } from '../data/plotsData';
 
 const CELL_SIZE = 8;
 const MIN_ZOOM = 0.25;
 const MAX_ZOOM = 2.5;
+
+function getTierLabel(count) {
+  if (count >= 10) return 'Tycoon';
+  if (count >= 5) return 'Collector';
+  if (count >= 1) return 'Landholder';
+  return null;
+}
+
+const gridContainer = {
+  hidden: { opacity: 0 },
+  show: { opacity: 1, transition: { staggerChildren: 0.00002, delayChildren: 0.02 } },
+};
+const gridCell = {
+  hidden: { opacity: 0 },
+  show: { opacity: 1 },
+};
 
 export default function LandMarketplacePage() {
   const navigate = useNavigate();
@@ -21,13 +38,20 @@ export default function LandMarketplacePage() {
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
 
-  const loadOwnership = useCallback(async () => {
-    const res = await plotsService.getAllOwnership();
-    if (res.success && res.data) setOwnershipMap(res.data);
-    setLoading(false);
+  const loadOwnership = useCallback(() => {
+    try {
+      const map = plotsService.getOwnershipMapSync();
+      setOwnershipMap(map || {});
+    } catch (err) {
+      console.error('Land: load ownership failed', err);
+      setOwnershipMap({});
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   useEffect(() => {
+    setLoading(true);
     loadOwnership();
   }, [loadOwnership]);
 
@@ -50,26 +74,13 @@ export default function LandMarketplacePage() {
 
   const handleMouseUp = () => setIsDragging(false);
 
-  const handlePlotClick = (e, index) => {
-    e.stopPropagation();
-    const { row, col } = indexToRowCol(index);
-    const owner = ownershipMap[index];
-    setSelectedPlot({
-      index,
-      row,
-      col,
-      ownerId: owner?.ownerId ?? null,
-      ownerName: owner?.ownerName ?? null,
-    });
-  };
-
   const handlePurchase = async () => {
     if (!isAuthenticated || !user) return;
     setPurchasing(true);
     const res = await plotsService.purchasePlot(user.id, user.name, selectedPlot.index);
     setPurchasing(false);
     if (res.success) {
-      await loadOwnership();
+      loadOwnership();
       setSelectedPlot(null);
     }
   };
@@ -77,6 +88,29 @@ export default function LandMarketplacePage() {
   const myPlotCount = ownershipMap
     ? Object.entries(ownershipMap).filter(([, v]) => v.ownerId === user?.id).length
     : 0;
+
+  const usersById = useMemo(() => {
+    const list = getData('users') || [];
+    return Object.fromEntries(list.map((u) => [u.id, { name: u.name, avatar: u.avatar }]));
+  }, [ownershipMap]);
+
+  const tierLabel = getTierLabel(myPlotCount);
+  const showAvatarOnCell = scale >= 0.9;
+
+  const handlePlotClick = (e, index) => {
+    e.stopPropagation();
+    const { row, col } = indexToRowCol(index);
+    const owner = ownershipMap[index];
+    const ownerUser = owner ? usersById[owner.ownerId] : null;
+    setSelectedPlot({
+      index,
+      row,
+      col,
+      ownerId: owner?.ownerId ?? null,
+      ownerName: owner?.ownerName ?? null,
+      ownerAvatar: ownerUser?.avatar ?? null,
+    });
+  };
 
   return (
     <div className="min-h-screen pb-24">
@@ -88,10 +122,15 @@ export default function LandMarketplacePage() {
               Virtual plots · ₹{PRICE_PER_PLOT} per plot · Own at least one to unlock premium profile themes
             </p>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 flex-wrap">
             <span className="px-3 py-1.5 rounded-lg bg-navy-800/80 border border-navy-600 text-gray-300 text-sm">
               Your plots: <strong className="text-gold">{myPlotCount}</strong>
             </span>
+            {tierLabel && (
+              <span className="px-3 py-1 rounded-lg bg-gold/15 border border-gold/40 text-gold text-xs font-bold uppercase tracking-wider">
+                {tierLabel}
+              </span>
+            )}
             <div className="flex gap-1">
               <button
                 type="button"
@@ -139,7 +178,10 @@ export default function LandMarketplacePage() {
                 transformOrigin: 'center center',
               }}
             >
-              <div
+              <motion.div
+                variants={gridContainer}
+                initial="hidden"
+                animate="show"
                 className="grid gap-px"
                 style={{
                   gridTemplateColumns: `repeat(${COLS}, ${CELL_SIZE}px)`,
@@ -152,21 +194,47 @@ export default function LandMarketplacePage() {
                   const owner = ownershipMap[index];
                   const isOwned = !!owner;
                   const isMine = owner?.ownerId === user?.id;
+                  const ownerUser = owner ? usersById[owner.ownerId] : null;
+                  const initial = owner?.ownerName ? owner.ownerName.trim().charAt(0).toUpperCase() : '?';
                   return (
-                    <button
+                    <motion.button
                       key={index}
                       type="button"
                       data-plot
+                      variants={gridCell}
                       onClick={(e) => handlePlotClick(e, index)}
-                      className={`min-w-0 min-h-0 p-0 border border-transparent rounded-sm transition-colors hover:ring-1 hover:ring-white/30 ${
-                        isOwned ? (isMine ? 'bg-gold/40 border-gold/50' : 'bg-navy-600/80 border-navy-500/50') : 'bg-navy-700/60 border-navy-600/50 hover:bg-navy-600'
+                      whileHover={{ scale: 1.15 }}
+                      whileTap={{ scale: 0.95 }}
+                      transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+                      className={`relative min-w-0 min-h-0 p-0 border border-transparent rounded-sm overflow-hidden transition-shadow hover:ring-1 hover:ring-white/40 ${
+                        isOwned
+                          ? isMine
+                            ? 'bg-gold/40 border-gold/50 hover:shadow-[0_0_8px_rgba(201,162,39,0.4)]'
+                            : 'bg-navy-600/80 border-navy-500/50 hover:shadow-[0_0_6px_rgba(255,255,255,0.15)]'
+                          : 'bg-navy-700/60 border-navy-600/50 hover:bg-navy-600'
                       }`}
                       style={{ width: CELL_SIZE, height: CELL_SIZE }}
                       title={`Plot ${index}${isOwned ? ` · ${owner.ownerName}` : ' · Available'}`}
-                    />
+                    >
+                      {isOwned && (
+                        <span className="absolute inset-0 flex items-center justify-center">
+                          {showAvatarOnCell && ownerUser?.avatar ? (
+                            <img
+                              src={ownerUser.avatar}
+                              alt=""
+                              className="w-full h-full object-cover rounded-sm"
+                            />
+                          ) : (
+                            <span className="text-[5px] font-bold text-white drop-shadow-md leading-none">
+                              {initial}
+                            </span>
+                          )}
+                        </span>
+                      )}
+                    </motion.button>
                   );
                 })}
-              </div>
+              </motion.div>
             </motion.div>
           )}
         </div>
@@ -198,7 +266,22 @@ export default function LandMarketplacePage() {
 
               {selectedPlot.ownerId ? (
                 <div className="space-y-4">
-                  <p className="text-gray-400 text-sm">Owned by <strong className="text-white">{selectedPlot.ownerName}</strong></p>
+                  <div className="flex items-center gap-4">
+                    <div className="w-14 h-14 rounded-xl overflow-hidden border-2 border-gold/40 bg-navy-800 shrink-0">
+                      {selectedPlot.ownerAvatar ? (
+                        <img src={selectedPlot.ownerAvatar} alt="" className="w-full h-full object-cover" />
+                      ) : (
+                        <span className="w-full h-full flex items-center justify-center text-gold font-bold text-xl">
+                          {selectedPlot.ownerName?.trim().charAt(0).toUpperCase() || '?'}
+                        </span>
+                      )}
+                    </div>
+                    <div>
+                      <p className="text-gray-500 text-xs">Owned by</p>
+                      <p className="font-serif font-bold text-white text-lg">{selectedPlot.ownerName}</p>
+                    </div>
+                  </div>
+                  <p className="text-gray-500 text-xs">Visit their profile to see their theme and collection.</p>
                   <button
                     type="button"
                     onClick={() => {

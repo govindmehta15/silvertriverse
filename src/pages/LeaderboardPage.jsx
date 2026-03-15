@@ -16,17 +16,27 @@ export default function LeaderboardPage() {
     // We simulate a fast network fetch for the board
     const { data: boards, isLoading } = useQuery({
         queryKey: ['globalLeaderboard'],
-        queryFn: () => new Promise(resolve => setTimeout(() => resolve(getGlobalLeaderboard()), 300)),
-        refetchInterval: 15000 // Refresh every 15s to simulate real-time updates
+        queryFn: () => {
+            try {
+                return Promise.resolve(getGlobalLeaderboard());
+            } catch (e) {
+                console.error('Leaderboard load failed', e);
+                return Promise.resolve({ 'Top Fans': [], 'Top Collectors': [], 'Top Creators': [] });
+            }
+        },
+        refetchInterval: 15000,
+        staleTime: 0
     });
 
-    if (isLoading) {
+    if (isLoading && !boards) {
         return (
-            <div className="flex items-center justify-center min-h-screen">
-                <div className="w-16 h-16 border-4 border-gold/30 border-t-gold rounded-full animate-spin"></div>
+            <div className="flex items-center justify-center min-h-[60vh]">
+                <div className="w-12 h-12 border-4 border-gold/30 border-t-gold rounded-full animate-spin" />
             </div>
         );
     }
+
+    const safeBoards = boards || { 'Top Fans': [], 'Top Collectors': [], 'Top Creators': [] };
 
     return (
         <div className="min-h-[calc(100vh-80px)] p-4 md:p-8 max-w-7xl mx-auto pb-24 lg:pb-8">
@@ -49,7 +59,7 @@ export default function LeaderboardPage() {
                 animate="show"
                 className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
             >
-                {Object.entries(boards || {}).map(([category, users], idx) => (
+                {Object.entries(safeBoards).map(([category, users], idx) => (
                     <motion.div key={category} variants={item} className="bg-navy-900/50 rounded-2xl border border-navy-700 overflow-hidden hide-scrollbar">
                         {/* Header */}
                         <div className="bg-navy-800/80 px-6 py-4 border-b border-navy-700">
@@ -64,7 +74,7 @@ export default function LeaderboardPage() {
                         {/* Ranks list */}
                         <div className="p-4 space-y-3">
                             <AnimatePresence mode="popLayout">
-                                {users.map((u, i) => (
+                                {(Array.isArray(users) ? users : []).map((u, i) => (
                                     <motion.div
                                         key={u.id}
                                         layout

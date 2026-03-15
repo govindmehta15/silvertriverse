@@ -38,14 +38,21 @@ export const plotsService = {
   },
 
   getAllOwnership() {
-    return simulateApi(() => {
-      const list = getOwnershipList();
-      const map = {};
+    return simulateApi(() => this.getOwnershipMapSync());
+  },
+
+  /** Sync read for instant grid load (no simulated delay). */
+  getOwnershipMapSync() {
+    const list = getOwnershipList();
+    const map = {};
+    if (Array.isArray(list)) {
       list.forEach((r) => {
-        map[r.plotIndex] = { ownerId: r.ownerId, ownerName: r.ownerName };
+        if (r && typeof r.plotIndex === 'number') {
+          map[r.plotIndex] = { ownerId: r.ownerId, ownerName: r.ownerName };
+        }
       });
-      return map;
-    });
+    }
+    return map;
   },
 
   purchasePlot(userId, ownerName, plotIndex) {

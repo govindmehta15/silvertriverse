@@ -1,9 +1,11 @@
 import { getData, updateData } from '../utils/storageService';
 import { mockUsers } from '../mock/mockUsers';
+import { seedPlotsAndThemes } from '../mock/seedPlotsAndThemes';
 
 if (!getData('users')) {
     updateData('users', () => mockUsers);
 }
+seedPlotsAndThemes();
 
 const simulateNetwork = (data) => {
     return new Promise(resolve => setTimeout(() => resolve({ success: true, data }), 500));
