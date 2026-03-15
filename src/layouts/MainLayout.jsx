@@ -18,7 +18,7 @@ export default function MainLayout() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     return (
-        <div className="min-h-screen relative pt-7">
+        <div className="min-h-screen relative pt-0">
             {/* Cinematic ambient light overlay */}
             <div className="fixed inset-0 pointer-events-none cinematic-overlay z-0" />
 

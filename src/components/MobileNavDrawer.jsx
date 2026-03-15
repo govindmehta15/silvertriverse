@@ -36,7 +36,7 @@ export default function MobileNavDrawer({ isOpen, onClose }) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60]"
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[110]"
             onClick={handleClose}
             aria-hidden
           />
@@ -45,7 +45,7 @@ export default function MobileNavDrawer({ isOpen, onClose }) {
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="fixed top-0 right-0 bottom-0 w-72 max-w-[85vw] bg-navy-950 border-l border-navy-600/50 z-[70] flex flex-col shadow-xl"
+            className="fixed top-0 right-0 bottom-0 w-72 max-w-[85vw] bg-navy-950 border-l border-navy-600/50 z-[120] flex flex-col shadow-xl"
           >
             <div className="flex items-center justify-between p-4 border-b border-navy-600/30">
               <Link to="/" onClick={handleClose} className="font-serif text-xl font-bold text-gold-shimmer">

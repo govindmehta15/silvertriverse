@@ -9,7 +9,7 @@ import RoleGuard from '../components/RoleGuard';
 import { getData, setData } from '../utils/storageService';
 import { dispatchNotification, NotificationTypes } from '../utils/notificationDispatcher';
 import { yoursMerchandise, oursMerchandise } from '../data/merchandiseData';
-import { getThemeById, DEFAULT_THEME_ID, PROFILE_THEMES } from '../data/profileThemes';
+import { getThemeById, DEFAULT_THEME_ID, PROFILE_THEMES, FALLBACK_PAGE_BACKGROUND, FALLBACK_COVER_BLEND } from '../data/profileThemes';
 
 const userProfileFallback = {
     club: 'Cinema Club 47',
@@ -256,18 +256,28 @@ export default function ProfilePage() {
         );
     }
 
+    const pageBg = activeTheme.pageBackground || FALLBACK_PAGE_BACKGROUND;
+    const coverBlend = activeTheme.coverBlend || FALLBACK_COVER_BLEND;
+    const transitionPreset = activeTheme.transitionPreset || 'smooth';
+    const hoverTransition = transitionPreset === 'spring'
+        ? { type: 'spring', stiffness: 400, damping: 25 }
+        : transitionPreset === 'subtle'
+            ? { type: 'tween', duration: 0.15 }
+            : { type: 'tween', duration: 0.2 };
+
     return (
-        <div className="min-h-screen pb-4">
+        <div className="min-h-screen pb-4 transition-colors duration-300" style={{ background: pageBg }}>
             {/* Cover + Avatar */}
             <div className="relative">
                 <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
+                    transition={hoverTransition}
                     className="h-48 md:h-64 overflow-hidden"
                     style={{ background: activeTheme.cover }}
                 >
                     <img src='/images/profile_cover.png' alt="Cover" className="w-full h-full object-cover opacity-60" />
-                    <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-navy-900" />
+                    <div className="absolute inset-0 transition-opacity duration-200" style={{ background: coverBlend }} />
                     <div
                         className="absolute inset-0 transition-opacity duration-200"
                         style={{
@@ -353,6 +363,7 @@ export default function ProfilePage() {
                     <div className="mt-5 flex items-center gap-4">
                         <motion.div
                             whileHover={{ scale: 1.05 }}
+                            transition={hoverTransition}
                             className={`px-4 py-1.5 rounded-full text-xs font-bold border shadow-sm ${activeTheme.badgeClass}`}
                         >
                             {profileUser?.totalPosts || 0} CONTRIBUTIONS
@@ -417,8 +428,8 @@ export default function ProfilePage() {
                 <motion.div
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.5 }}
-                    whileHover={{ transition: { duration: 0.2 } }}
+                    transition={{ delay: 0.5, ...hoverTransition }}
+                    whileHover={{ scale: 1.01 }}
                     className={`mt-8 p-6 md:p-8 rounded-xl relative overflow-hidden flex flex-col md:flex-row gap-6 md:gap-10 items-center justify-between ${activeTheme.cardClass} hover:shadow-lg transition-shadow duration-200`}
                 >
                     <div className="absolute top-0 right-0 w-64 h-64 bg-gold/5 rounded-full blur-[80px] pointer-events-none" />
@@ -492,7 +503,7 @@ export default function ProfilePage() {
                                                 <motion.div
                                                     key={idx}
                                                     whileHover={{ scale: 1.02 }}
-                                                    transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+                                                    transition={hoverTransition}
                                                     className={`flex flex-col sm:flex-row gap-6 p-4 rounded-xl relative overflow-hidden group ${activeTheme.cardClass}`}
                                                 >
                                                     <div className="absolute inset-0 bg-gradient-to-r from-transparent to-gold/5 pointer-events-none opacity-50" />
@@ -541,7 +552,7 @@ export default function ProfilePage() {
                                                 <motion.div
                                                     key={idx}
                                                     whileHover={{ scale: 1.02 }}
-                                                    transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+                                                    transition={hoverTransition}
                                                     className={`flex items-center gap-4 p-3 rounded-lg transition-colors ${activeTheme.cardClass}`}
                                                 >
                                                     <div className="w-16 h-16 rounded-md p-1 shrink-0 bg-white shadow-sm flex items-center justify-center overflow-hidden">
@@ -569,7 +580,7 @@ export default function ProfilePage() {
                                                     key={index}
                                                     variants={item}
                                                     whileHover={{ scale: 1.02, zIndex: 10 }}
-                                                    transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+                                                    transition={hoverTransition}
                                                     className={`group relative rounded-xl overflow-hidden transition-all duration-300 cursor-pointer aspect-square flex flex-col items-center justify-center p-2 ${activeTheme.cardClass}`}
                                                 >
                                                     <div className="absolute top-2 left-2 px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-navy-900/80 text-teal-400 border border-teal-500/40 z-10">
@@ -603,7 +614,7 @@ export default function ProfilePage() {
                                         <motion.div
                                             key={post.id}
                                             whileHover={{ scale: 1.01 }}
-                                            transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+                                            transition={hoverTransition}
                                             className={`p-4 rounded-xl border ${activeTheme.cardClass}`}
                                         >
                                             <div className="flex justify-between items-center mb-2">
@@ -626,7 +637,8 @@ export default function ProfilePage() {
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
                                 exit={{ opacity: 0 }}
-                                whileHover={{ transition: { duration: 0.2 } }}
+                                whileHover={{ scale: 1.005 }}
+                                transition={hoverTransition}
                                 className={`rounded-xl border p-6 transition-shadow duration-200 ${activeTheme.cardClass}`}
                             >
                                 {activityHistory.length === 0 ? (

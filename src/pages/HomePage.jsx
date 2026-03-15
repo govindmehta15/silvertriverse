@@ -88,7 +88,7 @@ export default function HomePage() {
   return (
     <div className="min-h-screen pb-24 lg:pb-12">
       {/* Hero */}
-      <div className="relative overflow-hidden pt-6 pb-10 px-4">
+      <div className="relative overflow-hidden pt-3 pb-10 px-4">
         <div className="absolute inset-0 bg-gradient-to-b from-gold/5 via-transparent to-transparent pointer-events-none" />
         <div className="relative max-w-4xl mx-auto text-center">
           <motion.h1

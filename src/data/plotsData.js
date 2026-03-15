@@ -1,5 +1,5 @@
-export const COLS = 100;
-export const ROWS = 100;
+export const COLS = 24;
+export const ROWS = 24;
 export const TOTAL_PLOTS = COLS * ROWS;
 export const PRICE_PER_PLOT = 200;
 

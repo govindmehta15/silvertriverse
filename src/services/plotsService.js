@@ -1,5 +1,8 @@
 import { getData, setData, updateData, simulateApi } from './storageService';
 import { TOTAL_PLOTS, PRICE_PER_PLOT, indexToRowCol, rowColToIndex } from '../data/plotsData';
+import { getPremiumThemeForPlotCount } from '../data/profileThemes';
+
+const THEME_KEY_PREFIX = 'yours_profile_theme_';
 
 const OWNERSHIP_KEY = 'yours_plots_ownership';
 
@@ -67,8 +70,17 @@ export const plotsService = {
         ownerName: ownerName || 'Unknown',
         purchasedAt: Date.now(),
       };
-      updateData(OWNERSHIP_KEY, (arr) => [...(arr || []), newRecord], []);
-      return { success: true, plotIndex, ownerId: userId };
+      const newList = Array.isArray(list) ? [...list, newRecord] : [newRecord];
+      updateData(OWNERSHIP_KEY, () => newList, []);
+
+      const ownedCount = newList.filter((r) => r.ownerId === userId).length;
+      const themeId = getPremiumThemeForPlotCount(ownedCount);
+      if (themeId) {
+        const themeKey = THEME_KEY_PREFIX + userId;
+        setData(themeKey, themeId);
+      }
+
+      return { success: true, plotIndex, ownerId: userId, themeAssigned: !!themeId };
     });
   },
 };

@@ -51,7 +51,7 @@ export default function BottomNav({ onMenuClick }) {
     const { isAuthenticated, user } = useAuth();
 
     return (
-        <nav className="fixed bottom-0 left-0 right-0 z-50 lg:hidden">
+        <nav className="fixed bottom-0 left-0 right-0 z-[100] lg:hidden">
             <div className="bg-navy-950/95 backdrop-blur-xl border-t border-navy-600/50">
                 <div className="flex items-center justify-around h-16 px-1 sm:px-2 min-h-[64px]">
                     {navItems.map((item, index) => {
