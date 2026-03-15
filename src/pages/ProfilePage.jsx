@@ -5,9 +5,10 @@ import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import StatsCard from '../components/StatsCard';
 import RoleGuard from '../components/RoleGuard';
-import { getData } from '../utils/storageService';
+import { getData, setData } from '../utils/storageService';
 import { dispatchNotification, NotificationTypes } from '../utils/notificationDispatcher';
 import { yoursMerchandise, oursMerchandise } from '../data/merchandiseData';
+import { getThemeById, DEFAULT_THEME_ID, PROFILE_THEMES } from '../data/profileThemes';
 
 const userProfileFallback = {
     club: 'Cinema Club 47',
@@ -53,6 +54,25 @@ export default function ProfilePage() {
     const viewedUser = viewingUserId ? allUsers.find(u => u.id === viewingUserId) : null;
     const profileUser = viewedUser || user;
     const isOwnProfile = !viewedUser || viewedUser.id === user?.id;
+
+    // Theme: eligibility (sponsor = owns ≥1 plot, winner = isWinner)
+    const ownershipList = getData('yours_plots_ownership') || [];
+    const ownedPlotsCount = ownershipList.filter((r) => r.ownerId === profileUser?.id).length;
+    const isSponsor = ownedPlotsCount >= 1;
+    const canUsePremium = isSponsor || !!profileUser?.isWinner;
+    const storedThemeId = getData(`yours_profile_theme_${profileUser?.id}`) || DEFAULT_THEME_ID;
+    const themeForStored = getThemeById(storedThemeId);
+    const effectiveThemeId = themeForStored.premium && !canUsePremium ? DEFAULT_THEME_ID : storedThemeId;
+    const activeTheme = getThemeById(effectiveThemeId);
+
+    const [themeSelectorOpen, setThemeSelectorOpen] = useState(false);
+    const [, setThemeRefresh] = useState(0);
+    const setProfileTheme = (themeId) => {
+        if (!user?.id) return;
+        setData(`yours_profile_theme_${user.id}`, themeId);
+        setThemeRefresh((n) => n + 1);
+        setThemeSelectorOpen(false);
+    };
 
     const handleRingBell = () => {
         if (!user || !viewedUser || bellRung) return;
@@ -191,9 +211,11 @@ export default function ProfilePage() {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     className="h-48 md:h-64 overflow-hidden"
+                    style={{ background: activeTheme.cover }}
                 >
-                    <img src='/images/profile_cover.png' alt="Cover" className="w-full h-full object-cover" />
+                    <img src='/images/profile_cover.png' alt="Cover" className="w-full h-full object-cover opacity-60" />
                     <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-navy-900" />
+                    <div className="absolute inset-0" style={{ backgroundColor: activeTheme.coverOverlay }} />
                 </motion.div>
 
                 <motion.div
@@ -266,7 +288,7 @@ export default function ProfilePage() {
                     )}
                     {profileUser?.bio && (
                         <p className="text-gray-300 text-sm mt-3 max-w-xl leading-relaxed">
-                            {user.bio}
+                            {profileUser?.bio}
                         </p>
                     )}
                     <div className="mt-5 flex items-center gap-4">
@@ -281,18 +303,38 @@ export default function ProfilePage() {
                         </div>
                         <span className="text-xs text-gold font-bold">{profileUser?.rankProgress || 0}% to next tier</span>
                     </div>
-                    {/* Prestige Rank Banner */}
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ delay: 0.35 }}
-                        className={`mt-4 inline-flex items-center gap-2 px-4 py-1.5 rounded-full border ${prestige.bg} ${prestige.border} ${prestige.shadow}`}
-                    >
-                        <span className="text-sm">🏆</span>
-                        <span className={`text-sm font-bold uppercase tracking-widest ${prestige.color}`}>
-                            {prestige.name} Rank
-                        </span>
-                    </motion.div>
+                    {/* Prestige Rank + Landholder badge */}
+                    <div className="mt-4 flex flex-wrap items-center gap-2">
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            transition={{ delay: 0.35 }}
+                            className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full border ${prestige.bg} ${prestige.border} ${prestige.shadow}`}
+                        >
+                            <span className="text-sm">🏆</span>
+                            <span className={`text-sm font-bold uppercase tracking-widest ${prestige.color}`}>
+                                {prestige.name} Rank
+                            </span>
+                        </motion.div>
+                        {isSponsor && (
+                            <motion.span
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-bold uppercase tracking-wider ${activeTheme.badgeClass}`}
+                            >
+                                🗺️ Landholder
+                            </motion.span>
+                        )}
+                        {isOwnProfile && (
+                            <button
+                                type="button"
+                                onClick={() => setThemeSelectorOpen(true)}
+                                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-bold uppercase tracking-wider ${activeTheme.buttonClass}`}
+                            >
+                                Theme: {activeTheme.name}
+                            </button>
+                        )}
+                    </div>
                 </motion.div>
 
                 {/* Role Tags */}
@@ -317,7 +359,7 @@ export default function ProfilePage() {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.5 }}
-                    className="mt-8 bg-zinc-950 border border-gold/20 p-6 md:p-8 rounded-xl relative overflow-hidden flex flex-col md:flex-row gap-6 md:gap-10 items-center justify-between shadow-[0_0_40px_rgba(201,162,39,0.1)]"
+                    className={`mt-8 p-6 md:p-8 rounded-xl relative overflow-hidden flex flex-col md:flex-row gap-6 md:gap-10 items-center justify-between ${activeTheme.cardClass}`}
                 >
                     <div className="absolute top-0 right-0 w-64 h-64 bg-gold/5 rounded-full blur-[80px] pointer-events-none" />
 
@@ -356,12 +398,11 @@ export default function ProfilePage() {
                         <button
                             key={tab}
                             onClick={() => setActiveTab(tab)}
-                            className={`pb-3 text-sm font-bold tracking-wider uppercase transition-colors relative ${activeTab === tab ? 'text-gold' : 'text-gray-500 hover:text-gray-300'
-                                }`}
+                            className={`pb-3 text-sm font-bold tracking-wider uppercase transition-colors relative ${activeTab === tab ? activeTheme.accentClass : 'text-gray-500 hover:text-gray-300'}`}
                         >
                             {tab}
                             {activeTab === tab && (
-                                <motion.div layoutId="profileTabIndicator" className="absolute bottom-0 left-0 right-0 h-0.5 bg-gold" />
+                                <motion.div layoutId="profileTabIndicator" className="absolute bottom-0 left-0 right-0 h-0.5 bg-current opacity-80" />
                             )}
                         </button>
                     ))}
@@ -530,6 +571,62 @@ export default function ProfilePage() {
                     </AnimatePresence>
                 </div>
             </div>
+
+            {/* Theme selector modal (own profile only) */}
+            <AnimatePresence>
+                {themeSelectorOpen && isOwnProfile && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
+                        onClick={() => setThemeSelectorOpen(false)}
+                    >
+                        <motion.div
+                            initial={{ scale: 0.95 }}
+                            animate={{ scale: 1 }}
+                            exit={{ scale: 0.95 }}
+                            onClick={(e) => e.stopPropagation()}
+                            className="bg-navy-900 border border-navy-600 rounded-2xl p-6 max-w-md w-full max-h-[80vh] overflow-hidden flex flex-col shadow-xl"
+                        >
+                            <h3 className="font-serif text-lg font-bold text-white mb-1">Profile theme</h3>
+                            <p className="text-gray-500 text-sm mb-4">Choose a theme. Premium themes require owning a plot or winner status.</p>
+                            <div className="overflow-y-auto flex-1 space-y-2 pr-1">
+                                {PROFILE_THEMES.map((t) => {
+                                    const disabled = t.premium && !canUsePremium;
+                                    const isActive = effectiveThemeId === t.id;
+                                    return (
+                                        <button
+                                            key={t.id}
+                                            type="button"
+                                            disabled={disabled}
+                                            title={disabled ? 'Own a plot or win to unlock' : undefined}
+                                            onClick={() => !disabled && setProfileTheme(t.id)}
+                                            className={`w-full text-left px-4 py-3 rounded-xl border transition-colors flex items-center justify-between ${
+                                                disabled
+                                                    ? 'border-navy-700 bg-navy-800/50 text-gray-500 cursor-not-allowed'
+                                                    : isActive
+                                                        ? `${activeTheme.buttonClass} border-current`
+                                                        : 'border-navy-600 bg-navy-800/80 text-gray-200 hover:border-gold/30'
+                                            }`}
+                                        >
+                                            <span className="font-medium">{t.name}</span>
+                                            {t.premium && <span className="text-xs opacity-80">{disabled ? '🔒' : '✨'}</span>}
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => setThemeSelectorOpen(false)}
+                                className="mt-4 w-full py-2 rounded-lg border border-navy-600 text-gray-400 hover:text-white"
+                            >
+                                Close
+                            </button>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 }

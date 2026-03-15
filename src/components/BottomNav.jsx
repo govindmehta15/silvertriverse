@@ -22,6 +22,12 @@ const navItems = [
         ),
     },
     {
+        to: '/',
+        label: 'Yours',
+        icon: null,
+        isCenter: true,
+    },
+    {
         to: '/fcu',
         label: 'FCU',
         icon: (
@@ -29,7 +35,6 @@ const navItems = [
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
             </svg>
         ),
-        isCenter: true,
     },
     {
         to: '/reelity/clubs',
@@ -50,6 +55,33 @@ const navItems = [
         ),
     },
     {
+        to: '/ai-writer',
+        label: 'AI Writer',
+        icon: (
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125" />
+            </svg>
+        ),
+    },
+    {
+        to: '/ai-producer',
+        label: 'AI Producer',
+        icon: (
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+        ),
+    },
+    {
+        to: '/land',
+        label: 'Land',
+        icon: (
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-.75 4.5H21m-3.75 3.75h.008v.008h-.008v-.008zm0 3h.008v.008h-.008v-.008zm0 3h.008v.008h-.008v-.008z" />
+            </svg>
+        ),
+    },
+    {
         to: '/profile',
         label: 'Profile',
         icon: (
@@ -66,30 +98,33 @@ export default function BottomNav() {
     return (
         <nav className="fixed bottom-0 left-0 right-0 z-50 lg:hidden">
             <div className="bg-navy-950/95 backdrop-blur-xl border-t border-navy-600/50">
-                <div className="flex items-center justify-around h-16 px-2">
-                    {navItems.map((item) => (
+                <div className="flex items-center justify-around h-16 px-1 sm:px-2 min-h-[64px]">
+                    {navItems.map((item, index) => (
                         <NavLink
-                            key={item.to}
+                            key={item.isCenter ? 'center' : `${item.to}-${index}`}
                             to={item.to}
+                            end={item.to === '/'}
                             className={({ isActive }) =>
-                                `nav-item flex-1 ${isActive ? 'active' : ''}`
+                                `nav-item flex-1 flex flex-col items-center justify-center gap-0.5 min-h-[44px] min-w-[44px] py-2 rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/50 focus-visible:ring-offset-2 focus-visible:ring-offset-navy-950 active:bg-navy-800/50 ${isActive ? 'active' : ''}`
                             }
                         >
                             {({ isActive }) => (
                                 <>
                                     {item.isCenter ? (
                                         <motion.div
-                                            className="relative -mt-5 w-14 h-14 rounded-full bg-gold-gradient flex items-center justify-center shadow-glow-gold"
-                                            whileHover={{ scale: 1.1 }}
-                                            whileTap={{ scale: 0.9 }}
+                                            className="relative -mt-5 w-14 h-14 rounded-full bg-gold-gradient flex items-center justify-center shadow-glow-gold focus:outline-none"
+                                            whileHover={{ scale: 1.08 }}
+                                            whileTap={{ scale: 0.92 }}
+                                            transition={{ type: 'spring', stiffness: 400, damping: 20 }}
                                         >
-                                            <span className="text-navy-900 font-serif font-bold text-xl">Y</span>
+                                            <span className="text-navy-900 font-serif font-bold text-xl" aria-hidden>Y</span>
                                         </motion.div>
                                     ) : (
                                         <motion.div
-                                            className="relative"
+                                            className="relative flex items-center justify-center"
                                             whileHover={{ scale: 1.1 }}
                                             whileTap={{ scale: 0.9 }}
+                                            transition={{ type: 'spring', stiffness: 400, damping: 20 }}
                                         >
                                             {item.to === '/profile' && isAuthenticated ? (
                                                 <div className="w-6 h-6 rounded-full overflow-hidden border border-gold/40 mx-auto">
@@ -108,7 +143,7 @@ export default function BottomNav() {
                                             )}
                                         </motion.div>
                                     )}
-                                    <span className={`text-[10px] mt-0.5 ${item.isCenter ? 'text-gold font-semibold' : ''}`}>
+                                    <span className={`text-[10px] mt-0.5 truncate max-w-[64px] text-center ${item.isCenter ? 'text-gold font-semibold' : ''}`}>
                                         {item.isCenter ? 'Yours' : item.label}
                                     </span>
                                 </>

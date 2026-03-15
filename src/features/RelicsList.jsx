@@ -119,7 +119,7 @@ export default function RelicsList() {
         queryFn: relicService.getRelics,
     });
 
-    const relicsData = response?.success ? response.data : [];
+    const relicsData = response?.success ? (response.data || []) : [];
 
     const filtered = useMemo(() => {
         let items = [...relicsData];

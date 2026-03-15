@@ -1,4 +1,4 @@
-import { NavLink } from 'react-router-dom';
+import { NavLink, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import NotificationBell from './NotificationBell';
@@ -6,6 +6,16 @@ import { mockUsers } from '../mock/mockUsers';
 import { useState } from 'react';
 
 const navItems = [
+    {
+        to: '/',
+        label: 'Home',
+        end: true,
+        icon: (
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
+            </svg>
+        ),
+    },
     {
         to: '/reelity',
         label: 'Reelity',
@@ -52,6 +62,24 @@ const navItems = [
         ),
     },
     {
+        to: '/ai-writer',
+        label: 'AI Writer',
+        icon: (
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125" />
+            </svg>
+        ),
+    },
+    {
+        to: '/ai-producer',
+        label: 'AI Producer',
+        icon: (
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+        ),
+    },
+    {
         to: '/leaderboard',
         label: 'Rankings',
         icon: (
@@ -59,6 +87,15 @@ const navItems = [
                 <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
             </svg>
         )
+    },
+    {
+        to: '/land',
+        label: 'Land',
+        icon: (
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-.75 4.5H21m-3.75 3.75h.008v.008h-.008v-.008zm0 3h.008v.008h-.008v-.008zm0 3h.008v.008h-.008v-.008z" />
+            </svg>
+        ),
     },
     {
         to: '/profile',
@@ -77,14 +114,18 @@ export default function Sidebar() {
 
     return (
         <aside className="hidden lg:flex flex-col w-64 h-screen fixed left-0 top-0 z-50 bg-navy-950/95 backdrop-blur-xl border-r border-navy-600/30">
-            {/* Logo */}
-            <div className="flex flex-col items-center py-8 border-b border-navy-600/30">
+            {/* Logo - clickable to home */}
+            <Link
+                to="/"
+                className="flex flex-col items-center py-8 border-b border-navy-600/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/50 focus-visible:ring-inset rounded-lg transition-opacity hover:opacity-90 active:opacity-80"
+                aria-label="YOURS Home"
+            >
                 <div className="relative">
                     <span className="text-gold text-xs tracking-[0.3em] uppercase">♛</span>
                 </div>
                 <h1 className="font-serif text-3xl font-bold text-gold-shimmer mt-1">YOURS</h1>
                 <p className="text-gray-500 text-xs tracking-widest uppercase mt-1">Entertainment</p>
-            </div>
+            </Link>
 
             {/* Navigation */}
             <nav className="flex-1 py-6 px-4 space-y-1">
@@ -92,8 +133,9 @@ export default function Sidebar() {
                     <NavLink
                         key={item.to}
                         to={item.to}
+                        end={item.end}
                         className={({ isActive }) =>
-                            `group flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${isActive
+                            `group flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/50 focus-visible:ring-offset-2 focus-visible:ring-offset-navy-950 ${isActive
                                 ? 'bg-gold/10 text-gold border border-gold/20'
                                 : 'text-gray-400 hover:text-gray-200 hover:bg-navy-800/50'
                             }`
@@ -103,6 +145,7 @@ export default function Sidebar() {
                             <>
                                 <motion.div
                                     whileHover={{ scale: 1.1 }}
+                                    whileTap={{ scale: 0.95 }}
                                     className={isActive ? 'text-gold' : ''}
                                 >
                                     {item.icon}
@@ -125,7 +168,7 @@ export default function Sidebar() {
                     <NavLink
                         to="/fcu/pipeline"
                         className={({ isActive }) =>
-                            `group flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${isActive
+                            `group flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-400/50 focus-visible:ring-offset-2 focus-visible:ring-offset-navy-950 ${isActive
                                 ? 'bg-teal-900/30 text-teal-400 border border-teal-500/30'
                                 : 'text-gray-400 hover:text-gray-200 hover:bg-navy-800/50'
                             }`
@@ -135,6 +178,7 @@ export default function Sidebar() {
                             <>
                                 <motion.div
                                     whileHover={{ scale: 1.1 }}
+                                    whileTap={{ scale: 0.95 }}
                                     className={isActive ? 'text-teal-400' : ''}
                                 >
                                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>

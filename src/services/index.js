@@ -8,6 +8,8 @@ export { storyService } from './storyService';
 export { communityService } from './communityService';
 export { reelityService } from './reelityService';
 export { pipelineService } from './pipelineService';
+export { aiWriterService } from './aiWriterService';
+export { plotsService } from './plotsService';
 export { simulateApi, getData, setData, updateData } from './storageService';
 
 /*

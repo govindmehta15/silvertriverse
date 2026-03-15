@@ -2,6 +2,7 @@ import { Outlet, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import BottomNav from '../components/BottomNav';
 import Sidebar from '../components/Sidebar';
+import MobileNavDrawer from '../components/MobileNavDrawer';
 import CartDrawer from '../components/CartDrawer';
 import ActivityTicker from '../components/ActivityTicker';
 
@@ -25,8 +26,11 @@ export default function MainLayout() {
             {/* Sidebar (desktop) */}
             <Sidebar />
 
-            {/* Main content area */}
-            <main className="relative z-10 lg:ml-64 pb-20 lg:pb-0 min-h-screen">
+            {/* Mobile menu - hamburger + drawer */}
+            <MobileNavDrawer />
+
+            {/* Main content area - extra left padding on mobile for hamburger */}
+            <main className="relative z-10 pl-12 lg:pl-0 lg:ml-64 pb-20 lg:pb-0 min-h-screen">
                 <AnimatePresence mode="wait">
                     <motion.div
                         key={location.pathname}

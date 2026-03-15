@@ -15,7 +15,8 @@ export const mockUsers = [
         bioLink: 'cinema.club/natalie_p',
         ownedRelics: [1, 3, 5],
         ownedCards: ['c1', 'c2'],
-        purchasedItems: ['y1', 'y8', 'y3', 'o3', 'o9']
+        purchasedItems: ['y1', 'y8', 'y3', 'o3', 'o9'],
+        isWinner: true,
     },
     {
         id: 'u2',
@@ -33,7 +34,8 @@ export const mockUsers = [
         bioLink: 'vance-shadows.net',
         ownedRelics: [2, 4],
         ownedCards: ['c3'],
-        purchasedItems: ['y2', 'y7', 'o2', 'o6', 'o10']
+        purchasedItems: ['y2', 'y7', 'o2', 'o6', 'o10'],
+        isWinner: true,
     },
     {
         id: 'u3',
