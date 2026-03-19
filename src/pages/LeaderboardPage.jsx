@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Link } from 'react-router-dom';
 import { getGlobalLeaderboard } from '../services/statsService';
 
 const container = {
@@ -49,7 +50,7 @@ export default function LeaderboardPage() {
                     Global Rankings
                 </h1>
                 <p className="text-gray-400 max-w-2xl mx-auto">
-                    The most dedicated fans, legendary collectors, and prolific creators in the YOURS Entertainment universe.
+                    The most dedicated fans, legendary collectors, and prolific creators in the SilverTriverse universe.
                 </p>
             </motion.div>
 
@@ -75,16 +76,12 @@ export default function LeaderboardPage() {
                         <div className="p-4 space-y-3">
                             <AnimatePresence mode="popLayout">
                                 {(Array.isArray(users) ? users : []).map((u, i) => (
-                                    <motion.div
+                                    <Link
                                         key={u.id}
-                                        layout
-                                        initial={{ opacity: 0, scale: 0.95 }}
-                                        animate={{ opacity: 1, scale: 1 }}
-                                        exit={{ opacity: 0, scale: 0.95 }}
-                                        transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-                                        className="flex items-center gap-4 bg-navy-800/40 hover:bg-navy-700/60 transition-colors p-3 rounded-xl border border-navy-700/50"
+                                        to={`/profile?user=${u.id}`}
+                                        className="flex items-center gap-4 bg-navy-800/40 hover:bg-navy-700/60 transition-colors p-3 rounded-xl border border-navy-700/50 w-full text-left"
                                     >
-                                        <div className={`w-8 h-8 flex items-center justify-center rounded-full font-bold text-sm ${i === 0 ? 'bg-gold text-navy-950 shadow-glow-gold' : i === 1 ? 'bg-gray-300 text-navy-950' : i === 2 ? 'bg-orange-400 text-navy-950' : 'bg-navy-900 text-gray-400 border border-navy-600'}`}>
+                                        <div className={`w-8 h-8 flex shrink-0 items-center justify-center rounded-full font-bold text-sm ${i === 0 ? 'bg-gold text-navy-950 shadow-glow-gold' : i === 1 ? 'bg-gray-300 text-navy-950' : i === 2 ? 'bg-orange-400 text-navy-950' : 'bg-navy-900 text-gray-400 border border-navy-600'}`}>
                                             #{i + 1}
                                         </div>
 
@@ -100,7 +97,7 @@ export default function LeaderboardPage() {
                                             {u.rankChange < 0 && <span className="text-red-400 text-xs">▼</span>}
                                             {u.rankChange === 0 && <span className="text-gray-500 text-xs">—</span>}
                                         </div>
-                                    </motion.div>
+                                    </Link>
                                 ))}
                             </AnimatePresence>
                         </div>

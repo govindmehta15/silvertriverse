@@ -1,2 +1,2 @@
-import { yoursMerchandise, oursMerchandise } from '../data/merchandiseData';
-export const mockMerchandise = [...yoursMerchandise, ...oursMerchandise];
+import { premiumMerchandise, dailyMerchandise } from '../data/merchandiseData';
+export const mockMerchandise = [...premiumMerchandise, ...dailyMerchandise];

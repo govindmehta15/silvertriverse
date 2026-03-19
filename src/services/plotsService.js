@@ -2,9 +2,9 @@ import { getData, setData, updateData, simulateApi } from './storageService';
 import { TOTAL_PLOTS, PRICE_PER_PLOT, indexToRowCol, rowColToIndex } from '../data/plotsData';
 import { getPremiumThemeForPlotCount } from '../data/profileThemes';
 
-const THEME_KEY_PREFIX = 'yours_profile_theme_';
+const THEME_KEY_PREFIX = 'silvertriverse_profile_theme_';
 
-const OWNERSHIP_KEY = 'yours_plots_ownership';
+const OWNERSHIP_KEY = 'silvertriverse_plots_ownership';
 
 function getOwnershipList() {
   return getData(OWNERSHIP_KEY, []);

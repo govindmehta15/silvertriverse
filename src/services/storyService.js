@@ -1,6 +1,6 @@
 import { getData, setData, updateData, simulateApi } from './storageService';
 
-const STORIES_KEY = 'yours_fcu_stories';
+const STORIES_KEY = 'silvertriverse_fcu_stories';
 
 // Seed initial data if none exists
 if (!getData(STORIES_KEY)) {

@@ -2,6 +2,7 @@ import { NavLink, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import NotificationBell from './NotificationBell';
+import logo from '../assets/logo.png';
 import { mockUsers } from '../mock/mockUsers';
 import { useState } from 'react';
 
@@ -118,13 +119,13 @@ export default function Sidebar() {
             <Link
                 to="/"
                 className="flex flex-col items-center py-8 border-b border-navy-600/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/50 focus-visible:ring-inset rounded-lg transition-opacity hover:opacity-90 active:opacity-80"
-                aria-label="YOURS Home"
+                aria-label="SilverTriverse Home"
             >
-                <div className="relative">
-                    <span className="text-gold text-xs tracking-[0.3em] uppercase">♛</span>
+                <div className="relative w-12 h-12 mb-2">
+                    <img src={logo} alt="SilverTriverse Logo" className="w-full h-full object-contain filter drop-shadow-glow-gold" />
                 </div>
-                <h1 className="font-serif text-3xl font-bold text-gold-shimmer mt-1">YOURS</h1>
-                <p className="text-gray-500 text-xs tracking-widest uppercase mt-1">Entertainment</p>
+                <h1 className="font-serif text-2xl font-bold text-gold-shimmer mt-1">SilverTriverse</h1>
+                <p className="text-gray-500 text-[10px] tracking-[0.4em] uppercase mt-1">Entertainment</p>
             </Link>
 
             {/* Navigation */}
@@ -299,7 +300,7 @@ export default function Sidebar() {
                         <div className="flex items-center justify-between px-2 py-2">
                             <div className="flex items-center gap-3">
                                 <div className="w-9 h-9 rounded-full bg-gradient-to-br from-teal-700 to-navy-700 flex items-center justify-center">
-                                    <span className="text-xs font-medium text-gold">Y</span>
+                                    <span className="text-xs font-medium text-gold">S</span>
                                 </div>
                                 <div>
                                     <p className="text-sm font-medium text-gray-300">Guest</p>

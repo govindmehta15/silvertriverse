@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
 
 export default function StoryViewer({ stories, onClose }) {
     const [currentIndex, setCurrentIndex] = useState(0);
@@ -67,13 +68,17 @@ export default function StoryViewer({ stories, onClose }) {
 
             {/* Header */}
             <div className="flex items-center justify-between px-4 py-2">
-                <div className="flex items-center gap-3">
+                <Link
+                    to={`/profile?user=${story.userId}`}
+                    className="flex items-center gap-3 hover:opacity-80 transition-opacity"
+                    onClick={(e) => { e.stopPropagation(); }}
+                >
                     <img src={story.userAvatar} alt={story.userName} className="w-8 h-8 rounded-full border border-white/30" />
                     <div>
-                        <p className="text-white text-sm font-medium">{story.userName}</p>
+                        <p className="text-white text-sm font-medium hover:text-gold transition-colors">{story.userName}</p>
                         <p className="text-white/50 text-[10px]">{hoursAgo(story.timestamp)}</p>
                     </div>
-                </div>
+                </Link>
                 <button onClick={onClose} className="text-white/70 hover:text-white text-2xl p-1">✕</button>
             </div>
 

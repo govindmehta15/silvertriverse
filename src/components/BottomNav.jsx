@@ -23,7 +23,7 @@ const navItems = [
     },
     {
         to: '/',
-        label: 'Yours',
+        label: 'SilverTriverse',
         icon: null,
         isCenter: true,
     },
@@ -64,7 +64,7 @@ export default function BottomNav({ onMenuClick }) {
                                         whileTap={{ scale: 0.92 }}
                                         transition={{ type: 'spring', stiffness: 400, damping: 20 }}
                                     >
-                                        <span className="text-navy-900 font-serif font-bold text-xl" aria-hidden>Y</span>
+                                        <span className="text-navy-900 font-serif font-bold text-xl" aria-hidden>S</span>
                                     </motion.div>
                                 ) : (
                                     <motion.div
@@ -118,7 +118,7 @@ export default function BottomNav({ onMenuClick }) {
                                                 whileTap={{ scale: 0.92 }}
                                                 transition={{ type: 'spring', stiffness: 400, damping: 20 }}
                                             >
-                                                <span className="text-navy-900 font-serif font-bold text-xl" aria-hidden>Y</span>
+                                                <span className="text-navy-900 font-serif font-bold text-xl" aria-hidden>S</span>
                                             </motion.div>
                                         ) : (
                                             <motion.div
@@ -145,7 +145,7 @@ export default function BottomNav({ onMenuClick }) {
                                             </motion.div>
                                         )}
                                         <span className={`text-[10px] mt-0.5 truncate max-w-[64px] text-center ${item.isCenter ? 'text-gold font-semibold' : ''}`}>
-                                            {item.isCenter ? 'Yours' : item.label}
+                                            {item.isCenter ? 'SilverTriverse' : item.label}
                                         </span>
                                     </>
                                 )}

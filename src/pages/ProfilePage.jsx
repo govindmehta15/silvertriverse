@@ -8,7 +8,7 @@ import StatsCard from '../components/StatsCard';
 import RoleGuard from '../components/RoleGuard';
 import { getData, setData } from '../utils/storageService';
 import { dispatchNotification, NotificationTypes } from '../utils/notificationDispatcher';
-import { yoursMerchandise, oursMerchandise } from '../data/merchandiseData';
+import { premiumMerchandise, dailyMerchandise } from '../data/merchandiseData';
 import { getThemeById, DEFAULT_THEME_ID, PROFILE_THEMES, FALLBACK_PAGE_BACKGROUND, FALLBACK_COVER_BLEND } from '../data/profileThemes';
 
 const userProfileFallback = {
@@ -43,25 +43,34 @@ const item = {
 export default function ProfilePage() {
     const { user, updateRole } = useAuth();
     const { addToast } = useToast();
-    const [searchParams] = useSearchParams();
     const [activeTab, setActiveTab] = useState('Shelf');
     const [orders, setOrders] = useState([]);
     const [coins, setCoins] = useState([]);
     const [bellRung, setBellRung] = useState(false);
 
     // Determine if we're viewing another user's profile
+    const [searchParams] = useSearchParams();
+    const navigate = useNavigate();
     const viewingUserId = searchParams.get('user');
-    const allUsers = getData('users') || [];
-    const viewedUser = viewingUserId ? allUsers.find(u => u.id === viewingUserId) : null;
+
+    const allUsers = useMemo(() => {
+        const saved = getData('users');
+        return (saved && saved.length > 0) ? saved : mockUsers;
+    }, []);
+
+    const viewedUser = useMemo(() => {
+        return viewingUserId ? allUsers.find(u => u.id === viewingUserId) : null;
+    }, [viewingUserId, allUsers]);
+
     const profileUser = viewedUser || user;
     const isOwnProfile = !viewedUser || viewedUser.id === user?.id;
 
     // Theme: eligibility (sponsor = owns ≥1 plot, winner = isWinner)
-    const ownershipList = getData('yours_plots_ownership') || [];
+    const ownershipList = getData('silvertriverse_plots_ownership') || [];
     const ownedPlotsCount = ownershipList.filter((r) => r.ownerId === profileUser?.id).length;
     const isSponsor = ownedPlotsCount >= 1;
     const canUsePremium = isSponsor || !!profileUser?.isWinner;
-    const storedThemeId = getData(`yours_profile_theme_${profileUser?.id}`) || DEFAULT_THEME_ID;
+    const storedThemeId = getData(`silvertriverse_profile_theme_${profileUser?.id}`) || DEFAULT_THEME_ID;
     const themeForStored = getThemeById(storedThemeId);
     const effectiveThemeId = themeForStored.premium && !canUsePremium ? DEFAULT_THEME_ID : storedThemeId;
     const activeTheme = getThemeById(effectiveThemeId);
@@ -70,7 +79,7 @@ export default function ProfilePage() {
     const [, setThemeRefresh] = useState(0);
     const setProfileTheme = (themeId) => {
         if (!user?.id) return;
-        setData(`yours_profile_theme_${user.id}`, themeId);
+        setData(`silvertriverse_profile_theme_${user.id}`, themeId);
         setThemeRefresh((n) => n + 1);
         setThemeSelectorOpen(false);
     };
@@ -106,7 +115,7 @@ export default function ProfilePage() {
 
     // Derived Data
     const userPosts = useMemo(() => {
-        if (!profileUser) return [];
+        if (!profileUser || !profileUser.id) return [];
         const groups = getData('communities_v2') || [];
         let posts = [];
         groups.forEach(g => {
@@ -121,7 +130,7 @@ export default function ProfilePage() {
 
     // Shelf items aggregation
     const { premiumItems, dailyItems, otherItems, totalCollectibles } = useMemo(() => {
-        if (!profileUser) return { premiumItems: [], dailyItems: [], otherItems: [], totalCollectibles: 0 };
+        if (!profileUser || !profileUser.id) return { premiumItems: [], dailyItems: [], otherItems: [], totalCollectibles: 0 };
         const premium = [];
         const daily = [];
         const other = [];
@@ -142,8 +151,8 @@ export default function ProfilePage() {
         } else if (profileUser.purchasedItems) {
             profileUser.purchasedItems.forEach(itemId => {
                 total++;
-                const yMatch = yoursMerchandise.find(m => m.id === itemId);
-                const oMatch = oursMerchandise.find(m => m.id === itemId);
+                const yMatch = premiumMerchandise.find(m => m.id === itemId);
+                const oMatch = dailyMerchandise.find(m => m.id === itemId);
                 if (yMatch) {
                     premium.push({ name: yMatch.title, image: yMatch.images[0], serialNumber: yMatch.serialNumber, digitalTwinId: yMatch.digitalTwinId, type: 'Premium' });
                 } else if (oMatch) {
@@ -294,7 +303,7 @@ export default function ProfilePage() {
                     className="absolute bottom-0 left-6 translate-y-1/2"
                 >
                     <div className="w-24 h-24 md:w-28 md:h-28 rounded-2xl overflow-hidden border-4 border-navy-900 shadow-glow-gold relative group">
-                        <img src={user?.avatar || '/images/profile_avatar.png'} alt={user?.name} className="w-full h-full object-cover" />
+                        <img src={profileUser?.avatar || '/images/profile_avatar.png'} alt={profileUser?.name} className="w-full h-full object-cover" />
 
                         <RoleGuard allowedRoles={['creator', 'professional']}>
                             <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-blue-500 rounded-full border-2 border-navy-900 flex items-center justify-center shadow-lg" title="Verified status">
@@ -328,26 +337,28 @@ export default function ProfilePage() {
                             </motion.button>
                         )}
 
-                        {/* Interactive Role Switcher for simulation purposes */}
-                        <div className="relative ml-auto">
-                            <select
-                                value={user?.role || 'fan'}
-                                onChange={(e) => updateRole(e.target.value)}
-                                className="appearance-none bg-navy-800 border border-gold/30 text-gold text-xs font-bold uppercase tracking-wider py-1.5 pl-3 pr-8 rounded-full outline-none focus:ring-1 focus:ring-gold/50 cursor-pointer shadow-glow-gold"
-                            >
-                                <option value="fan">Fan level</option>
-                                <option value="creator">Creator level</option>
-                                <option value="professional">Pro level</option>
-                            </select>
-                            <svg className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gold/70 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
-                        </div>
+                        {/* Interactive Role Switcher — only for own profile or simulation purposes */}
+                        {isOwnProfile && (
+                            <div className="relative ml-auto">
+                                <select
+                                    value={profileUser?.role || 'fan'}
+                                    onChange={(e) => updateRole(e.target.value)}
+                                    className="appearance-none bg-navy-800 border border-gold/30 text-gold text-xs font-bold uppercase tracking-wider py-1.5 pl-3 pr-8 rounded-full outline-none focus:ring-1 focus:ring-gold/50 cursor-pointer shadow-glow-gold"
+                                >
+                                    <option value="fan">Fan level</option>
+                                    <option value="creator">Creator level</option>
+                                    <option value="professional">Pro level</option>
+                                </select>
+                                <svg className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gold/70 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+                            </div>
+                        )}
                     </div>
 
                     <p className="text-gray-400 text-sm mt-1 flex items-center gap-1">
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
                         </svg>
-                        {user?.role === 'professional' ? 'Horizon Studios' : userProfileFallback.club}
+                        {profileUser?.role === 'professional' ? 'Horizon Studios' : userProfileFallback.club}
                     </p>
                     {profileUser?.bioLink && (
                         <a href={`https://${profileUser.bioLink}`} target="_blank" rel="noopener noreferrer" className="text-teal-400 text-xs font-bold hover:underline flex items-center gap-1 mt-1">
@@ -493,7 +504,7 @@ export default function ProfilePage() {
                                 {/* Premium Collection */}
                                 <div>
                                     <h3 className="text-gold font-serif text-2xl mb-6 flex items-center gap-3">
-                                        <span className="text-xl">✧</span> Premium Collection <span className="text-zinc-500 font-sans text-xs uppercase tracking-widest">/ YOURS</span>
+                                        <span className="text-xl">✧</span> Premium Collection <span className="text-zinc-500 font-sans text-xs uppercase tracking-widest">/ SILVERTRIVERSE</span>
                                     </h3>
                                     {premiumItems.length === 0 ? (
                                         <p className="text-gray-500 text-center py-8 bg-zinc-900/30 rounded-xl border border-dashed border-zinc-800 text-sm uppercase tracking-widest">No premium artifacts acquired.</p>

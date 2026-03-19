@@ -1,6 +1,6 @@
 // Mock data for the Merchandise module
 
-export const yoursMerchandise = [
+export const premiumMerchandise = [
     {
         id: 'y1',
         type: 'PremiumProduct',
@@ -481,7 +481,7 @@ export const yoursMerchandise = [
     }
 ];
 
-export const oursMerchandise = [
+export const dailyMerchandise = [
     {
         id: 'o1',
         type: 'DailyProduct',

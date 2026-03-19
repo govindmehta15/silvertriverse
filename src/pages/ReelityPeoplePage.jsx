@@ -1,7 +1,8 @@
+import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
 import { getData } from '../utils/storageService';
 import { useAuth } from '../context/AuthContext';
+import { mockUsers } from '../mock/mockUsers';
 
 const container = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.08 } } };
 const item = { hidden: { opacity: 0, y: 15 }, show: { opacity: 1, y: 0 } };
@@ -9,7 +10,8 @@ const item = { hidden: { opacity: 0, y: 15 }, show: { opacity: 1, y: 0 } };
 export default function ReelityPeoplePage() {
     const { user } = useAuth();
     const navigate = useNavigate();
-    const allUsers = getData('users') || [];
+    const saved = getData('users');
+    const allUsers = (saved && saved.length > 0) ? saved : mockUsers;
 
     const getPrestigeLabel = (u) => {
         const total = (u.participationScore || 0) + (u.ownedRelics?.length || 0) * 100;
@@ -28,12 +30,10 @@ export default function ReelityPeoplePage() {
                     const prestige = getPrestigeLabel(u);
                     const isMe = user?.id === u.id;
                     return (
-                        <motion.div
+                        <Link
                             key={u.id}
-                            variants={item}
-                            whileHover={{ x: 4 }}
-                            onClick={() => navigate(isMe ? '/profile' : `/profile?user=${u.id}`)}
-                            className="flex items-center gap-4 bg-navy-800/60 border border-navy-700/50 rounded-xl p-4 cursor-pointer hover:border-gold/30 transition-all"
+                            to={isMe ? '/profile' : `/profile?user=${u.id}`}
+                            className="flex items-center gap-4 bg-navy-800/60 border border-navy-700/50 rounded-xl p-4 cursor-pointer hover:border-gold/30 transition-all block"
                         >
                             <div className="relative shrink-0">
                                 <img src={u.avatar} alt={u.name} className="w-14 h-14 rounded-full border-2 border-navy-600 object-cover" />
@@ -46,7 +46,7 @@ export default function ReelityPeoplePage() {
 
                             <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-2">
-                                    <p className="text-white text-sm font-semibold truncate">{u.name}</p>
+                                    <p className="text-white text-sm font-semibold truncate group-hover:text-gold transition-colors">{u.name}</p>
                                     {isMe && <span className="text-[9px] text-gold bg-gold/10 px-1.5 py-0.5 rounded-full font-bold">YOU</span>}
                                 </div>
                                 <p className="text-gray-400 text-xs truncate">@{u.username} · {u.role}</p>
@@ -59,7 +59,7 @@ export default function ReelityPeoplePage() {
                                 </span>
                                 <span className="text-gray-500 text-[10px]">{(u.followers || 0).toLocaleString()} fans</span>
                             </div>
-                        </motion.div>
+                        </Link>
                     );
                 })}
             </motion.div>

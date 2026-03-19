@@ -1,6 +1,6 @@
 import { getData, simulateApi } from './storageService';
 
-const VOTES_KEY = 'yours_reality_votes';
+const VOTES_KEY = 'silvertriverse_reality_votes';
 
 // Format: { [battleId]: { f1_votes: 0, f2_votes: 0, userVotes: { [userId]: 'f1' } } }
 if (!getData(VOTES_KEY)) {

@@ -2,7 +2,7 @@ import { createContext, useContext, useState, useEffect } from 'react';
 import { mockUsers } from '../mock/mockUsers';
 
 const AuthContext = createContext();
-const AUTH_KEY = 'yours_auth_session';
+const AUTH_KEY = 'silvertriverse_auth_session';
 
 export function AuthProvider({ children }) {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -41,8 +41,29 @@ export function AuthProvider({ children }) {
         return user;
     };
 
+    const updateRole = (newRole) => {
+        if (!user) return;
+        const updated = { ...user, role: newRole };
+        setUser(updated);
+        localStorage.setItem(AUTH_KEY, JSON.stringify(updated));
+
+        // Ensure the global users list exists for other pages/profiles
+        let allUsers = JSON.parse(localStorage.getItem('users') || '[]');
+        if (allUsers.length === 0) {
+            allUsers = [...mockUsers];
+        }
+
+        const idx = allUsers.findIndex(u => u.id === user.id);
+        if (idx !== -1) {
+            allUsers[idx] = updated;
+        } else {
+            allUsers.push(updated);
+        }
+        localStorage.setItem('users', JSON.stringify(allUsers));
+    };
+
     return (
-        <AuthContext.Provider value={{ isAuthenticated, user, login, logout, getCurrentUser }}>
+        <AuthContext.Provider value={{ isAuthenticated, user, login, logout, getCurrentUser, updateRole }}>
             {children}
         </AuthContext.Provider>
     );

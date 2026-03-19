@@ -1,11 +1,11 @@
 import { getData, simulateApi } from './storageService';
-import { yoursMerchandise, oursMerchandise } from '../data/merchandiseData';
+import { premiumMerchandise, dailyMerchandise } from '../data/merchandiseData';
 
-const MERCH_KEY = 'yours_merch_v4';
+const MERCH_KEY = 'silvertriverse_merch_v4';
 
 // Seed initial data
 if (!getData(MERCH_KEY)) {
-    localStorage.setItem(MERCH_KEY, JSON.stringify([...yoursMerchandise, ...oursMerchandise]));
+    localStorage.setItem(MERCH_KEY, JSON.stringify([...premiumMerchandise, ...dailyMerchandise]));
 }
 
 export const merchandiseService = {

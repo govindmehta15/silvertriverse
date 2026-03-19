@@ -1,7 +1,7 @@
 import { getData, updateData, simulateApi } from './storageService';
 import { storyService } from './storyService';
 
-const PIPELINE_KEY = 'yours_pro_pipelines';
+const PIPELINE_KEY = 'silvertriverse_pro_pipelines';
 
 // Helper to get full story details mixed with pipeline stage
 const enrichPipelineItems = async (pipelineItems) => {

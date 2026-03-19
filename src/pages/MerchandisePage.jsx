@@ -17,7 +17,7 @@ const item = {
 };
 
 export default function MerchandisePage() {
-    const [activeBrand, setActiveBrand] = useState('YOURS'); // 'YOURS' or 'OURS'
+    const [activeBrand, setActiveBrand] = useState('SILVERTRIVERSE'); // 'SILVERTRIVERSE' or 'OURS'
     const [searchQuery, setSearchQuery] = useState('');
     const [addedId, setAddedId] = useState(null);
     const { addToCart, totalItems, setIsOpen } = useCart();
@@ -32,7 +32,7 @@ export default function MerchandisePage() {
 
     // Filter based on brand and search
     const filtered = products.filter((p) => {
-        const matchBrand = activeBrand === 'YOURS' ? p.type === 'PremiumProduct' : p.type === 'DailyProduct';
+        const matchBrand = activeBrand === 'SILVERTRIVERSE' ? p.type === 'PremiumProduct' : p.type === 'DailyProduct';
         const searchTarget = p.title || p.name || '';
         const matchSearch = searchTarget.toLowerCase().includes(searchQuery.toLowerCase());
         return matchBrand && matchSearch;
@@ -46,19 +46,19 @@ export default function MerchandisePage() {
     };
 
     return (
-        <div className={`min-h-screen pb-4 transition-colors duration-500 ${activeBrand === 'YOURS' ? 'bg-zinc-950' : 'bg-gray-50'}`}>
+        <div className={`min-h-screen pb-4 transition-colors duration-500 ${activeBrand === 'SILVERTRIVERSE' ? 'bg-zinc-950' : 'bg-gray-50'}`}>
 
             {/* Top Navigation / Brand Switcher */}
-            <div className={`sticky top-0 z-40 backdrop-blur-md border-b ${activeBrand === 'YOURS' ? 'bg-zinc-950/80 border-gold/20' : 'bg-white/80 border-gray-200'}`}>
+            <div className={`sticky top-0 z-40 backdrop-blur-md border-b ${activeBrand === 'SILVERTRIVERSE' ? 'bg-zinc-950/80 border-gold/20' : 'bg-white/80 border-gray-200'}`}>
                 <div className="flex items-center justify-between px-4 py-3">
                     <div className="flex items-center gap-6">
                         <button
-                            onClick={() => setActiveBrand('YOURS')}
-                            className={`font-serif text-xl tracking-widest uppercase transition-all ${activeBrand === 'YOURS' ? 'text-gold font-bold scale-105' : 'text-gray-500 hover:text-gold/70'}`}
+                            onClick={() => setActiveBrand('SILVERTRIVERSE')}
+                            className={`font-serif text-xl tracking-widest uppercase transition-all ${activeBrand === 'SILVERTRIVERSE' ? 'text-gold font-bold scale-105' : 'text-gray-500 hover:text-gold/70'}`}
                         >
-                            Yours
+                            SilverTriverse
                         </button>
-                        <div className={`w-px h-6 ${activeBrand === 'YOURS' ? 'bg-gold/20' : 'bg-gray-300'}`} />
+                        <div className={`w-px h-6 ${activeBrand === 'SILVERTRIVERSE' ? 'bg-gold/20' : 'bg-gray-300'}`} />
                         <button
                             onClick={() => setActiveBrand('OURS')}
                             className={`font-sans text-xl tracking-tight font-bold transition-all ${activeBrand === 'OURS' ? 'text-blue-600 scale-105' : 'text-gray-500 hover:text-blue-400'}`}
@@ -71,7 +71,7 @@ export default function MerchandisePage() {
                     <motion.button
                         whileTap={{ scale: 0.9 }}
                         onClick={() => setIsOpen(true)}
-                        className={`relative w-10 h-10 rounded-full flex items-center justify-center transition-all ${activeBrand === 'YOURS' ? 'bg-zinc-900 border border-gold/30 text-gold' : 'bg-white border border-gray-200 text-blue-600 shadow-sm'}`}
+                        className={`relative w-10 h-10 rounded-full flex items-center justify-center transition-all ${activeBrand === 'SILVERTRIVERSE' ? 'bg-zinc-900 border border-gold/30 text-gold' : 'bg-white border border-gray-200 text-blue-600 shadow-sm'}`}
                     >
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
@@ -80,7 +80,7 @@ export default function MerchandisePage() {
                             <motion.span
                                 initial={{ scale: 0 }}
                                 animate={{ scale: 1 }}
-                                className={`absolute -top-1 -right-1 w-4 h-4 rounded-full text-[9px] font-bold flex items-center justify-center ${activeBrand === 'YOURS' ? 'bg-gold text-zinc-900 relative shadow-[0_0_10px_rgba(201,162,39,0.5)]' : 'bg-blue-600 text-white'}`}
+                                className={`absolute -top-1 -right-1 w-4 h-4 rounded-full text-[9px] font-bold flex items-center justify-center ${activeBrand === 'SILVERTRIVERSE' ? 'bg-gold text-zinc-900 relative shadow-[0_0_10px_rgba(201,162,39,0.5)]' : 'bg-blue-600 text-white'}`}
                             >
                                 {totalItems}
                             </motion.span>
@@ -90,11 +90,11 @@ export default function MerchandisePage() {
             </div>
 
             {/* Header Content based on Brand */}
-            {activeBrand === 'YOURS' ? (
-                // YOURS Header (Dark Velvet, Luxury)
+            {activeBrand === 'SILVERTRIVERSE' ? (
+                // SILVERTRIVERSE Header (Dark Velvet, Luxury)
                 <div className="relative overflow-hidden mb-6 py-12 text-center" style={{ background: 'radial-gradient(circle at center, #2e101a 0%, #09090b 100%)' }}>
                     <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="text-gold/70 text-2xl mb-2">♛</motion.div>
-                    <motion.h1 initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="font-serif text-4xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-gold via-yellow-200 to-gold tracking-[0.2em] mb-3">YOURS</motion.h1>
+                    <motion.h1 initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="font-serif text-4xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-gold via-yellow-200 to-gold tracking-[0.2em] mb-3">SILVERTRIVERSE</motion.h1>
                     <p className="text-gold/60 text-xs tracking-[0.4em] uppercase">Premium Limited Editions</p>
                 </div>
             ) : (
@@ -113,9 +113,9 @@ export default function MerchandisePage() {
                         placeholder="Search collection..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className={`w-full pl-12 pr-4 py-3 rounded-full focus:outline-none transition-all duration-300 ${activeBrand === 'YOURS' ? 'bg-zinc-900 border border-gold/20 text-gold placeholder-gold/40 focus:border-gold/60 focus:shadow-[0_0_15px_rgba(201,162,39,0.15)]' : 'bg-white border border-gray-200 text-gray-800 placeholder-gray-400 focus:border-blue-400 focus:ring-4 focus:ring-blue-100'}`}
+                        className={`w-full pl-12 pr-4 py-3 rounded-full focus:outline-none transition-all duration-300 ${activeBrand === 'SILVERTRIVERSE' ? 'bg-zinc-900 border border-gold/20 text-gold placeholder-gold/40 focus:border-gold/60 focus:shadow-[0_0_15px_rgba(201,162,39,0.15)]' : 'bg-white border border-gray-200 text-gray-800 placeholder-gray-400 focus:border-blue-400 focus:ring-4 focus:ring-blue-100'}`}
                     />
-                    <svg className={`absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 ${activeBrand === 'YOURS' ? 'text-gold/50' : 'text-gray-400'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                    <svg className={`absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 ${activeBrand === 'SILVERTRIVERSE' ? 'text-gold/50' : 'text-gray-400'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
                     </svg>
                 </div>
@@ -134,12 +134,12 @@ export default function MerchandisePage() {
                         className={`px-4 max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8`}
                     >
                         {filtered.length === 0 ? (
-                            <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className={`col-span-full text-center py-20 ${activeBrand === 'YOURS' ? 'text-gold/40' : 'text-gray-500'}`}>No items found.</motion.p>
+                            <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className={`col-span-full text-center py-20 ${activeBrand === 'SILVERTRIVERSE' ? 'text-gold/40' : 'text-gray-500'}`}>No items found.</motion.p>
                         ) : (
                             filtered.map((product) => (
                                 <motion.div key={product.id} variants={item}>
-                                    {activeBrand === 'YOURS' ? (
-                                        // YOURS CARD DESIGN
+                                    {activeBrand === 'SILVERTRIVERSE' ? (
+                                        // SILVERTRIVERSE CARD DESIGN
                                         <div
                                             onClick={() => navigate(`/merchandise/${product.id}`)}
                                             className="group cursor-pointer relative rounded-sm border border-gold/20 bg-zinc-900/80 overflow-hidden hover:border-gold/60 transition-colors shadow-2xl"

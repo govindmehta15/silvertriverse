@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { reelityService } from '../services/reelityService';
 import { communityService } from '../services/communityService';
 import { realityService } from '../services';
@@ -164,13 +164,13 @@ export default function ReelityFeedPage() {
                     // Social post
                     return (
                         <motion.div key={feedItem.id} variants={item} className="bg-navy-900/60 border border-navy-700/50 rounded-xl overflow-hidden">
-                            <div className="flex items-center gap-3 p-4 pb-2">
+                            <Link to={`/profile?user=${feedItem.authorId}`} className="flex items-center gap-3 p-4 pb-2 hover:opacity-80 transition-opacity">
                                 <img src={feedItem.authorAvatar} alt="" className="w-10 h-10 rounded-full border border-navy-600" />
                                 <div className="flex-1">
-                                    <p className="text-white text-sm font-semibold">{feedItem.authorName}</p>
+                                    <p className="text-white text-sm font-semibold hover:text-gold transition-colors">{feedItem.authorName}</p>
                                     <p className="text-gray-500 text-[10px]">{hoursAgo(feedItem.timestamp)}</p>
                                 </div>
-                            </div>
+                            </Link>
                             {feedItem.tags?.length > 0 && (
                                 <div className="px-4 pb-2 flex gap-2 flex-wrap">
                                     {feedItem.tags.map((tag, ti) => (
@@ -194,7 +194,7 @@ export default function ReelityFeedPage() {
                                     <div className="space-y-2 pt-2 border-t border-navy-700/50">
                                         {feedItem.comments.slice(0, 2).map(c => (
                                             <div key={c.id} className="flex gap-2">
-                                                <span className="text-white text-xs font-semibold shrink-0">{c.authorName}</span>
+                                                <Link to={`/profile?user=${c.authorId}`} className="text-white text-xs font-semibold shrink-0 hover:text-gold transition-colors">{c.authorName}</Link>
                                                 <span className="text-gray-300 text-xs">{c.text}</span>
                                             </div>
                                         ))}

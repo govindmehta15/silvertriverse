@@ -13,8 +13,8 @@ export default function ActivityTicker() {
     useEffect(() => {
         loadActivities();
         const handleUpdate = () => loadActivities();
-        window.addEventListener('yours_ticker_update', handleUpdate);
-        return () => window.removeEventListener('yours_ticker_update', handleUpdate);
+        window.addEventListener('silvertriverse_ticker_update', handleUpdate);
+        return () => window.removeEventListener('silvertriverse_ticker_update', handleUpdate);
     }, []);
 
     useEffect(() => {

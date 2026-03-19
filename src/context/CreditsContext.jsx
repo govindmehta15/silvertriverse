@@ -3,7 +3,7 @@ import { creditsService } from '../services/creditsService';
 import { useAuth } from './AuthContext';
 import { updateData } from '../services/storageService';
 
-const HISTORY_KEY = 'yours_credits_history';
+const HISTORY_KEY = 'silvertriverse_credits_history';
 const CreditsContext = createContext();
 
 export function CreditsProvider({ children }) {

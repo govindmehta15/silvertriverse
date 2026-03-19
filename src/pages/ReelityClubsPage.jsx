@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { communityService } from '../services/communityService';
 import { useAuth } from '../context/AuthContext';
@@ -204,7 +205,11 @@ export default function ReelityClubsPage() {
                         ) : (
                             <div className="space-y-3 relative z-10">
                                 {globalLeaderboard.slice(0, 5).map((u, index) => (
-                                    <div key={u.userId} className="flex items-center justify-between p-3 bg-zinc-900/50 border border-zinc-800 rounded-lg hover:border-gold/30 transition-colors group">
+                                    <Link
+                                        key={u.userId}
+                                        to={`/profile?user=${u.userId}`}
+                                        className="flex items-center justify-between p-3 bg-zinc-900/50 border border-zinc-800 rounded-lg hover:border-gold/30 transition-colors group"
+                                    >
                                         <div className="flex items-center gap-3">
                                             <span className={`w-5 text-center font-bold font-serif text-lg
                                                 ${index === 0 ? 'text-gold drop-shadow-md' :
@@ -219,7 +224,7 @@ export default function ReelityClubsPage() {
                                             <span className="text-white text-xs">{u.postCount}</span>
                                             <span className="text-zinc-500 scale-90">Posts</span>
                                         </div>
-                                    </div>
+                                    </Link>
                                 ))}
                             </div>
                         )}

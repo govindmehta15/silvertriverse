@@ -1,13 +1,15 @@
 import { getData } from './storageService';
+import { mockUsers } from '../mock/mockUsers';
 
 // Calculate global rankings based on local storage data
 export const getGlobalLeaderboard = () => {
     // 1. Gather all users
     // For this simulation, we'll construct a mock user pool + the current user
-    const authData = getData('yours_auth');
+    const authData = getData('silvertriverse_auth');
     const currentUser = authData?.user;
 
-    const usersColl = getData('users') || [];
+    const saved = getData('users');
+    const usersColl = (saved && saved.length > 0) ? saved : mockUsers;
     const allUsersMap = {};
 
     usersColl.forEach(u => {

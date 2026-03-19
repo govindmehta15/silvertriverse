@@ -1,6 +1,6 @@
 import { getData, updateData, simulateApi } from './storageService';
 
-const HISTORY_KEY = 'yours_ai_writer_history';
+const HISTORY_KEY = 'silvertriverse_ai_writer_history';
 
 const MOCK_ANALYSES = [
   {

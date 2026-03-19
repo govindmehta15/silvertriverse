@@ -35,6 +35,9 @@ import AIProducerHubPage from './pages/AIProducerHubPage';
 import AIProducerTopUpPage from './pages/AIProducerTopUpPage';
 import AIProducerWorkflowPage from './pages/AIProducerWorkflowPage';
 import LandMarketplacePage from './pages/LandMarketplacePage';
+import SplashScreen from './components/SplashScreen';
+import { AnimatePresence } from 'framer-motion';
+import { useState, useEffect } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 const queryClient = new QueryClient({
@@ -50,6 +53,15 @@ const queryClient = new QueryClient({
 initSimulation();
 
 export default function App() {
+  const [showSplash, setShowSplash] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowSplash(false);
+    }, 2500);
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
@@ -57,6 +69,9 @@ export default function App() {
           <NotificationProvider>
             <CartProvider>
               <CreditsProvider>
+                <AnimatePresence mode="wait">
+                  {showSplash && <SplashScreen key="splash" />}
+                </AnimatePresence>
                 <Router>
                   <Routes>
                     <Route element={<MainLayout />}>

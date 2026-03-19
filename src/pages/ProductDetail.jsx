@@ -154,14 +154,14 @@ export default function ProductDetail() {
         navigate('/profile');
     };
 
-    const isYours = product.type === 'PremiumProduct';
+    const isSilverTriverse = product.type === 'PremiumProduct';
 
     const isSoldOut = product.stock === 0;
     const isWindowClosed = Date.now() > product.allocationEndTime;
     const isPremiumDisabled = isSoldOut || isWindowClosed;
 
     let isEligible = true;
-    if (isYours && product.allocationCriteria && user) {
+    if (isSilverTriverse && product.allocationCriteria && user) {
         const ranks = ['None', 'Bronze', 'Silver', 'Gold', 'Platinum'];
         const userRankIndex = ranks.indexOf(user.collectorRank || 'None');
         const reqRankIndex = ranks.indexOf(product.allocationCriteria.minCollectorRank || 'None');
@@ -173,7 +173,7 @@ export default function ProductDetail() {
     }
 
     return (
-        <div className={`min-h-screen transition-colors duration-700 ${isYours ? 'bg-zinc-950 text-gray-200 font-sans' : 'bg-gray-50 text-gray-800 font-sans'}`}>
+        <div className={`min-h-screen transition-colors duration-700 ${isSilverTriverse ? 'bg-zinc-950 text-gray-200 font-sans' : 'bg-gray-50 text-gray-800 font-sans'}`}>
 
             <AnimatePresence>
                 {showPrestige && purchasedProduct && <PrestigeModal product={purchasedProduct} onClose={handleClosePrestige} />}
@@ -181,7 +181,7 @@ export default function ProductDetail() {
                     <DigitalBooklet
                         pages={product.digitalBooklet}
                         onClose={() => setShowBooklet(false)}
-                        isPremium={isYours}
+                        isPremium={isSilverTriverse}
                     />
                 )}
             </AnimatePresence>
@@ -191,20 +191,20 @@ export default function ProductDetail() {
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 onClick={() => navigate('/merchandise')}
-                className={`fixed top-4 left-4 lg:left-6 z-50 w-10 h-10 rounded-full flex items-center justify-center transition-all ${isYours ? 'bg-zinc-900/80 backdrop-blur-sm border border-gold/30 text-gold hover:bg-gold/10' : 'bg-white/80 backdrop-blur-sm border border-gray-200 text-blue-600 hover:bg-blue-50 shadow-sm'}`}
+                className={`fixed top-4 left-4 lg:left-6 z-50 w-10 h-10 rounded-full flex items-center justify-center transition-all ${isSilverTriverse ? 'bg-zinc-900/80 backdrop-blur-sm border border-gold/30 text-gold hover:bg-gold/10' : 'bg-white/80 backdrop-blur-sm border border-gray-200 text-blue-600 hover:bg-blue-50 shadow-sm'}`}
             >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
                 </svg>
             </motion.button>
 
-            {isYours ? (
-                // ════════════ YOURS (PREMIUM) FULL LAYOUT ════════════
+            {isSilverTriverse ? (
+                // ════════════ SILVERTRIVERSE (PREMIUM) FULL LAYOUT ════════════
                 <div className="pb-24">
                     {/* Hero Split Section */}
-                    <div className="grid grid-cols-1 lg:grid-cols-2 min-h-[90vh] border-b border-gold/10">
+                    < div className="grid grid-cols-1 lg:grid-cols-2 min-h-[90vh] border-b border-gold/10" >
                         {/* Left: Sticky Image Gallery Simulation */}
-                        <div
+                        < div
                             className="relative bg-zinc-900 flex items-center justify-center p-8 lg:p-16 border-r border-gold/10 overflow-hidden group min-h-[50vh] lg:min-h-screen"
                             onMouseMove={(e) => {
                                 const rect = e.currentTarget.getBoundingClientRect();
@@ -267,12 +267,12 @@ export default function ProductDetail() {
                                     <span className="text-xl block w-6 h-6 leading-none flex items-center justify-center">✨</span>
                                 </button>
                             </div>
-                        </div>
+                        </div >
 
                         {/* Right: Scrolling Purchase Details */}
-                        <div className="flex flex-col justify-center px-6 lg:px-16 py-12 lg:py-20 relative">
+                        < div className="flex flex-col justify-center px-6 lg:px-16 py-12 lg:py-20 relative" >
                             {/* Cinematic BG blur */}
-                            <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-gold/5 rounded-full blur-[100px] pointer-events-none -z-10" />
+                            < div className="absolute top-0 right-0 w-[500px] h-[500px] bg-gold/5 rounded-full blur-[100px] pointer-events-none -z-10" />
 
                             <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2 }}>
                                 <div className="flex items-center gap-3 mb-6">
@@ -376,14 +376,14 @@ export default function ProductDetail() {
                                     </div>
                                 </div>
                             </motion.div>
-                        </div>
-                    </div>
+                        </div >
+                    </div >
 
                     {/* Extended Content Sections */}
-                    <div className="max-w-5xl mx-auto px-6 py-20 space-y-24">
+                    < div className="max-w-5xl mx-auto px-6 py-20 space-y-24" >
 
                         {/* 2. The Story Behind It */}
-                        <section className="grid md:grid-cols-2 gap-12 items-center">
+                        < section className="grid md:grid-cols-2 gap-12 items-center" >
                             <div>
                                 <h2 className="font-serif text-3xl text-white mb-6">The Inspiration</h2>
                                 <p className="text-zinc-400 text-sm leading-relaxed mb-6">
@@ -398,10 +398,10 @@ export default function ProductDetail() {
                             <div className="aspect-[16/9] bg-zinc-900 relative shadow-2xl">
                                 <img src={product.storyBooklet.still} alt="Scene" className="w-full h-full object-cover opacity-60 mix-blend-luminosity hover:mix-blend-normal transition-all duration-700" />
                             </div>
-                        </section>
+                        </section >
 
                         {/* 3. Craftsmanship */}
-                        <section className="grid md:grid-cols-3 gap-8">
+                        < section className="grid md:grid-cols-3 gap-8" >
                             <div className="col-span-full mb-4">
                                 <h2 className="font-serif text-3xl text-white text-center">Master Craftsmanship</h2>
                             </div>
@@ -420,10 +420,10 @@ export default function ProductDetail() {
                                 <h4 className="text-white text-xs tracking-widest uppercase mb-2">Engraving</h4>
                                 <p className="text-zinc-400 text-sm leading-relaxed">{product.engravingDetails}</p>
                             </div>
-                        </section>
+                        </section >
 
                         {/* 4. Digital Twin Provenance Timeline */}
-                        <section className="bg-zinc-900 border border-gold/10 p-8 shadow-2xl relative overflow-hidden">
+                        < section className="bg-zinc-900 border border-gold/10 p-8 shadow-2xl relative overflow-hidden" >
                             <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-900/10 blur-[80px] pointer-events-none" />
                             <div className="flex items-center gap-3 mb-8">
                                 <span className="text-xl">⬡</span>
@@ -461,10 +461,10 @@ export default function ProductDetail() {
                                     </motion.div>
                                 ))}
                             </div>
-                        </section>
+                        </section >
 
                         {/* 4.5 In the Hands of (Celebrity Mock) */}
-                        <section className="bg-gradient-to-r from-zinc-900 via-zinc-900/50 to-transparent border-l-2 border-gold p-8 md:p-12 mb-16 relative overflow-hidden">
+                        < section className="bg-gradient-to-r from-zinc-900 via-zinc-900/50 to-transparent border-l-2 border-gold p-8 md:p-12 mb-16 relative overflow-hidden" >
                             <div className="absolute right-0 top-0 bottom-0 w-1/3 bg-[url('/images/film_thriller.png')] bg-cover bg-center mix-blend-overlay opacity-30 mask-image:linear-gradient(to_right,transparent,black)" />
                             <div className="relative z-10 max-w-xl">
                                 <div className="flex items-center gap-4 mb-4">
@@ -475,29 +475,33 @@ export default function ProductDetail() {
                                     This exact specification was famously worn by <strong className="text-white">leading cast members</strong> throughout the film's 2026 global press tour. Its highly distinctive silhouette has become an indelible mark of cinematic prestige on the modern red carpet.
                                 </p>
                             </div>
-                        </section>
+                        </section >
 
                         {/* 5. Cultural Archive Entry */}
-                        {product.archiveEntry && (
-                            <section className="mt-8">
-                                <ArchiveEntryCard entry={product.archiveEntry} isPremium={true} />
-                            </section>
-                        )}
+                        {
+                            product.archiveEntry && (
+                                <section className="mt-8">
+                                    <ArchiveEntryCard entry={product.archiveEntry} isPremium={true} />
+                                </section>
+                            )
+                        }
 
                         {/* 6. Digital Booklet */}
-                        {product.digitalBooklet && (
-                            <section className="flex justify-center mt-16">
-                                <button
-                                    onClick={() => setShowBooklet(true)}
-                                    className="px-10 py-5 bg-transparent border-2 border-gold text-gold font-serif text-xl tracking-widest hover:bg-gold hover:text-zinc-950 transition-all shadow-[0_0_20px_rgba(201,162,39,0.15)] hover:shadow-[0_0_30px_rgba(201,162,39,0.4)]"
-                                >
-                                    View Story Booklet
-                                </button>
-                            </section>
-                        )}
+                        {
+                            product.digitalBooklet && (
+                                <section className="flex justify-center mt-16">
+                                    <button
+                                        onClick={() => setShowBooklet(true)}
+                                        className="px-10 py-5 bg-transparent border-2 border-gold text-gold font-serif text-xl tracking-widest hover:bg-gold hover:text-zinc-950 transition-all shadow-[0_0_20px_rgba(201,162,39,0.15)] hover:shadow-[0_0_30px_rgba(201,162,39,0.4)]"
+                                    >
+                                        View Story Booklet
+                                    </button>
+                                </section>
+                            )
+                        }
 
-                    </div>
-                </div>
+                    </div >
+                </div >
             ) : (
                 // ════════════ OURS (DAILY) LAYOUT ════════════
                 <div className="max-w-7xl mx-auto px-4 pt-16 md:pt-24 pb-20">
@@ -624,6 +628,6 @@ export default function ProductDetail() {
                     </div>
                 </div>
             )}
-        </div>
+        </div >
     );
 }

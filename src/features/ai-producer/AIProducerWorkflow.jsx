@@ -140,8 +140,8 @@ export default function AIProducerWorkflow({ tool, creditsCost, onDeduct, onSave
                                             key={ps.id}
                                             onClick={() => { setSelectedPastScript(ps); setFile(null); }}
                                             className={`flex items-center justify-between p-4 rounded-2xl border transition-all ${selectedPastScript?.id === ps.id
-                                                    ? 'bg-gold/10 border-gold shadow-lg shadow-gold/5'
-                                                    : 'bg-navy-800/50 border-navy-700 hover:border-navy-600'
+                                                ? 'bg-gold/10 border-gold shadow-lg shadow-gold/5'
+                                                : 'bg-navy-800/50 border-navy-700 hover:border-navy-600'
                                                 }`}
                                         >
                                             <div className="flex items-center gap-4 text-left">
@@ -366,7 +366,7 @@ export default function AIProducerWorkflow({ tool, creditsCost, onDeduct, onSave
             </div>
 
             <p className="text-center text-gray-500 text-xs uppercase tracking-[0.2em]">
-                YOURS PRODUCER ENGINE · v2.4a · Confidential 2026
+                SILVERTRIVERSE PRODUCER ENGINE · v2.4a · Confidential 2026
             </p>
         </div>
     );

@@ -5,6 +5,8 @@ import { useAuth } from '../context/AuthContext';
 import { plotsService } from '../services/plotsService';
 import { getData } from '../utils/storageService';
 import { PRICE_PER_PLOT, COLS, ROWS, indexToRowCol } from '../data/plotsData';
+import { mockUsers } from '../mock/mockUsers';
+import Land3D from '../components/Land3D';
 
 // Keep grid small for performance (e.g. 32x32 = 1024 cells)
 const CELL_PX = 12;
@@ -30,6 +32,12 @@ export default function LandMarketplacePage() {
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
 
+  const usersById = useMemo(() => {
+    const saved = getData('users');
+    const all = (saved && saved.length > 0) ? saved : mockUsers;
+    return all.reduce((acc, u) => ({ ...acc, [u.id]: u }), {});
+  }, []);
+
   const loadOwnership = useCallback(() => {
     try {
       const map = plotsService.getOwnershipMapSync();
@@ -53,18 +61,21 @@ export default function LandMarketplacePage() {
     setScale((s) => Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, s + delta)));
   };
 
-  const handleMouseDown = (e) => {
-    if (e.button !== 0 || e.target.closest('button')) return;
-    setIsDragging(true);
-    setDragStart({ x: e.clientX - translate.x, y: e.clientY - translate.y });
-  };
-
-  const handleMouseMove = (e) => {
-    if (!isDragging) return;
-    setTranslate({ x: e.clientX - dragStart.x, y: e.clientY - dragStart.y });
-  };
-
   const handleMouseUp = () => setIsDragging(false);
+
+  const handlePlotClick = (index) => {
+    const { row, col } = indexToRowCol(index);
+    const owner = ownershipMap[index];
+    const ownerUser = owner ? usersById[owner.ownerId] : null;
+    setSelectedPlot({
+      index,
+      row,
+      col,
+      ownerId: owner?.ownerId ?? null,
+      ownerName: owner?.ownerName ?? null,
+      ownerAvatar: ownerUser?.avatar ?? null,
+    });
+  };
 
   const handlePurchase = async () => {
     if (!isAuthenticated || !user) return;
@@ -82,33 +93,15 @@ export default function LandMarketplacePage() {
     [ownershipMap, user?.id]
   );
 
-  const usersById = useMemo(() => {
-    const list = getData('users') || [];
-    return Object.fromEntries(list.map((u) => [u.id, { name: u.name, avatar: u.avatar }]));
-  }, []);
 
   const tierLabel = getTierLabel(myPlotCount);
 
-  const handlePlotClick = (e, index) => {
-    e.stopPropagation();
-    const { row, col } = indexToRowCol(index);
-    const owner = ownershipMap[index];
-    const ownerUser = owner ? usersById[owner.ownerId] : null;
-    setSelectedPlot({
-      index,
-      row,
-      col,
-      ownerId: owner?.ownerId ?? null,
-      ownerName: owner?.ownerName ?? null,
-      ownerAvatar: ownerUser?.avatar ?? null,
-    });
-  };
 
   const totalCells = COLS * ROWS;
 
   return (
-    <div className="min-h-screen pb-24">
-      <div className="max-w-4xl mx-auto px-4 py-4">
+    <div className="min-h-screen pb-24 relative -mt-4 md:-mt-6">
+      <div className="max-w-4xl mx-auto px-4 pt-4 pb-4">
         <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
           <div>
             <h1 className="font-serif text-xl md:text-2xl font-bold text-white">Land Marketplace</h1>
@@ -154,64 +147,23 @@ export default function LandMarketplacePage() {
         </div>
 
         <div
-          className="relative overflow-hidden rounded-xl border border-navy-600/50 bg-navy-950 select-none"
-          style={{ height: 'min(65vmin, 420px)', minHeight: 280 }}
-          onWheel={handleWheel}
-          onMouseDown={handleMouseDown}
-          onMouseMove={handleMouseMove}
-          onMouseUp={handleMouseUp}
-          onMouseLeave={handleMouseUp}
+          className="relative overflow-hidden rounded-xl border border-navy-600/50 bg-navy-950 select-none shadow-2xl"
+          style={{ height: 'min(75vmin, 580px)', minHeight: 400 }}
         >
           {loading ? (
             <div className="absolute inset-0 flex items-center justify-center text-gray-500 text-sm">
               Loading…
             </div>
           ) : (
-            <div
-              className="absolute inset-0 flex items-center justify-center"
-              style={{
-                transform: `translate(${translate.x}px, ${translate.y}px) scale(${scale})`,
-                transformOrigin: 'center center',
-              }}
-            >
-              <div
-                className="grid gap-px flex-shrink-0"
-                style={{
-                  gridTemplateColumns: `repeat(${COLS}, ${CELL_PX}px)`,
-                  gridTemplateRows: `repeat(${ROWS}, ${CELL_PX}px)`,
-                  width: COLS * CELL_PX,
-                  height: ROWS * CELL_PX,
-                }}
-              >
-                {Array.from({ length: totalCells }, (_, index) => {
-                  const owner = ownershipMap[index];
-                  const isOwned = !!owner;
-                  const isMine = owner?.ownerId === user?.id;
-                  const initial = owner?.ownerName ? owner.ownerName.trim().charAt(0).toUpperCase() : '?';
-                  return (
-                    <button
-                      key={index}
-                      type="button"
-                      onClick={(e) => handlePlotClick(e, index)}
-                      className={`land-plot min-w-0 min-h-0 p-0 border rounded-sm text-[8px] font-bold leading-none flex items-center justify-center transition-colors hover:opacity-90 ${
-                        isOwned
-                          ? isMine
-                            ? 'bg-amber-500/50 border-amber-400/60 text-navy-900'
-                            : 'bg-navy-600/90 border-navy-500/60 text-gray-300'
-                          : 'bg-navy-700/80 border-navy-600/60 text-gray-500 hover:bg-navy-600'
-                      }`}
-                      style={{ width: CELL_PX, height: CELL_PX }}
-                      title={isOwned ? `Plot ${index} · ${owner.ownerName}` : `Plot ${index} · Available`}
-                    >
-                      {isOwned ? initial : ''}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
+            <Land3D
+              ownershipMap={ownershipMap}
+              user={user}
+              onPlotClick={handlePlotClick}
+              selectedPlotIndex={selectedPlot?.index}
+            />
           )}
         </div>
-        <p className="text-gray-500 text-xs mt-2">Scroll to zoom · Drag to pan · Click a plot</p>
+        <p className="text-gray-500 text-xs mt-2 italic">Navigate: Right-click/Drag to rotate · Zoom: Scroll · Click a plot to view details</p>
       </div>
 
       <AnimatePresence>
@@ -254,6 +206,7 @@ export default function LandMarketplacePage() {
                   <button
                     type="button"
                     onClick={() => {
+                      console.log('Diagnostic: Navigating to profile for ownerId=', selectedPlot.ownerId);
                       setSelectedPlot(null);
                       navigate(`/profile?user=${selectedPlot.ownerId}`);
                     }}

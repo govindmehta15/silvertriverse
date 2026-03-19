@@ -28,17 +28,17 @@ const MOCK_PLOT_ASSIGNMENTS = [
 const baseTime = Date.now() - 30 * 24 * 60 * 60 * 1000;
 
 export function seedPlotsAndThemes() {
-  const existing = getData('yours_plots_ownership');
+  const existing = getData('silvertriverse_plots_ownership');
   if (!existing || !Array.isArray(existing) || existing.length === 0) {
     const records = MOCK_PLOT_ASSIGNMENTS.map((r, i) => ({
       ...r,
       purchasedAt: baseTime + i * 60 * 60 * 1000,
     }));
-    setData('yours_plots_ownership', records);
+    setData('silvertriverse_plots_ownership', records);
   }
 
   mockUsers.forEach((u) => {
-    const themeKey = `yours_profile_theme_${u.id}`;
+    const themeKey = `silvertriverse_profile_theme_${u.id}`;
     if (getData(themeKey) == null) {
       setData(themeKey, MOCK_THEMES[u.id] || 'default');
     }

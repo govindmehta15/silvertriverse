@@ -1,6 +1,6 @@
 import { getData, setData, simulateApi } from './storageService';
 
-const CREDITS_PREFIX = 'yours_ai_credits_';
+const CREDITS_PREFIX = 'silvertriverse_ai_credits_';
 const DEFAULT_BALANCE = 100;
 
 function storageKey(userId) {

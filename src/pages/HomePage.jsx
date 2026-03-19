@@ -98,7 +98,7 @@ export default function HomePage() {
             className="font-serif text-4xl sm:text-5xl md:text-6xl font-bold text-white tracking-tight mb-2"
             style={{ textShadow: '0 0 40px rgba(255,255,255,0.15)' }}
           >
-            YOURS
+            SilverTriverse
           </motion.h1>
           <motion.p
             initial={{ opacity: 0 }}

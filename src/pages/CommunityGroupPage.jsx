@@ -1,5 +1,4 @@
-import { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { communityService } from '../services';
@@ -230,15 +229,15 @@ export default function CommunityGroupPage() {
                                             animate={{ opacity: 1, y: 0 }}
                                             className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6"
                                         >
-                                            <div className="flex items-center mb-4">
-                                                <div className="w-8 h-8 rounded-full bg-cyan-900 text-cyan-400 flex items-center justify-center font-bold mr-3 border border-cyan-500/30">
+                                            <Link to={`/profile?user=${post.authorId}`} className="flex items-center hover:opacity-80 transition-opacity">
+                                                <div className="w-8 h-8 rounded-full bg-cyan-900 text-cyan-400 flex items-center justify-center font-bold mr-3 border border-cyan-500/30 shrink-0">
                                                     {post.authorName?.charAt(0)}
                                                 </div>
                                                 <div>
-                                                    <h3 className="text-sm font-bold text-white">{post.authorName}</h3>
+                                                    <h3 className="text-sm font-bold text-white hover:text-gold transition-colors">{post.authorName}</h3>
                                                     <p className="text-[10px] text-zinc-500 uppercase tracking-widest">{new Date(post.timestamp).toLocaleString()}</p>
                                                 </div>
-                                            </div>
+                                            </Link>
                                             <p className="text-zinc-300 text-sm leading-relaxed whitespace-pre-wrap mb-5 font-serif">{post.content}</p>
 
                                             <div className="h-px bg-zinc-800 w-full mb-4" />
@@ -285,18 +284,22 @@ export default function CommunityGroupPage() {
                                 ) : (
                                     <div className="space-y-2">
                                         {leaderboard.map((u, index) => (
-                                            <div key={u.userId} className="flex justify-between items-center p-3 rounded-lg bg-zinc-900 border border-zinc-800/50 hover:border-gold/30 hover:bg-zinc-800 transition-colors">
+                                            <Link
+                                                key={u.userId}
+                                                to={`/profile?user=${u.userId}`}
+                                                className="flex justify-between items-center p-3 rounded-lg bg-zinc-900 border border-zinc-800/50 hover:border-gold/30 hover:bg-zinc-800 transition-colors"
+                                            >
                                                 <div className="flex items-center gap-3">
                                                     <span className={`w-4 font-serif font-bold text-center ${index === 0 ? 'text-gold' : index === 1 ? 'text-zinc-300' : 'text-zinc-500'}`}>
                                                         {index + 1}
                                                     </span>
-                                                    <span className="text-zinc-200 text-sm font-medium">{u.name}</span>
+                                                    <span className="text-zinc-200 text-sm font-medium group-hover:text-gold">{u.name}</span>
                                                 </div>
                                                 <div className="flex flex-col items-end">
                                                     <span className="text-teal-400 font-mono text-xs">{u.score} PV</span>
                                                     <span className="text-zinc-600 text-[9px] uppercase tracking-widest">Points</span>
                                                 </div>
-                                            </div>
+                                            </Link>
                                         ))}
                                     </div>
                                 )}

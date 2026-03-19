@@ -30,7 +30,7 @@ const fakeUsers = [
 
 const generateFakeActivity = () => {
     // Determine target user (the real simulated user if we want to show a notification)
-    const authData = getData('yours_auth');
+    const authData = getData('silvertriverse_auth');
     const currentUser = authData?.user;
 
     const activities = ['new_vote', 'new_bid', 'new_post', 'new_follower'];
@@ -75,15 +75,15 @@ const generateFakeActivity = () => {
 };
 
 const addGlobalActivity = (message) => {
-    updateData('yours_global_ticker', (tickerItems) => {
+    updateData('silvertriverse_global_ticker', (tickerItems) => {
         const newItem = { id: `tick_${Date.now()}`, message, timestamp: Date.now() };
         return [newItem, ...(tickerItems || [])].slice(0, 10);
     }, []);
-    window.dispatchEvent(new Event('yours_ticker_update'));
+    window.dispatchEvent(new Event('silvertriverse_ticker_update'));
 };
 
 export const getTickerActivities = () => {
-    return getData('yours_global_ticker', [
-        { id: 'tick_initial_1', message: 'Welcome to YOURS Entertainment! The auction house is now live.', timestamp: Date.now() }
+    return getData('silvertriverse_global_ticker', [
+        { id: 'tick_initial_1', message: 'Welcome to SilverTriverse Entertainment! The auction house is now live.', timestamp: Date.now() }
     ]);
 };

@@ -49,7 +49,7 @@ export default function MobileNavDrawer({ isOpen, onClose }) {
           >
             <div className="flex items-center justify-between p-4 border-b border-navy-600/30">
               <Link to="/" onClick={handleClose} className="font-serif text-xl font-bold text-gold-shimmer">
-                YOURS
+                SilverTriverse
               </Link>
               <button
                 type="button"
@@ -189,7 +189,7 @@ export default function MobileNavDrawer({ isOpen, onClose }) {
                   <div className="flex items-center justify-between px-2 py-2">
                     <div className="flex items-center gap-3">
                       <div className="w-9 h-9 rounded-full bg-gradient-to-br from-teal-700 to-navy-700 flex items-center justify-center">
-                        <span className="text-xs font-medium text-gold">Y</span>
+                        <span className="text-xs font-medium text-gold">S</span>
                       </div>
                       <div>
                         <p className="text-sm font-medium text-gray-300">Guest</p>
