@@ -2,8 +2,16 @@ import { getData, updateData } from '../utils/storageService';
 import { mockRelics } from '../mock/mockRelics';
 import { dispatchNotification, NotificationTypes } from '../utils/notificationDispatcher';
 
-// Initialize mock relics if not present
-if (!getData('relics')) {
+// Initialize mock relics if not present, and auto-reset when everything has ended.
+const existingRelics = getData('relics');
+if (!existingRelics) {
+    updateData('relics', () => mockRelics);
+} else if (
+    Array.isArray(existingRelics) &&
+    existingRelics.length > 0 &&
+    existingRelics.every((relic) => relic.status === 'ended' || relic.phase === 'closed' || relic.endTime <= Date.now())
+) {
+    // Re-seed with fresh Date.now()-based timers from mock data.
     updateData('relics', () => mockRelics);
 }
 

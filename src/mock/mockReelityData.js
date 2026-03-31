@@ -49,7 +49,7 @@ export const mockFeedItems = [
     {
         id: 'fp_2',
         type: 'cultural',
-        title: 'FCU Story Pitch Trending',
+        title: 'Collectible Units story pitch trending',
         message: '"The Last Signal" by Elias Vance has received 200+ upvotes on the Film Creative Universe.',
         icon: '🔥',
         timestamp: Date.now() - 3600000 * 2

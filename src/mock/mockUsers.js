@@ -44,7 +44,7 @@ export const mockUsers = [
         email: 'sarah@example.com',
         avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah',
         role: 'fan',
-        bio: 'Huge fan of FCU! Love collecting rare props and tracking box office hits.',
+        bio: 'Huge fan of Collectible Units! Love collecting rare props and tracking box office hits.',
         followers: 150,
         participationScore: 340,
         collectorRank: 'None',

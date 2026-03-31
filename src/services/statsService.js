@@ -25,7 +25,7 @@ export const getGlobalLeaderboard = () => {
         };
     });
 
-    // Count FCU Films / Stories (mock proxy to filmsCreated)
+    // Count Collectible Units films / stories (mock proxy to filmsCreated)
     // Count community posts
     const communities = getData('communities') || [];
     communities.forEach(c => {

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { fcuFilms, FCU_PHASES, formatPrice, formatLargePrice } from '../data/collectibleUnitsData';
+import { collectibleUnitsFilms, COLLECTIBLE_UNITS_PHASES, formatPrice, formatLargePrice } from '../data/collectibleUnitsData';
 import useCountdown from '../hooks/useCountdown';
 import GoldButton from '../components/GoldButton';
 import { useToast } from '../context/ToastContext';
@@ -58,20 +58,20 @@ function Sparkline({ data, positive }) {
 
 /* ─── Phase Pipeline ───────────────────────────────────────── */
 function PhasePipeline({ currentPhase, phaseHistory }) {
-    const currentIdx = FCU_PHASES.findIndex(p => p.key === currentPhase);
+    const currentIdx = COLLECTIBLE_UNITS_PHASES.findIndex(p => p.key === currentPhase);
     return (
         <div className="relative">
             <div className="absolute top-4 left-4 right-4 h-0.5 bg-navy-700/30 rounded-full" />
             <div className="absolute top-4 left-4 h-0.5 bg-gradient-to-r from-gold to-gold/60 rounded-full transition-all duration-700"
-                style={{ width: `${Math.min(100, (currentIdx / (FCU_PHASES.length - 1)) * 100)}%`, maxWidth: 'calc(100% - 2rem)' }} />
+                style={{ width: `${Math.min(100, (currentIdx / (COLLECTIBLE_UNITS_PHASES.length - 1)) * 100)}%`, maxWidth: 'calc(100% - 2rem)' }} />
 
             <div className="relative flex justify-between">
-                {FCU_PHASES.map((p, i) => {
+                {COLLECTIBLE_UNITS_PHASES.map((p, i) => {
                     const done = i <= currentIdx;
                     const active = i === currentIdx;
                     const entry = phaseHistory?.find(h => h.phase === p.key);
                     return (
-                        <div key={p.key} className="flex flex-col items-center gap-1.5" style={{ width: `${100 / FCU_PHASES.length}%` }}>
+                        <div key={p.key} className="flex flex-col items-center gap-1.5" style={{ width: `${100 / COLLECTIBLE_UNITS_PHASES.length}%` }}>
                             <motion.div animate={active ? { scale: [1, 1.15, 1] } : {}} transition={active ? { duration: 2, repeat: Infinity } : {}}
                                 className={`w-8 h-8 rounded-full flex items-center justify-center text-sm border-2 transition-all ${active ? 'bg-gold/20 border-gold text-gold shadow-[0_0_15px_rgba(201,162,39,0.3)]' : done ? 'bg-gold/10 border-gold/40 text-gold/70' : 'bg-navy-800/50 border-navy-700/30 text-gray-600'}`}>
                                 {p.icon}
@@ -271,7 +271,7 @@ export default function FilmPage() {
     const { addToast } = useToast();
 
     // Use local state initialized from static data, so purchases reflect instantly in numbers/charts
-    const [film, setFilm] = useState(() => fcuFilms.find(f => f.id === Number(id)));
+    const [film, setFilm] = useState(() => collectibleUnitsFilms.find(f => f.id === Number(id)));
 
     if (!film) {
         return (
@@ -281,7 +281,7 @@ export default function FilmPage() {
         );
     }
 
-    const currentPhaseConf = FCU_PHASES.find(p => p.key === film.phase) || FCU_PHASES[0];
+    const currentPhaseConf = COLLECTIBLE_UNITS_PHASES.find(p => p.key === film.phase) || COLLECTIBLE_UNITS_PHASES[0];
     const isPositive = film.priceChange >= 0;
 
     const handleBuyTokens = (amount) => {

@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useParams } from 'react-router-dom';
 import HomePage from './pages/HomePage';
 import ProfilePage from './pages/ProfilePage';
 import LeaderboardPage from './pages/LeaderboardPage';
@@ -39,6 +39,11 @@ import SplashScreen from './components/SplashScreen';
 import { AnimatePresence } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+
+function LegacyFcuFilmRedirect() {
+  const { id } = useParams();
+  return <Navigate to={`/collectible-units/film/${id}`} replace />;
+}
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -120,6 +125,7 @@ export default function App() {
                           </ProtectedRoute>
                         }
                       />
+                      {/* Own profile — requires login */}
                       <Route
                         path="/profile"
                         element={
@@ -130,12 +136,14 @@ export default function App() {
                           </ProtectedRoute>
                         }
                       />
+                      {/* Public user profile — anyone can view */}
+                      <Route path="/profile/:userId" element={<ProfilePage />} />
                       <Route path="/leaderboard" element={<LeaderboardPage />} />
                       <Route path="/land" element={<LandMarketplacePage />} />
                       {/* Legacy FCU URLs -> Collectible Units */}
                       <Route path="/fcu" element={<Navigate to="/collectible-units" replace />} />
                       <Route path="/fcu/explore" element={<Navigate to="/collectible-units/explore" replace />} />
-                      <Route path="/fcu/film/:id" element={<Navigate to="/collectible-units/explore" replace />} />
+                      <Route path="/fcu/film/:id" element={<LegacyFcuFilmRedirect />} />
                       <Route path="/fcu/create-post" element={<Navigate to="/collectible-units/create-post" replace />} />
                       <Route path="/fcu/submit-story" element={<Navigate to="/collectible-units/submit-story" replace />} />
                       <Route path="/fcu/pipeline" element={<Navigate to="/collectible-units/pipeline" replace />} />

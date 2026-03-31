@@ -1,4 +1,4 @@
-// FCU — Film Collectible Units (Tokenization System)
+// Collectible Units — film tokenization dataset (legacy filename: fcuData.js)
 // Films are tokenized into units that users can buy before/during release.
 // Based on film performance (profit/loss), token holders receive benefits.
 // Each film has themed silver coin designs.
