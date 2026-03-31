@@ -62,8 +62,8 @@ export default function AIWriterWorkflow({ tool, onSaveRun }) {
     URL.revokeObjectURL(url);
   };
 
-  const handleSendToFCU = () => {
-    navigate('/fcu/submit-story', { state: { prefilledSynopsis: displayText } });
+  const handleSendToCollectibleUnits = () => {
+    navigate('/collectible-units/submit-story', { state: { prefilledSynopsis: displayText } });
   };
 
   return (
@@ -250,7 +250,7 @@ export default function AIWriterWorkflow({ tool, onSaveRun }) {
             className="rounded-xl border border-navy-600/50 bg-navy-900/30 p-6 space-y-4"
           >
             <h4 className="font-medium text-white">Export & pitch</h4>
-            <p className="text-gray-400 text-sm">Your refined content is ready. Download or send to FCU.</p>
+            <p className="text-gray-400 text-sm">Your refined content is ready. Download or send to Collectible Units.</p>
             <div className="flex flex-wrap gap-2">
               <button
                 type="button"
@@ -261,10 +261,10 @@ export default function AIWriterWorkflow({ tool, onSaveRun }) {
               </button>
               <button
                 type="button"
-                onClick={handleSendToFCU}
+                onClick={handleSendToCollectibleUnits}
                 className="px-4 py-2 rounded-lg bg-teal-900/50 border border-teal-500/30 text-teal-300 text-sm font-medium hover:bg-teal-800/50"
               >
-                Send to FCU
+                Send to Collectible Units
               </button>
               <button
                 type="button"

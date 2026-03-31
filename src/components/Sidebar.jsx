@@ -36,8 +36,8 @@ const navItems = [
         ),
     },
     {
-        to: '/fcu',
-        label: 'FCU',
+        to: '/collectible-units',
+        label: 'Collectible Units',
         icon: (
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -167,7 +167,7 @@ export default function Sidebar() {
                 {/* Conditional Pipeline Link for Professionals */}
                 {isAuthenticated && user?.role === 'professional' && (
                     <NavLink
-                        to="/fcu/pipeline"
+                        to="/collectible-units/pipeline"
                         className={({ isActive }) =>
                             `group flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-400/50 focus-visible:ring-offset-2 focus-visible:ring-offset-navy-950 ${isActive
                                 ? 'bg-teal-900/30 text-teal-400 border border-teal-500/30'

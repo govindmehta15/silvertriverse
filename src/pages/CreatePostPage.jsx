@@ -40,7 +40,7 @@ export default function CreatePostPage() {
         },
         onSuccess: () => {
             queryClient.invalidateQueries(['posts']);
-            navigate('/fcu'); // Or specifically to fcu?tab=Feed
+            navigate('/collectible-units');
         }
     });
 

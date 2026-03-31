@@ -19,9 +19,9 @@ const FEATURES = [
     borderGlow: 'hover:shadow-glow-gold',
   },
   {
-    to: '/fcu',
-    title: 'FCU',
-    description: 'Film tokens, explore & trade.',
+    to: '/collectible-units',
+    title: 'Collectible Units',
+    description: 'Explore sports, film, and multi-category collectible units.',
     icon: '🎬',
     gradient: 'from-gold-900/40 to-navy-900',
     borderGlow: 'hover:shadow-glow-gold',

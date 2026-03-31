@@ -8,7 +8,7 @@ const navItems = [
   { to: '/', label: 'Home', end: true },
   { to: '/reelity', label: 'Reelity' },
   { to: '/relics', label: 'Relics' },
-  { to: '/fcu', label: 'FCU' },
+  { to: '/collectible-units', label: 'Collectible Units' },
   { to: '/reelity/clubs', label: 'Societies' },
   { to: '/merchandise', label: 'Merchandise' },
   { to: '/ai-writer', label: 'AI Writer' },
@@ -79,7 +79,7 @@ export default function MobileNavDrawer({ isOpen, onClose }) {
               ))}
               {isAuthenticated && user?.role === 'professional' && (
                 <NavLink
-                  to="/fcu/pipeline"
+                  to="/collectible-units/pipeline"
                   onClick={handleClose}
                   className={({ isActive }) =>
                     `flex items-center gap-3 px-4 py-3 rounded-lg text-left font-medium transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-400/50 min-h-[44px] mt-2 ${isActive ? 'bg-teal-900/30 text-teal-400 border border-teal-500/30' : 'text-gray-300 hover:bg-navy-800/80 hover:text-teal-300'

@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import HomePage from './pages/HomePage';
 import ProfilePage from './pages/ProfilePage';
 import LeaderboardPage from './pages/LeaderboardPage';
@@ -18,7 +18,7 @@ import ReelityPeoplePage from './pages/ReelityPeoplePage';
 import ReelityClubsPage from './pages/ReelityClubsPage';
 import RelicsPage from './pages/RelicsPage';
 import RelicDetailPage from './pages/RelicDetailPage';
-import FCUPage from './pages/FCUPage';
+import CollectibleUnitsPage from './pages/CollectibleUnitsPage';
 import FilmPage from './pages/FilmPage';
 import MerchandisePage from './pages/MerchandisePage';
 import ProductDetail from './pages/ProductDetail';
@@ -85,36 +85,36 @@ export default function App() {
                       </Route>
                       <Route path="/relics" element={<RelicsPage />} />
                       <Route path="/relics/:id" element={<RelicDetailPage />} />
-                      <Route path="/fcu" element={<FCUPage />} />
-                      <Route path="/fcu/explore" element={<FCUPage />} />
-                      <Route path="/fcu/film/:id" element={<FilmPage />} />
+                      <Route path="/collectible-units" element={<CollectibleUnitsPage />} />
+                      <Route path="/collectible-units/explore" element={<CollectibleUnitsPage />} />
+                      <Route path="/collectible-units/film/:id" element={<FilmPage />} />
                       <Route path="/merchandise" element={<MerchandisePage />} />
                       <Route path="/merchandise/:id" element={<ProductDetail />} />
                       <Route
-                        path="/fcu/create-post"
+                        path="/collectible-units/create-post"
                         element={
                           <ProtectedRoute>
-                            <RoleGuard allowedRoles={['creator', 'professional', 'fan']} fallbackRoute="/fcu">
+                            <RoleGuard allowedRoles={['creator', 'professional', 'fan']} fallbackRoute="/collectible-units">
                               <CreatePostPage />
                             </RoleGuard>
                           </ProtectedRoute>
                         }
                       />
                       <Route
-                        path="/fcu/submit-story"
+                        path="/collectible-units/submit-story"
                         element={
                           <ProtectedRoute>
-                            <RoleGuard allowedRoles={['creator', 'professional']} fallbackRoute="/fcu">
+                            <RoleGuard allowedRoles={['creator', 'professional']} fallbackRoute="/collectible-units">
                               <StorySubmissionPage />
                             </RoleGuard>
                           </ProtectedRoute>
                         }
                       />
                       <Route
-                        path="/fcu/pipeline"
+                        path="/collectible-units/pipeline"
                         element={
                           <ProtectedRoute>
-                            <RoleGuard allowedRoles={['professional']} fallbackRoute="/fcu">
+                            <RoleGuard allowedRoles={['professional']} fallbackRoute="/collectible-units">
                               <TalentPipelinePage />
                             </RoleGuard>
                           </ProtectedRoute>
@@ -132,6 +132,13 @@ export default function App() {
                       />
                       <Route path="/leaderboard" element={<LeaderboardPage />} />
                       <Route path="/land" element={<LandMarketplacePage />} />
+                      {/* Legacy FCU URLs -> Collectible Units */}
+                      <Route path="/fcu" element={<Navigate to="/collectible-units" replace />} />
+                      <Route path="/fcu/explore" element={<Navigate to="/collectible-units/explore" replace />} />
+                      <Route path="/fcu/film/:id" element={<Navigate to="/collectible-units/explore" replace />} />
+                      <Route path="/fcu/create-post" element={<Navigate to="/collectible-units/create-post" replace />} />
+                      <Route path="/fcu/submit-story" element={<Navigate to="/collectible-units/submit-story" replace />} />
+                      <Route path="/fcu/pipeline" element={<Navigate to="/collectible-units/pipeline" replace />} />
                       <Route path="/ai-writer" element={<AIWriterLayout />}>
                         <Route index element={<AIWriterHubPage />} />
                         <Route path="history" element={<AIWriterHistoryPage />} />

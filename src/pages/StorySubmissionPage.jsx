@@ -23,7 +23,7 @@ export default function StorySubmissionPage() {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['stories'] });
             addToast('Story pitch submitted successfully!', 'success');
-            navigate('/fcu');
+            navigate('/collectible-units');
         },
         onError: () => {
             addToast('Failed to submit story', 'error');
@@ -54,11 +54,11 @@ export default function StorySubmissionPage() {
             <div className="max-w-2xl mx-auto">
                 <motion.button
                     initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-                    onClick={() => navigate('/fcu')}
+                    onClick={() => navigate('/collectible-units')}
                     className="flex items-center text-gray-400 hover:text-gold mb-6 transition-colors"
                 >
                     <svg className="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" /></svg>
-                    Back to FCU
+                    Back to Collectible Units
                 </motion.button>
 
                 <motion.div
@@ -73,7 +73,7 @@ export default function StorySubmissionPage() {
                             </svg>
                         </span>
                         <h1 className="font-serif text-3xl font-bold text-white mb-2">Pitch Your Story</h1>
-                        <p className="text-gray-400">Share your original concept with the FCU community and catch the eye of industry professionals.</p>
+                        <p className="text-gray-400">Share your original concept with the Collectible Units community and catch the eye of collectors and industry professionals.</p>
                     </div>
 
                     <form onSubmit={handleSubmit} className="space-y-6">

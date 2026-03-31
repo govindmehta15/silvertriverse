@@ -48,13 +48,13 @@ export default function ArchiveEntryCard({ entry, isPremium = false }) {
                     {/* Links */}
                     <div className={`flex flex-wrap gap-4 pt-5 border-t ${isPremium ? 'border-zinc-800' : 'border-gray-100'}`}>
                         <button
-                            onClick={() => navigate(`/fcu/film/${entry.filmId}`)}
+                            onClick={() => navigate(`/collectible-units/film/${entry.filmId}`)}
                             className={`px-5 py-2.5 text-xs font-bold uppercase tracking-wider transition-all ${buttonClass}`}
                         >
                             Explore Film 🎬
                         </button>
                         <button
-                            onClick={() => navigate(`/fcu`)} // Adjust route based on actual structure
+                            onClick={() => navigate(`/collectible-units`)}
                             className={`px-5 py-2.5 text-xs font-bold uppercase tracking-wider transition-all ${buttonClass}`}
                         >
                             View Relic Context 🏛
