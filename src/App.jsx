@@ -1,4 +1,10 @@
 import { BrowserRouter as Router, Routes, Route, Navigate, useParams } from 'react-router-dom';
+
+// Forces ProfilePage to fully remount when userId changes (no stale state between profiles)
+function KeyedProfilePage() {
+  const { userId } = useParams();
+  return <ProfilePage key={userId || 'own'} />;
+}
 import HomePage from './pages/HomePage';
 import ProfilePage from './pages/ProfilePage';
 import LeaderboardPage from './pages/LeaderboardPage';
@@ -92,9 +98,6 @@ export default function App() {
                       <Route path="/relics/:id" element={<RelicDetailPage />} />
                       <Route path="/collectible-units" element={<CollectibleUnitsPage />} />
                       <Route path="/collectible-units/explore" element={<CollectibleUnitsPage />} />
-                      <Route path="/collectible-units/film/:id" element={<FilmPage />} />
-                      <Route path="/merchandise" element={<MerchandisePage />} />
-                      <Route path="/merchandise/:id" element={<ProductDetail />} />
                       <Route
                         path="/collectible-units/create-post"
                         element={
@@ -125,6 +128,9 @@ export default function App() {
                           </ProtectedRoute>
                         }
                       />
+                      <Route path="/collectible-units/:category/:id" element={<FilmPage />} />
+                      <Route path="/merchandise" element={<MerchandisePage />} />
+                      <Route path="/merchandise/:id" element={<ProductDetail />} />
                       {/* Own profile — requires login */}
                       <Route
                         path="/profile"
@@ -137,7 +143,7 @@ export default function App() {
                         }
                       />
                       {/* Public user profile — anyone can view */}
-                      <Route path="/profile/:userId" element={<ProfilePage />} />
+                      <Route path="/profile/:userId" element={<KeyedProfilePage />} />
                       <Route path="/leaderboard" element={<LeaderboardPage />} />
                       <Route path="/land" element={<LandMarketplacePage />} />
                       {/* Legacy FCU URLs -> Collectible Units */}

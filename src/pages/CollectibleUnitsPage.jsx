@@ -1,7 +1,14 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { collectibleUnitsFilms, COLLECTIBLE_UNITS_PHASES, formatPrice, formatLargePrice } from '../data/collectibleUnitsData';
+import {
+    collectibleUnitsFilms,
+    COLLECTIBLE_UNITS_PHASES,
+    formatPrice,
+    formatLargePrice,
+    sportsCollectibleUnits,
+    brandCollectibleUnits,
+} from '../data/collectibleUnitsData';
 import useCountdown from '../hooks/useCountdown';
 
 /* ─── Mini sparkline ───────────────────────────────────────── */
@@ -19,7 +26,7 @@ function Sparkline({ data, positive }) {
 }
 
 /* ─── Masterpiece card ─────────────────────────────────────── */
-function MasterpieceCard({ mp, filmTitle, onClick }) {
+function MasterpieceCard({ mp, parentTitle, onClick }) {
     const { formatted, isUrgent } = useCountdown(mp.endTime);
     return (
         <motion.div whileHover={{ y: -4 }} onClick={onClick}
@@ -36,7 +43,7 @@ function MasterpieceCard({ mp, filmTitle, onClick }) {
                 </div>
             </div>
             <div className="p-3.5">
-                <p className="text-gray-500 text-[9px] uppercase tracking-wider">{filmTitle}</p>
+                <p className="text-gray-500 text-[9px] uppercase tracking-wider">{parentTitle}</p>
                 <h3 className="font-serif text-sm font-bold text-white mt-0.5">{mp.title}</h3>
                 <div className="flex items-center justify-between mt-2">
                     <div>
@@ -52,7 +59,7 @@ function MasterpieceCard({ mp, filmTitle, onClick }) {
 
 /* ─── FILTERS ──────────────────────────────────────────────── */
 const FILTERS = [
-    { value: 'all', label: 'All Films' },
+    { value: 'all', label: 'All' },
     { value: 'trading', label: '📈 Trading' },
     { value: 'bidding', label: '🔨 Bidding Open' },
     { value: 'entry', label: '🎬 New Entry' },
@@ -63,16 +70,40 @@ const FILTERS = [
 /* ═══════════════════════════════════════════════════════════ */
 /*              Collectible Units — film token index          */
 /* ═══════════════════════════════════════════════════════════ */
+const CATEGORY_TABS = [
+    { key: 'film', label: 'Film' },
+    { key: 'sports', label: 'Sports' },
+    { key: 'brand', label: 'Brands' },
+];
+
 export default function CollectibleUnitsPage() {
+    const [unitCategory, setUnitCategory] = useState('film');
     const [searchQuery, setSearchQuery] = useState('');
     const [filter, setFilter] = useState('all');
     const navigate = useNavigate();
 
+    const activeList = useMemo(() => {
+        switch (unitCategory) {
+            case 'sports':
+                return sportsCollectibleUnits;
+            case 'brand':
+                return brandCollectibleUnits;
+            default:
+                return collectibleUnitsFilms;
+        }
+    }, [unitCategory]);
+
     const filtered = useMemo(() => {
-        let items = [...collectibleUnitsFilms];
+        let items = [...activeList];
         if (searchQuery.trim()) {
             const q = searchQuery.toLowerCase();
-            items = items.filter(f => f.title.toLowerCase().includes(q) || f.genre.toLowerCase().includes(q));
+            items = items.filter((f) => {
+                if (f.title.toLowerCase().includes(q) || f.genre?.toLowerCase().includes(q)) return true;
+                if (f.context && typeof f.context === 'object') {
+                    return Object.values(f.context).some((v) => String(v).toLowerCase().includes(q));
+                }
+                return false;
+            });
         }
         if (filter === 'trading') items = items.filter(f => f.phase === 'trading');
         else if (filter === 'bidding') items = items.filter(f => f.phase === 'bidding');
@@ -80,13 +111,27 @@ export default function CollectibleUnitsPage() {
         else if (filter === 'exit') items = items.filter(f => f.phase === 'exit' || f.phase === 'closing' || f.phase === 'settlement');
         else if (filter === 'gainers') items = items.filter(f => f.priceChange > 0).sort((a, b) => b.priceChange - a.priceChange);
         return items;
-    }, [searchQuery, filter]);
+    }, [activeList, searchQuery, filter]);
 
-    const masterpieces = collectibleUnitsFilms.filter(f => f.masterpiece).map(f => ({ ...f.masterpiece, filmTitle: f.title, filmId: f.id }));
-    const totalMarketCap = collectibleUnitsFilms.reduce((s, f) => s + f.marketCap, 0);
-    const totalTokensSold = collectibleUnitsFilms.reduce((s, f) => s + f.tokensSold, 0);
-    const totalTokens = collectibleUnitsFilms.reduce((s, f) => s + f.totalTokens, 0);
-    const avgChange = (collectibleUnitsFilms.reduce((s, f) => s + f.priceChange, 0) / collectibleUnitsFilms.length).toFixed(2);
+    const masterpieces = useMemo(
+        () =>
+            activeList
+                .filter((f) => f.masterpiece)
+                .map((f) => ({
+                    ...f.masterpiece,
+                    parentTitle: f.title,
+                    parentId: f.id,
+                    category: unitCategory,
+                })),
+        [activeList, unitCategory]
+    );
+    const totalMarketCap = activeList.reduce((s, f) => s + f.marketCap, 0);
+    const totalTokensSold = activeList.reduce((s, f) => s + f.tokensSold, 0);
+    const totalTokens = activeList.reduce((s, f) => s + f.totalTokens, 0);
+    const avgChange =
+        activeList.length > 0
+            ? (activeList.reduce((s, f) => s + f.priceChange, 0) / activeList.length).toFixed(2)
+            : '0.00';
 
     const container = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.06 } } };
     const item = { hidden: { opacity: 0, y: 15 }, show: { opacity: 1, y: 0 } };
@@ -131,6 +176,24 @@ export default function CollectibleUnitsPage() {
                 </div>
             </div>
 
+            {/* Category tabs: Film / Sports / Brands */}
+            <div className="px-4 max-w-4xl mx-auto mb-6 flex flex-wrap gap-2 justify-center">
+                {CATEGORY_TABS.map((tab) => (
+                    <button
+                        key={tab.key}
+                        type="button"
+                        onClick={() => setUnitCategory(tab.key)}
+                        className={`px-4 py-2.5 rounded-full text-sm font-medium border transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/50 ${
+                            unitCategory === tab.key
+                                ? 'bg-gold/15 text-gold border-gold/40 shadow-[0_0_20px_rgba(201,162,39,0.12)]'
+                                : 'text-gray-400 border-navy-600/50 hover:border-gold/25 hover:text-gray-200'
+                        }`}
+                    >
+                        {tab.label}
+                    </button>
+                ))}
+            </div>
+
             {/* ═══ INDEX OVERVIEW ═══ */}
             <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
                 className="px-4 -mt-4 mb-6 max-w-4xl mx-auto">
@@ -155,9 +218,9 @@ export default function CollectibleUnitsPage() {
                             <p className="text-gray-600 text-[9px]">of {totalTokens.toLocaleString('en-IN')}</p>
                         </div>
                         <div>
-                            <p className="text-gray-500 text-[9px] uppercase tracking-wider">Films Listed</p>
-                            <p className="text-white font-mono font-bold text-lg">{collectibleUnitsFilms.length}</p>
-                            <p className="text-gray-600 text-[9px]">{collectibleUnitsFilms.filter(f => f.phase === 'bidding').length} accepting bids</p>
+                            <p className="text-gray-500 text-[9px] uppercase tracking-wider">Listings</p>
+                            <p className="text-white font-mono font-bold text-lg">{activeList.length}</p>
+                            <p className="text-gray-600 text-[9px]">{activeList.filter(f => f.phase === 'bidding').length} accepting bids</p>
                         </div>
                     </div>
                     {/* Animated chart line */}
@@ -177,7 +240,7 @@ export default function CollectibleUnitsPage() {
                     <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
                     </svg>
-                    <input type="text" placeholder="Search film tokens..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
+                    <input type="text" placeholder="Search titles, sport, league, brand…" value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
                         className="w-full pl-12 pr-4 py-3 bg-navy-800/50 border border-navy-600/30 rounded-xl text-gray-200 placeholder-gray-500 focus:outline-none focus:border-gold/30 transition-all" />
                 </div>
                 <div className="flex items-center justify-between">
@@ -195,7 +258,7 @@ export default function CollectibleUnitsPage() {
             {/* ═══ INDEX VIEW — Trading rows ═══ */}
             <motion.div variants={container} initial="hidden" animate="show" className="px-4 max-w-4xl mx-auto mb-8">
                 <div className="flex items-center gap-2 px-3 py-2 text-[9px] text-gray-500 uppercase tracking-wider font-mono border-b border-navy-700/20">
-                    <span className="w-10">Film</span>
+                    <span className="w-10">Asset</span>
                     <span className="flex-1 ml-2">Title</span>
                     <span className="w-16 text-right">₹ Token</span>
                     <span className="w-14 text-right">Change</span>
@@ -205,8 +268,8 @@ export default function CollectibleUnitsPage() {
                     const pct = Math.round((film.tokensSold / film.totalTokens) * 100);
                     const isPos = film.priceChange >= 0;
                     return (
-                        <motion.div key={film.id} variants={item}
-                            onClick={() => navigate(`/collectible-units/film/${film.id}`)}
+                        <motion.div key={`${unitCategory}-${film.id}`} variants={item}
+                            onClick={() => navigate(`/collectible-units/${unitCategory}/${film.id}`)}
                             className="flex items-center gap-2 px-3 py-3.5 border-b border-navy-700/10 cursor-pointer hover:bg-navy-800/20 transition-colors group">
                             <div className="w-10 h-10 rounded-lg overflow-hidden shrink-0 border border-navy-700/20">
                                 <img src={film.banner} alt={film.title} className="w-full h-full object-cover" />
@@ -248,10 +311,10 @@ export default function CollectibleUnitsPage() {
                         <span className="text-gold/50 text-sm">✦</span>
                         <h2 className="font-serif text-xl text-gold font-bold uppercase tracking-wider">Ultra-Rare Masterpieces</h2>
                     </div>
-                    <p className="text-gray-500 text-xs mb-4">1-of-1 hand-crafted collectibles. Bid for once-in-a-lifetime cinema artifacts with physical delivery.</p>
+                    <p className="text-gray-500 text-xs mb-4">1-of-1 hand-crafted collectibles — film, sports, and brand vault drops with physical delivery where noted.</p>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {masterpieces.map(mp => (
-                            <MasterpieceCard key={mp.id} mp={mp} filmTitle={mp.filmTitle} onClick={() => navigate(`/collectible-units/film/${mp.filmId}`)} />
+                            <MasterpieceCard key={`${mp.category}-${mp.id}`} mp={mp} parentTitle={mp.parentTitle} onClick={() => navigate(`/collectible-units/${mp.category}/${mp.parentId}`)} />
                         ))}
                     </div>
                 </div>

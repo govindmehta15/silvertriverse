@@ -1,7 +1,13 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { collectibleUnitsFilms, COLLECTIBLE_UNITS_PHASES, formatPrice, formatLargePrice } from '../data/collectibleUnitsData';
+import {
+    COLLECTIBLE_UNITS_PHASES,
+    formatPrice,
+    formatLargePrice,
+    getCollectibleUnit,
+    isValidCollectibleCategory,
+} from '../data/collectibleUnitsData';
 import useCountdown from '../hooks/useCountdown';
 import GoldButton from '../components/GoldButton';
 import { useToast } from '../context/ToastContext';
@@ -135,34 +141,34 @@ function CollectibleCoinCard({ coin, onAction }) {
     );
 }
 
-function TokenPurchase({ film, onBuy }) {
+function TokenPurchase({ unit, onBuy }) {
     const [amount, setAmount] = useState(1);
     const { addToast } = useToast();
 
     const handleBuy = () => {
-        if (amount > film.tokensAvailable) {
+        if (amount > unit.tokensAvailable) {
             addToast('Not enough tokens available.', 'error');
             return;
         }
-        addToast(`Successfully purchased ${amount} units of ${film.title}! 🎬`, 'success');
+        addToast(`Successfully purchased ${amount} units of ${unit.title}!`, 'success');
         onBuy(amount);
         setAmount(1);
     };
 
     return (
         <div className="rounded-xl border border-navy-700/30 p-5 mt-5" style={{ background: 'linear-gradient(180deg, rgba(15,23,42,0.5) 0%, rgba(10,15,30,0.8) 100%)' }}>
-            <h2 className="font-serif text-xl text-white tracking-widest text-center mb-6">{film.title}</h2>
+            <h2 className="font-serif text-xl text-white tracking-widest text-center mb-6">{unit.title}</h2>
 
             {/* Stats row */}
             <div className="grid grid-cols-2 gap-4 mb-6 relative">
                 <div className="absolute inset-y-0 left-1/2 w-px bg-gradient-to-b from-transparent via-navy-600/50 to-transparent -translate-x-1/2" />
                 <div className="text-center">
                     <p className="text-gray-400 text-xs mb-1">Total Limit</p>
-                    <p className="font-mono text-xl sm:text-2xl text-white tracking-wider">{film.totalTokens.toLocaleString()}</p>
+                    <p className="font-mono text-xl sm:text-2xl text-white tracking-wider">{unit.totalTokens.toLocaleString()}</p>
                 </div>
                 <div className="text-center">
                     <p className="text-gray-400 text-xs mb-1">Tokens Sold</p>
-                    <p className="font-mono text-xl sm:text-2xl text-white tracking-wider">{film.tokensSold.toLocaleString()}</p>
+                    <p className="font-mono text-xl sm:text-2xl text-white tracking-wider">{unit.tokensSold.toLocaleString()}</p>
                 </div>
             </div>
 
@@ -173,27 +179,27 @@ function TokenPurchase({ film, onBuy }) {
                     <span className="text-[10px] text-gray-500 uppercase block leading-none mb-1">Qty</span>
                     <span className="font-mono text-lg font-bold text-white leading-none">{amount}</span>
                 </div>
-                <button onClick={() => setAmount(Math.min(film.tokensAvailable, amount + 1))} className="w-8 h-8 rounded flex items-center justify-center bg-navy-800 text-gray-400 hover:text-white">+</button>
+                <button onClick={() => setAmount(Math.min(unit.tokensAvailable, amount + 1))} className="w-8 h-8 rounded flex items-center justify-center bg-navy-800 text-gray-400 hover:text-white">+</button>
             </div>
 
             {/* Main Action */}
             <div className="flex flex-col items-center border-t border-navy-700/30 pt-6">
-                <button onClick={handleBuy} disabled={film.tokensAvailable === 0} className="relative group mb-3 w-3/4 max-w-[250px]">
+                <button onClick={handleBuy} disabled={unit.tokensAvailable === 0} className="relative group mb-3 w-3/4 max-w-[250px]">
                     <div className="absolute -inset-1 bg-gradient-to-r from-gold/0 via-gold/30 to-gold/0 rounded-lg blur opacity-70 group-hover:opacity-100 transition duration-500" />
                     <div className="relative w-full px-6 py-3 bg-gradient-to-b from-navy-800 to-navy-900 border border-gold/40 rounded-lg shadow-[inset_0_1px_rgba(255,255,255,0.1)]">
                         <span className="font-serif text-white tracking-[0.2em] text-sm font-bold text-center block">
-                            {film.tokensAvailable === 0 ? 'SOLD OUT' : `BUY ${amount} UNITS`}
+                            {unit.tokensAvailable === 0 ? 'SOLD OUT' : `BUY ${amount} UNITS`}
                         </span>
                     </div>
                 </button>
-                <p className="text-gray-300 text-xs font-mono">Total: {formatPrice(amount * film.tokenPrice)}</p>
+                <p className="text-gray-300 text-xs font-mono">Total: {formatPrice(amount * unit.tokenPrice)}</p>
             </div>
 
             {/* Benefits border */}
             <div className="mt-6 pt-4 border-t border-navy-700/30">
                 <p className="text-[10px] text-gray-400 uppercase tracking-wider mb-2 font-bold">Holder Benefits</p>
                 <ul className="space-y-1.5">
-                    {film.benefits?.map((b, i) => (
+                    {unit.benefits?.map((b, i) => (
                         <li key={i} className="flex items-start gap-1.5 text-[11px] text-gray-300">
                             <span className="text-green-400 mt-0.5">✓</span> {b}
                         </li>
@@ -266,26 +272,64 @@ function MasterpieceSection({ mp }) {
 /*                     MAIN DETAIL PAGE                         */
 /* ═════════════════════════════════════════════════════════════ */
 export default function FilmPage() {
-    const { id } = useParams();
+    const { category, id } = useParams();
     const navigate = useNavigate();
     const { addToast } = useToast();
 
-    // Use local state initialized from static data, so purchases reflect instantly in numbers/charts
-    const [film, setFilm] = useState(() => collectibleUnitsFilms.find(f => f.id === Number(id)));
+    const [unit, setUnit] = useState(null);
 
-    if (!film) {
+    useEffect(() => {
+        if (!category || !isValidCollectibleCategory(category)) {
+            setUnit(null);
+            return;
+        }
+        const base = getCollectibleUnit(category, id);
+        setUnit(base ? { ...base } : null);
+    }, [category, id]);
+
+    if (!unit) {
         return (
             <div className="min-h-screen flex items-center justify-center">
-                <p className="text-gray-400">Film not found.</p>
+                <p className="text-gray-400">Collectible not found.</p>
             </div>
         );
     }
 
-    const currentPhaseConf = COLLECTIBLE_UNITS_PHASES.find(p => p.key === film.phase) || COLLECTIBLE_UNITS_PHASES[0];
-    const isPositive = film.priceChange >= 0;
+    const categorySubtitle =
+        category === 'film' ? 'Film Collectible Units' : category === 'sports' ? 'Sports Collectible Units' : 'Brand Collectible Units';
+
+    const metaRows =
+        category === 'sports' && unit.context
+            ? [
+                  { label: 'League / Series', value: unit.context.league },
+                  { label: 'Team / Franchise', value: unit.context.team },
+                  { label: 'Sport', value: unit.context.sport },
+                  { label: 'Season', value: unit.context.season },
+              ]
+            : category === 'brand' && unit.context
+              ? [
+                    { label: 'Sector', value: unit.context.sector },
+                    { label: 'House / Company', value: unit.context.company },
+                    { label: 'Campaign', value: unit.context.campaign },
+                    { label: 'Window', value: unit.context.window },
+                ]
+              : [
+                    { label: 'Director', value: unit.director },
+                    { label: 'Studio', value: unit.studio },
+                    { label: 'Genre', value: unit.genre },
+                    { label: 'Release', value: unit.releaseDate },
+                ];
+
+    const budgetLabel = category === 'film' ? 'Production Budget' : category === 'sports' ? 'Event & Ops Budget' : 'Launch & Program Budget';
+    const revenueNote =
+        category === 'film'
+            ? 'Net profit distributed to token holders upon exit phase completion.'
+            : 'Net proceeds allocated per series rules at exit / settlement.';
+
+    const isPositive = unit.priceChange >= 0;
 
     const handleBuyTokens = (amount) => {
-        setFilm(prev => {
+        setUnit(prev => {
             // slightly increase token price for visual effect
             const priceIncrease = amount * (Math.random() * 0.05 + 0.02);
             const newPrice = prev.tokenPrice + priceIncrease;
@@ -337,14 +381,14 @@ export default function FilmPage() {
             {/* ═══ HERO ═══ */}
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="relative">
                 <div className="aspect-[16/9] max-h-[50vh] overflow-hidden">
-                    <img src={film.banner} alt={film.title} className="w-full h-full object-cover" />
+                    <img src={unit.banner} alt={unit.title} className="w-full h-full object-cover" />
                     <div className="absolute inset-0 bg-gradient-to-t from-navy-950 via-navy-950/50 to-navy-950/20" />
                 </div>
                 <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center z-10">
                     <h1 className="font-serif text-3xl md:text-5xl font-bold text-white uppercase tracking-widest text-shadow-lg shadow-black mt-8">
-                        {film.title}
+                        {unit.title}
                     </h1>
-                    <p className="text-gold/80 text-xs md:text-sm mt-2 uppercase tracking-[0.2em] font-medium">Film Collectible Units</p>
+                    <p className="text-gold/80 text-xs md:text-sm mt-2 uppercase tracking-[0.2em] font-medium">{categorySubtitle}</p>
                 </div>
                 <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-gold/40 to-transparent" />
             </motion.div>
@@ -354,10 +398,10 @@ export default function FilmPage() {
                 className="px-4 md:px-6 py-4 max-w-4xl mx-auto">
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                     {[
-                        { label: 'Token Price', value: formatPrice(film.tokenPrice), sub: `${isPositive ? '+' : ''}${film.priceChange}%`, subColor: isPositive ? 'text-green-400' : 'text-red-400' },
-                        { label: 'Market Cap', value: formatLargePrice(film.marketCap), sub: `${film.totalTokens.toLocaleString()} tokens` },
-                        { label: 'Proj. Revenue', value: formatLargePrice(film.projectedRevenue), sub: `Budget: ${formatLargePrice(film.productionBudget)}`, subColor: 'text-gray-400' },
-                        { label: 'Est. Return (ROI)', value: film.currentROI, sub: film.phase === 'exit' ? 'Finalized' : 'Projected', subColor: film.currentROI.startsWith('+') ? 'text-green-400' : 'text-yellow-400' },
+                        { label: 'Token Price', value: formatPrice(unit.tokenPrice), sub: `${isPositive ? '+' : ''}${unit.priceChange}%`, subColor: isPositive ? 'text-green-400' : 'text-red-400' },
+                        { label: 'Market Cap', value: formatLargePrice(unit.marketCap), sub: `${unit.totalTokens.toLocaleString()} tokens` },
+                        { label: 'Proj. Revenue', value: formatLargePrice(unit.projectedRevenue), sub: `Budget: ${formatLargePrice(unit.productionBudget)}`, subColor: 'text-gray-400' },
+                        { label: 'Est. Return (ROI)', value: unit.currentROI, sub: unit.phase === 'exit' ? 'Finalized' : 'Projected', subColor: unit.currentROI.startsWith('+') ? 'text-green-400' : 'text-yellow-400' },
                     ].map((s, i) => (
                         <div key={i} className="rounded-lg border border-navy-700/20 p-3" style={{ background: 'linear-gradient(180deg, rgba(15,23,42,0.5) 0%, rgba(10,15,30,0.8) 100%)' }}>
                             <p className="text-gray-500 text-[9px] uppercase tracking-wider">{s.label}</p>
@@ -375,17 +419,17 @@ export default function FilmPage() {
                     <div className="flex items-center justify-between mb-2">
                         <h3 className="text-gray-400 text-xs uppercase tracking-wider">Token Price History</h3>
                         <span className={`font-mono text-sm font-bold ${isPositive ? 'text-green-400' : 'text-red-400'}`}>
-                            {formatPrice(film.tokenPrice)}
+                            {formatPrice(unit.tokenPrice)}
                         </span>
                     </div>
-                    <Sparkline data={film.tokenPriceHistory} positive={isPositive} />
+                    <Sparkline data={unit.tokenPriceHistory} positive={isPositive} />
                 </div>
             </motion.div>
 
             {/* ═══ LIFECYCLE PIPELINE ═══ */}
             <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}
                 className="px-4 md:px-6 mb-8 max-w-4xl mx-auto">
-                <PhasePipeline currentPhase={film.phase} phaseHistory={film.phaseHistory} />
+                <PhasePipeline currentPhase={unit.phase} phaseHistory={unit.phaseHistory} />
             </motion.div>
 
             {/* ═══ CONTENT GRID ═══ */}
@@ -398,15 +442,10 @@ export default function FilmPage() {
                         <h2 className="font-serif text-lg text-gold font-bold mb-3 flex items-center gap-2">
                             <span className="text-gold/40">📜</span> About
                         </h2>
-                        <p className="text-gray-400 text-sm leading-relaxed mb-4">{film.description}</p>
+                        <p className="text-gray-400 text-sm leading-relaxed mb-4">{unit.description}</p>
 
                         <div className="space-y-2 pt-4 border-t border-navy-700/30">
-                            {[
-                                { label: 'Director', value: film.director },
-                                { label: 'Studio', value: film.studio },
-                                { label: 'Genre', value: film.genre },
-                                { label: 'Release', value: film.releaseDate },
-                            ].map((row, i) => (
+                            {metaRows.map((row, i) => (
                                 <div key={i} className="flex items-center justify-between text-xs">
                                     <span className="text-gray-500">{row.label}</span>
                                     <span className="text-gray-200 font-medium">{row.value}</span>
@@ -415,7 +454,7 @@ export default function FilmPage() {
                         </div>
                     </div>
 
-                    <TokenPurchase film={film} onBuy={handleBuyTokens} />
+                    <TokenPurchase unit={unit} onBuy={handleBuyTokens} />
 
                     {/* Performance & P&L breakdown */}
                     <div className="rounded-xl border border-navy-700/30 p-5" style={{ background: 'linear-gradient(180deg, rgba(15,23,42,0.5) 0%, rgba(10,15,30,0.8) 100%)' }}>
@@ -425,19 +464,19 @@ export default function FilmPage() {
                         <div className="space-y-4">
                             <div className="flex justify-between items-end">
                                 <div>
-                                    <p className="text-[10px] text-gray-500 uppercase tracking-wider">Production Budget</p>
-                                    <p className="font-mono text-sm text-white">{formatLargePrice(film.productionBudget)}</p>
+                                    <p className="text-[10px] text-gray-500 uppercase tracking-wider">{budgetLabel}</p>
+                                    <p className="font-mono text-sm text-white">{formatLargePrice(unit.productionBudget)}</p>
                                 </div>
                                 <div className="text-right">
                                     <p className="text-[10px] text-gray-500 uppercase tracking-wider">Proj. Revenue</p>
-                                    <p className="font-mono text-sm text-green-400">{formatLargePrice(film.projectedRevenue)}</p>
+                                    <p className="font-mono text-sm text-green-400">{formatLargePrice(unit.projectedRevenue)}</p>
                                 </div>
                             </div>
                             <div className="h-2 flex rounded-full overflow-hidden bg-navy-800">
-                                <div className="h-full bg-red-500/80" style={{ width: `${(film.productionBudget / (film.productionBudget + film.projectedRevenue)) * 100}%` }} title="Budget" />
-                                <div className="h-full bg-green-500/80" style={{ width: `${(film.projectedRevenue / (film.productionBudget + film.projectedRevenue)) * 100}%` }} title="Revenue" />
+                                <div className="h-full bg-red-500/80" style={{ width: `${(unit.productionBudget / (unit.productionBudget + unit.projectedRevenue)) * 100}%` }} title="Budget" />
+                                <div className="h-full bg-green-500/80" style={{ width: `${(unit.projectedRevenue / (unit.productionBudget + unit.projectedRevenue)) * 100}%` }} title="Revenue" />
                             </div>
-                            <p className="text-[10px] text-gray-400 text-center">Net profit distributed to token holders upon exit phase completion.</p>
+                            <p className="text-[10px] text-gray-400 text-center">{revenueNote}</p>
                         </div>
                     </div>
 
@@ -449,25 +488,29 @@ export default function FilmPage() {
                     {/* Collectible Coins */}
                     <div className="rounded-xl border border-navy-700/30 p-5 mt-6" style={{ background: 'linear-gradient(180deg, rgba(15,23,42,0.5) 0%, rgba(10,15,30,0.8) 100%)' }}>
                         <h2 className="font-serif text-lg text-gold font-bold mb-4 flex items-center gap-2">
-                            <span className="text-gold/40">🪙</span> Collectible Coins
+                            <span className="text-gold/40">🪙</span> {category === 'film' ? 'Collectible Coins' : 'Themed Collectibles'}
                         </h2>
-                        <p className="text-[11px] text-gray-400 mb-6">Bid on exclusive themed collectible coins. Ships to your registered address.</p>
+                        <p className="text-[11px] text-gray-400 mb-6">
+                            {category === 'film'
+                                ? 'Bid on exclusive themed collectible coins. Ships to your registered address.'
+                                : 'Bid on exclusive themed collectibles. Ships to your registered address where applicable.'}
+                        </p>
 
                         <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
-                            {film.silverCoins.map((coin, i) => (
-                                <CollectibleCoinCard key={coin.id} coin={{ ...coin, name: `Design: ${i + 1}` }} onAction={handleCoinAction} />
+                            {unit.silverCoins.map((coin) => (
+                                <CollectibleCoinCard key={coin.id} coin={coin} onAction={handleCoinAction} />
                             ))}
                         </div>
                     </div>
 
                     {/* Masterpiece */}
-                    {film.masterpiece && (
+                    {unit.masterpiece && (
                         <div>
                             <div className="flex items-center gap-2 mb-3">
                                 <span className="text-gold/50 text-sm">✦</span>
                                 <h2 className="font-serif text-lg text-gold font-bold">Ultra-Rare Masterpiece</h2>
                             </div>
-                            <MasterpieceSection mp={film.masterpiece} />
+                            <MasterpieceSection mp={unit.masterpiece} />
                         </div>
                     )}
 

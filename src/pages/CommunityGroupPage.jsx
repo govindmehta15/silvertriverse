@@ -229,7 +229,7 @@ export default function CommunityGroupPage() {
                                             animate={{ opacity: 1, y: 0 }}
                                             className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6"
                                         >
-                                            <Link to={`/profile?user=${post.authorId}`} className="flex items-center hover:opacity-80 transition-opacity">
+                                            <Link to={`/profile/${post.authorId}`} className="flex items-center hover:opacity-80 transition-opacity">
                                                 <div className="w-8 h-8 rounded-full bg-cyan-900 text-cyan-400 flex items-center justify-center font-bold mr-3 border border-cyan-500/30 shrink-0">
                                                     {post.authorName?.charAt(0)}
                                                 </div>
@@ -286,7 +286,7 @@ export default function CommunityGroupPage() {
                                         {leaderboard.map((u, index) => (
                                             <Link
                                                 key={u.userId}
-                                                to={`/profile?user=${u.userId}`}
+                                                to={`/profile/${u.userId}`}
                                                 className="flex justify-between items-center p-3 rounded-lg bg-zinc-900 border border-zinc-800/50 hover:border-gold/30 hover:bg-zinc-800 transition-colors"
                                             >
                                                 <div className="flex items-center gap-3">

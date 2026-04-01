@@ -2,7 +2,7 @@ import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import TagBadge from './TagBadge';
 
-export default function FilmCard({ film }) {
+export default function FilmCard({ film, category = 'film' }) {
     const navigate = useNavigate();
 
     return (
@@ -12,7 +12,7 @@ export default function FilmCard({ film }) {
                 boxShadow: '0 0 30px rgba(201,162,39,0.25), 0 8px 30px rgba(0,0,0,0.5)',
             }}
             whileTap={{ scale: 0.98 }}
-            onClick={() => navigate(`/collectible-units/film/${film.id}`)}
+            onClick={() => navigate(`/collectible-units/${category}/${film.id}`)}
             className="card-luxury overflow-hidden cursor-pointer group"
         >
             {/* Banner */}

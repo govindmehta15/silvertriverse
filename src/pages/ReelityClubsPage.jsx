@@ -207,7 +207,7 @@ export default function ReelityClubsPage() {
                                 {globalLeaderboard.slice(0, 5).map((u, index) => (
                                     <Link
                                         key={u.userId}
-                                        to={`/profile?user=${u.userId}`}
+                                        to={`/profile/${u.userId}`}
                                         className="flex items-center justify-between p-3 bg-zinc-900/50 border border-zinc-800 rounded-lg hover:border-gold/30 transition-colors group"
                                     >
                                         <div className="flex items-center gap-3">

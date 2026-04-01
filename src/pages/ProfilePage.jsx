@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useSearchParams, Link } from 'react-router-dom';
+import { useSearchParams, useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { mockUsers } from '../mock/mockUsers';
@@ -49,9 +49,11 @@ export default function ProfilePage() {
     const [bellRung, setBellRung] = useState(false);
 
     // Determine if we're viewing another user's profile
+    // Priority: /profile/:userId route param > ?user= search param > own profile
+    const { userId: routeUserId } = useParams();
     const [searchParams] = useSearchParams();
     const navigate = useNavigate();
-    const viewingUserId = searchParams.get('user');
+    const viewingUserId = routeUserId || searchParams.get('user') || null;
 
     const allUsers = useMemo(() => {
         const saved = getData('users');
@@ -59,11 +61,12 @@ export default function ProfilePage() {
     }, []);
 
     const viewedUser = useMemo(() => {
-        return viewingUserId ? allUsers.find(u => u.id === viewingUserId) : null;
+        if (!viewingUserId) return null;
+        return allUsers.find(u => u.id === viewingUserId) || null;
     }, [viewingUserId, allUsers]);
 
     const profileUser = viewedUser || user;
-    const isOwnProfile = !viewedUser || viewedUser.id === user?.id;
+    const isOwnProfile = !viewedUser || viewedUser?.id === user?.id;
 
     // Theme: eligibility (sponsor = owns ≥1 plot, winner = isWinner)
     const ownershipList = getData('silvertriverse_plots_ownership') || [];

@@ -32,7 +32,7 @@ export default function ReelityPeoplePage() {
                     return (
                         <Link
                             key={u.id}
-                            to={isMe ? '/profile' : `/profile?user=${u.id}`}
+                        to={isMe ? '/profile' : `/profile/${u.id}`}
                             className="flex items-center gap-4 bg-navy-800/60 border border-navy-700/50 rounded-xl p-4 cursor-pointer hover:border-gold/30 transition-all block"
                         >
                             <div className="relative shrink-0">

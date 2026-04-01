@@ -78,7 +78,7 @@ export default function LeaderboardPage() {
                                 {(Array.isArray(users) ? users : []).map((u, i) => (
                                     <Link
                                         key={u.id}
-                                        to={`/profile?user=${u.id}`}
+                                        to={`/profile/${u.id}`}
                                         className="flex items-center gap-4 bg-navy-800/40 hover:bg-navy-700/60 transition-colors p-3 rounded-xl border border-navy-700/50 w-full text-left"
                                     >
                                         <div className={`w-8 h-8 flex shrink-0 items-center justify-center rounded-full font-bold text-sm ${i === 0 ? 'bg-gold text-navy-950 shadow-glow-gold' : i === 1 ? 'bg-gray-300 text-navy-950' : i === 2 ? 'bg-orange-400 text-navy-950' : 'bg-navy-900 text-gray-400 border border-navy-600'}`}>

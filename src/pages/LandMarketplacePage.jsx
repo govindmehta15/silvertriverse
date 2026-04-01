@@ -364,7 +364,7 @@ export default function LandMarketplacePage() {
                     </div>
                   </div>
                   <button type="button"
-                    onClick={() => { setSelectedPlot(null); navigate(`/profile?user=${selectedPlot.ownerId}`); }}
+                    onClick={() => { setSelectedPlot(null); navigate(`/profile/${selectedPlot.ownerId}`); }}
                     className="w-full py-2.5 rounded-xl font-medium text-sm transition-all"
                     style={{
                       background: 'rgba(139,92,246,0.15)',
