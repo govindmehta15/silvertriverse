@@ -1,0 +1,412 @@
+================================================================================
+  SILVERTRIVERSE — FULL USER FLOW
+  5-Minute PR / Demo Video Script
+  Version 1.0 | April 2026
+================================================================================
+
+OVERVIEW
+--------
+SilverTriverse is an entertainment super-app that blends social discovery,
+collectibles, AI-powered creative tools, and a virtual land economy — all
+wrapped in a cinematic, dark-luxury UI.
+
+Target Audience  : Film fans, collectors, independent creators, studio professionals
+Tone of Video    : Premium, aspirational, fast-paced — like a movie trailer
+Total Duration   : ~5 minutes
+Recommended      : Screen recording at 1440p, smooth mouse movements, no typing errors
+Background Music : Cinematic/electronic, low-key during narration, swells at reveals
+
+
+================================================================================
+SECTION 1 — COLD OPEN & SPLASH SCREEN  [0:00 – 0:20]
+================================================================================
+
+WHAT TO SHOW:
+  • App launches in browser (http://localhost:5174)
+  • The animated SilverTriverse splash screen appears
+    — Glowing logo pulses to life with a gold shimmer effect
+    — "SilverTriverse Entertainment" text fades in
+    — Splash fades out smoothly into the Home page
+
+NARRATION (voice-over):
+  "This is SilverTriverse — an entertainment platform where film fans,
+   collectors, and creators come together in one connected world."
+
+VISUAL TIPS:
+  • Slow zoom-in on the logo during the splash
+  • Use screen fade from black for a cinematic entry
+
+
+================================================================================
+SECTION 2 — HOME PAGE  [0:20 – 0:45]
+================================================================================
+
+WHAT TO SHOW:
+  • The home page grid with 10 feature cards animates in (staggered entry)
+  • Hover over a few cards to show glow effects (Reelity, Relics, Land)
+  • Highlight the sidebar navigation (desktop)
+  • Briefly pan across all cards: Reelity, Relics, Collectible Units, Societies,
+    Merchandise, AI Writer, AI Producer, Rankings, Land, Profile
+
+NARRATION:
+  "From the home screen, every part of the platform is one click away.
+   Fans explore. Creators build. Professionals discover."
+
+KEY POINTS TO HIGHLIGHT:
+  • Gold accent colour — premium feel
+  • Animated card hover glow effects
+  • Sidebar always visible on desktop with active-item indicator
+
+
+================================================================================
+SECTION 3 — LOGIN & PROFILE SETUP  [0:45 – 1:10]
+================================================================================
+
+WHAT TO SHOW:
+  Step 1 — Click user avatar at bottom of sidebar → Login dropdown appears
+  Step 2 — Select "Natalie Portman" (Creator, 120K followers, Gold rank)
+  Step 3 — Navigate to Profile (/profile) from the sidebar
+  Step 4 — Show own profile page:
+             • Cinematic cover banner with animated overlay
+             • Avatar with verified blue checkmark (Creator role)
+             • Name, username, bio, followers count
+             • Prestige rank badge: "Gold"
+             • Stats row: Followers | Participation Score | Relics | Orders
+             • 4 tabs: Shelf · Posts · Activity · Themes
+
+NARRATION:
+  "Log in as Natalie Portman — a Gold-ranked Creator with over 120,000
+   followers. Your profile is your identity in the SilverTriverse."
+
+PROFILE TABS TO DEMO:
+  ① Shelf — Shows owned merchandise, relics, collectible coins and verse cards
+             organised by Premium / Daily / Other categories
+  ② Posts — Community posts authored by this user
+  ③ Activity — Full history: purchases, bids, posts, acquisitions
+  ④ Themes — Click "Themes" button → Theme selector grid opens
+              Show premium themes (locked behind owning a Land plot)
+              Select "Emerald" or "Violet" theme → page background + cover
+              updates live
+
+
+================================================================================
+SECTION 4 — REELITY (SOCIAL FEED)  [1:10 – 1:40]
+================================================================================
+
+WHAT TO SHOW:
+  • Click "Reelity" in sidebar → Feed loads with staggered animation
+  • Scroll through social posts — images, captions, like counts, comments
+  • Click ❤️ to like a post → count animates up
+  • Click another user's name on a post → navigates to /profile/u2
+    (Elias Vance's profile — no refresh needed, instant navigation!)
+  • Click "Add a comment..." → type a comment and press Enter
+  • Show the "New Post" button at top → tap it → post creation modal opens
+    (Fill caption, click "Post to Reelity" → Live posts instantly)
+  • Scroll down to see the FILM BATTLE section:
+    — Two films face off in a VS layout
+    — Countdown timer shows live voting window
+    — Click "Vote Now" on one → +50 points awarded, button switches to "Voted"
+  • Leaderboard preview appears further down the feed
+
+NARRATION:
+  "Reelity is the social heartbeat. Share posts, discover creators,
+   vote in live film battles, and earn participation points in real time."
+
+KEY MOMENTS:
+  • The film battle live countdown (tension!)
+  • Voting → score update (immediate feedback)
+  • Clicking a username in a comment or post → opens their public profile
+
+
+================================================================================
+SECTION 5 — VISITING ANOTHER USER'S PROFILE  [1:40 – 1:55]
+================================================================================
+
+WHAT TO SHOW:
+  • Navigate to Reelity > People (/reelity/people)
+  • A grid of all users with prestige badges (Legendary / Gold / Silver / Bronze)
+  • Click "Elias Vance" (Creator, Silver rank, 85K followers)
+  • His profile opens at /profile/u2 — instant, no page refresh
+  • Show his Shelf tab with his purchased merchandise
+  • Show his stats row
+  • Click the Collaboration Bell 🔔 icon → sends collaboration notification
+  • Point out: this is a PUBLIC profile — no login needed to view
+
+NARRATION:
+  "Tap any creator's name anywhere in the app — feed, rankings, clubs, or
+   the land map — and their public profile loads instantly."
+
+KEY POINTS:
+  • URL changes to /profile/u2 (clean social-media style URLs)
+  • Back navigation works naturally (browser back button)
+  • Verified checkmarks on Creator and Professional accounts
+
+
+================================================================================
+SECTION 6 — RELICS (AUCTION HOUSE)  [1:55 – 2:20]
+================================================================================
+
+WHAT TO SHOW:
+  • Click "Relics" in sidebar → Collection of rare film assets
+  • Browse relic cards — props, costumes, memorabilia
+  • Click a relic → Relic Detail page opens
+    — Large image, description, current highest bid, bid history
+    — Enter a bid amount in the bid input field
+    — Click "Place Bid" → Bid confirmed toast notification
+    — Profile > Activity tab will now show this bid in history
+
+NARRATION:
+  "Relics are rare digital assets from the world of film. Bid on a
+   legendary prop, a signed script, or a one-of-a-kind costume piece."
+
+KEY MOMENTS:
+  • The rarity indicators (colour-coded borders)
+  • Bid confirmation toast
+  • Activity history updated automatically
+
+
+================================================================================
+SECTION 7 — COLLECTIBLE UNITS  [2:20 – 2:50]
+================================================================================
+
+WHAT TO SHOW:
+  • Click "Collectible Units" → CU Browse page
+  • Grid of film cards — sports, sci-fi, thriller, drama
+  • Filter / sort cards by category
+  • Click a card → Film detail page opens:
+    — Cinematic full-bleed movie banner
+    — Cast, director, genre, synopsis
+    — Box office stats
+    — Collector rank and owned status
+    — "Collect" / "Add to Watchlist" CTA buttons
+  • Switch user to "Marcus Thorne" (Professional / Casting Director)
+  • Now show: Talent Pipeline (/collectible-units/pipeline) in sidebar
+    — Exclusive professional-only view
+    — Talent submissions, screening queue, notes
+  • Switch back to Natalie Portman (Creator)
+  • Show: Create Post (/collectible-units/create-post)
+    — Post a new collectible unit story / update
+
+NARRATION:
+  "Collectible Units combine the thrill of trading cards with film discovery.
+   Fans collect. Creators post updates. Professionals use the Talent Pipeline
+   to screen new talent — each role unlocks a different experience."
+
+KEY POINTS:
+  • Role-based access: Fan vs Creator vs Professional views differ
+  • Create Post available for Creators and Professionals
+  • Story Submission route for Creators
+
+
+================================================================================
+SECTION 8 — MERCHANDISE SHOP  [2:50 – 3:15]
+================================================================================
+
+WHAT TO SHOW:
+  • Click "Merchandise" → Premium and Daily product grid
+  • Show product categories — Premium (limited edition) vs Daily items
+  • Hover products to see glow shimmer
+  • Click a product → Product Detail page:
+    — Large product images (carousel / gallery)
+    — Name, price in ₹, description
+    — Serial number for premium items
+    — Digital Twin ID (blockchain-style collectible proof)
+    — Size selector (if applicable)
+    — "Add to Cart" button → Cart count in header updates
+  • Click "Add to Cart" → toast notification
+  • Proceed to checkout → Order placed
+  • Navigate back to Profile > Shelf → The purchased item now appears
+    in the Shelf tab under the correct category (Premium / Daily)
+
+NARRATION:
+  "From limited-edition leather jackets to daily collectibles — everything
+   you buy is logged on your profile Shelf, creating a curated showcase
+   of your collection."
+
+KEY MOMENTS:
+  • The Digital Twin ID / Serial Number (unique ownership proof)
+  • Cart interaction — smooth and instant
+  • Profile Shelf updates live after purchase
+
+
+================================================================================
+SECTION 9 — SOCIETIES & CLUBS  [3:15 – 3:40]
+================================================================================
+
+WHAT TO SHOW:
+  • Click "Societies" → Clubs page with trending and full list
+  • Show the sticky "Cultural Architects" global leaderboard sidebar
+  • Click a club (e.g. "The Kubrick Collective") → Club detail page:
+    — Society header: name, description, member count, founding year
+    — "Request Induction" button → join the society
+    — Once joined: community post feed unlocks
+    — Write and submit a post to the society discourse
+    — Comment on existing posts
+    — Society leaderboard sidebar updates with post count
+  • Click "Enter Sync Room" → Live Sync Room overlay appears
+    — Real-time film watch party room
+    — Members' activity visible live
+
+NARRATION:
+  "Societies let fans, creators, and professionals gather around shared
+   obsessions — from Kubrick to sci-fi world-building. The Sync Room
+   brings members together for live watch parties in real time."
+
+KEY MOMENTS:
+  • Joining a society (induction metaphor — premium language)
+  • Sync Room entry (wow moment — live room)
+  • Discourse / post submission
+
+
+================================================================================
+SECTION 10 — AI WRITER & AI PRODUCER  [3:40 – 4:05]
+================================================================================
+
+WHAT TO SHOW:
+  AI WRITER:
+  • Click "AI Writer" → Hub page with available writing tools
+  • Click a tool (e.g. "Screenplay Generator" or "Character Bio Writer")
+  • Show the workflow page — inputs and output generation
+  • Show History page → previous generated outputs saved automatically
+
+  AI PRODUCER:
+  • Click "AI Producer" → Hub page with studio-grade screening tools
+  • Click a tool (e.g. "Script Analyser" or "Market Fit Scorer")
+  • Show the workflow
+  • Show Top-Up credits page → buy credits to unlock premium tools
+
+NARRATION:
+  "The AI suite gives writers a creative co-pilot and studios a smart
+   screening assistant. Generate screenplays, analyse scripts, and
+   discover market-ready stories — all inside the platform."
+
+KEY MOMENTS:
+  • Tool workflow animation (inputs → generated result)
+  • History page (persistent memory)
+  • Separate personas: AI Writer for creatives, AI Producer for studios
+
+
+================================================================================
+SECTION 11 — LAND MARKETPLACE (3D)  [4:05 – 4:35]
+================================================================================
+
+WHAT TO SHOW:
+  • Click "Land" → 3D scene loads with animated star-field sky
+  • Slowly orbit the camera — colourful glowing houses visible
+  • Estate strip at top: "MY PLOTS: 4 | MY CARDS: 2 | HOUSE TYPE: Crystal Tower
+    | WORLD FILL: 2.4%"
+  • Point out different house types visible in the scene:
+    — Classic Cottage (new user, 0 cards)
+    — Modern Villa (0 cards, alternate seed)
+    — Crystal Tower (1+ cards) — tall hexagonal glowing spire
+    — Pagoda (3+ cards) — layered temple with golden lanterns
+    — Floating Cube (5+ cards) — metallic cube hovering + orbiting rings
+    — Cosmic Pyramid (10+ cards) — pyramid with cosmic rotating halos
+  • Zoom into a house — show gold-bordered picture frames on walls
+    (collectible images from the owner's profile shelf displayed as wall art)
+  • Plot ground tiles glow in the owner's profile theme colour
+    (amber for gold theme, violet for purple theme, teal for emerald theme)
+  • Click a plot → Plot Detail modal opens:
+    — Owner name, avatar, house type badge, card count
+    — "Visit Profile →" button → navigates to that user's profile
+  • Click an available (dark) plot → Purchase modal:
+    — Price: ₹200 per plot
+    — "Purchase Plot" button → confirms ownership
+    — Plot now shows your house and glows your theme colour
+
+NARRATION:
+  "The Land Marketplace is a living 3D world. Your house design, colour,
+   and collectibles on the walls — everything reflects who you are on
+   SilverTriverse. Own a plot to unlock premium profile themes."
+
+KEY MOMENTS:
+  • Camera orbiting smoothly — no lag
+  • Wall art frames with actual collectible images
+  • Theme-coloured glowing ground plots
+  • Buying a plot → immediate house appears
+
+
+================================================================================
+SECTION 12 — RANKINGS / LEADERBOARD  [4:35 – 4:48]
+================================================================================
+
+WHAT TO SHOW:
+  • Click "Rankings" → Global Leaderboard page
+  • Three columns: Top Fans · Top Collectors · Top Creators
+  • Gold #1 badge, silver #2, bronze #3 with rank-change arrows (▲ ▼)
+  • Hover over any name → subtle highlight
+  • Click any user → navigates to their public profile instantly
+
+NARRATION:
+  "The Rankings show who's dominating each category — updated live.
+   Every like, bid, purchase, and post pushes your score higher."
+
+
+================================================================================
+SECTION 13 — CLOSING SHOT & CTA  [4:48 – 5:00]
+================================================================================
+
+WHAT TO SHOW:
+  • Slowly pull back from the 3D land scene (wide cinematic aerial view)
+  • Fade to the SilverTriverse home page hero
+  • Logo pulses once with gold shimmer
+
+NARRATION:
+  "SilverTriverse — where every film fan has a home, every creator has
+   a stage, and every collector has a story to tell.
+
+   Join the universe."
+
+ENDING CARD (static screen, 3 seconds):
+  ┌─────────────────────────────────┐
+  │         SilverTriverse          │
+  │        Entertainment            │
+  │                                 │
+  │   silverTriverse.com            │
+  │   @SilverTriverse               │
+  └─────────────────────────────────┘
+
+
+================================================================================
+RECORDING CHECKLIST (Before You Hit Record)
+================================================================================
+
+  □ Log in as Natalie Portman from sidebar (u1 — Creator, Gold rank)
+  □ Clear browser localStorage to get fresh state, OR pre-populate:
+      — 2+ merchandise orders in user_orders
+      — 1+ bid in user_bids
+      — 1+ coin in user_coins
+  □ Open the app at 1440 × 900 browser size minimum
+  □ Ensure npm run dev is running with no hot-reload errors
+  □ Have background music ready (start at 0:00, fade at 5:00)
+  □ Use OBS / Loom / Quicktime for recording
+  □ Do a dry run of the entire flow before recording
+  □ Slow mouse movements — no janky fast dragging
+  □ In the 3D land scene: drag slowly to orbit, scroll to zoom
+
+
+================================================================================
+APPROXIMATE TIME BUDGET
+================================================================================
+
+  0:00 – 0:20  Splash + intro                    20s
+  0:20 – 0:45  Home page                         25s
+  0:45 – 1:10  Login + own profile               25s
+  1:10 – 1:40  Reelity feed + battle             30s
+  1:40 – 1:55  Visiting another profile          15s
+  1:55 – 2:20  Relics / auction                  25s
+  2:20 – 2:50  Collectible Units                 30s
+  2:50 – 3:15  Merchandise + shelf               25s
+  3:15 – 3:40  Societies + Sync Room             25s
+  3:40 – 4:05  AI Writer + AI Producer           25s
+  4:05 – 4:35  Land Marketplace 3D               30s
+  4:35 – 4:48  Rankings                          13s
+  4:48 – 5:00  Closing + CTA                     12s
+               ─────────────────────────────
+               TOTAL                            5:00
+
+
+================================================================================
+  END OF USER FLOW DOCUMENT
+  SilverTriverse v1.0 — PR Video Reference
+================================================================================

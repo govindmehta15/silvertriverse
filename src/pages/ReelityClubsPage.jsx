@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -96,6 +96,9 @@ const item = { hidden: { opacity: 0, y: 15 }, show: { opacity: 1, y: 0 } };
 
 export default function ReelityClubsPage() {
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [query, setQuery] = useState('');
+    const [topicFilter, setTopicFilter] = useState('all');
+    const [sortBy, setSortBy] = useState('members');
 
     const { data: commRes, isLoading } = useQuery({
         queryKey: ['communities'],
@@ -110,17 +113,55 @@ export default function ReelityClubsPage() {
     const communities = commRes?.data || [];
     const globalLeaderboard = globalLeaderboardRes?.success ? globalLeaderboardRes.data : [];
 
+    const allTopics = useMemo(() => {
+        const topics = Array.from(new Set(communities.map((c) => c.topic).filter(Boolean)));
+        return ['all', ...topics];
+    }, [communities]);
+
+    const topTopic = useMemo(() => {
+        const countByTopic = communities.reduce((acc, c) => {
+            const key = c.topic || 'General';
+            acc[key] = (acc[key] || 0) + 1;
+            return acc;
+        }, {});
+        const [topic] = Object.entries(countByTopic).sort((a, b) => b[1] - a[1])[0] || ['General'];
+        return topic;
+    }, [communities]);
+
+    const totalMembers = useMemo(
+        () => communities.reduce((sum, c) => sum + (c.members?.length || 0), 0),
+        [communities]
+    );
+
+    const filteredCommunities = useMemo(() => {
+        const normalizedQuery = query.trim().toLowerCase();
+        const base = communities.filter((c) => {
+            const name = c.name?.toLowerCase() || '';
+            const desc = c.description?.toLowerCase() || '';
+            const topic = c.topic?.toLowerCase() || '';
+            const topicMatch = topicFilter === 'all' || c.topic === topicFilter;
+            const textMatch = !normalizedQuery || name.includes(normalizedQuery) || desc.includes(normalizedQuery) || topic.includes(normalizedQuery);
+            return topicMatch && textMatch;
+        });
+
+        return [...base].sort((a, b) => {
+            if (sortBy === 'name') return (a.name || '').localeCompare(b.name || '');
+            if (sortBy === 'newest') return (b.createdAt || 0) - (a.createdAt || 0);
+            return (b.members?.length || 0) - (a.members?.length || 0);
+        });
+    }, [communities, query, topicFilter, sortBy]);
+
     // Sort trending by members descending
-    const trendingClubs = [...communities].sort((a, b) => (b.members?.length || 0) - (a.members?.length || 0)).slice(0, 3);
+    const trendingClubs = [...communities].sort((a, b) => (b.members?.length || 0) - (a.members?.length || 0)).slice(0, 4);
 
     return (
-        <div className="space-y-12 pb-24 lg:pb-12 max-w-5xl mx-auto px-4">
+        <div className="space-y-8 pb-24 lg:pb-12 max-w-6xl mx-auto px-4">
 
             {/* Header Area */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 border-b border-zinc-800 pb-6 mt-4">
                 <div>
-                    <h2 className="font-serif text-3xl font-bold tracking-wide text-white">Societies & Clubs</h2>
-                    <p className="text-zinc-400 text-sm mt-2 max-w-xl">Deep cultural enclaves dedicated to nuanced discussion, artifact collecting, and real-time cinematic sync rooms.</p>
+                    <h2 className="font-serif text-3xl font-bold tracking-wide text-white">Clubs Hub</h2>
+                    <p className="text-zinc-400 text-sm mt-2 max-w-xl">A better arranged space for societies and clubs: discover, filter, and join active communities fast.</p>
                 </div>
 
                 <RoleGuard allowedRoles={['creator', 'professional']}>
@@ -135,9 +176,25 @@ export default function ReelityClubsPage() {
                 </RoleGuard>
             </div>
 
+            {/* Overview Strip */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-4">
+                    <p className="text-[10px] uppercase tracking-widest text-zinc-500 font-bold">Registered Clubs</p>
+                    <p className="mt-1 text-2xl font-serif text-white">{communities.length}</p>
+                </div>
+                <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-4">
+                    <p className="text-[10px] uppercase tracking-widest text-zinc-500 font-bold">Total Members</p>
+                    <p className="mt-1 text-2xl font-serif text-gold">{totalMembers}</p>
+                </div>
+                <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-4">
+                    <p className="text-[10px] uppercase tracking-widest text-zinc-500 font-bold">Top Topic</p>
+                    <p className="mt-1 text-2xl font-serif text-teal-400">{topTopic}</p>
+                </div>
+            </div>
+
             <div className="flex flex-col lg:flex-row gap-10">
                 {/* Left Column: Clubs Feed */}
-                <div className="lg:w-2/3 space-y-10">
+                <div className="lg:w-2/3 space-y-8">
 
                     {/* Trending First */}
                     <section>
@@ -162,26 +219,57 @@ export default function ReelityClubsPage() {
 
                     {/* The Rest of the Clubs */}
                     <section>
-                        <div className="flex items-center gap-3 mb-6">
+                        <div className="flex items-center gap-3 mb-4">
                             <h3 className="text-white font-serif text-xl tracking-wide">
                                 All Registered Clubs
                             </h3>
                             <div className="h-px bg-zinc-800 flex-1 ml-4" />
                         </div>
 
+                        <div className="mb-4 grid grid-cols-1 md:grid-cols-3 gap-2">
+                            <input
+                                value={query}
+                                onChange={(e) => setQuery(e.target.value)}
+                                placeholder="Search by name, topic, or description"
+                                className="md:col-span-2 rounded-lg border border-zinc-800 bg-zinc-900/60 px-3 py-2 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-gold/40"
+                            />
+                            <div className="grid grid-cols-2 gap-2">
+                                <select
+                                    value={topicFilter}
+                                    onChange={(e) => setTopicFilter(e.target.value)}
+                                    className="rounded-lg border border-zinc-800 bg-zinc-900/60 px-2 py-2 text-xs text-zinc-200 focus:outline-none focus:border-gold/40"
+                                >
+                                    {allTopics.map((topic) => (
+                                        <option key={topic} value={topic}>
+                                            {topic === 'all' ? 'All Topics' : topic}
+                                        </option>
+                                    ))}
+                                </select>
+                                <select
+                                    value={sortBy}
+                                    onChange={(e) => setSortBy(e.target.value)}
+                                    className="rounded-lg border border-zinc-800 bg-zinc-900/60 px-2 py-2 text-xs text-zinc-200 focus:outline-none focus:border-gold/40"
+                                >
+                                    <option value="members">Top Members</option>
+                                    <option value="name">A-Z</option>
+                                    <option value="newest">Newest</option>
+                                </select>
+                            </div>
+                        </div>
+
                         {isLoading ? (
                             <div className="space-y-4"><SkeletonCard /><SkeletonCard /></div>
                         ) : (
                             <motion.div variants={container} initial="hidden" animate="show" className="space-y-4">
-                                {communities.map(c => (
+                                {filteredCommunities.map(c => (
                                     <motion.div key={`all-${c.id}`} variants={item}>
                                         <ClubCard community={c} />
                                     </motion.div>
                                 ))}
 
-                                {communities.length === 0 && (
+                                {filteredCommunities.length === 0 && (
                                     <div className="text-center py-16 bg-zinc-900/30 border border-zinc-800/50 rounded-2xl">
-                                        <p className="text-zinc-500 font-serif text-lg">No societies have been registered.</p>
+                                        <p className="text-zinc-500 font-serif text-lg">No clubs found for current filters.</p>
                                     </div>
                                 )}
                             </motion.div>

@@ -22,7 +22,7 @@ const navItems = [
         ),
     },
     {
-        to: '/',
+        to: '/reelity',
         label: 'SilverTriverse',
         icon: null,
         isCenter: true,
@@ -104,7 +104,7 @@ export default function BottomNav({ onMenuClick }) {
                             <NavLink
                                 key={item.isCenter ? 'center' : `${item.to}-${index}`}
                                 to={item.to}
-                                end={item.to === '/'}
+                                end={item.to === '/reelity'}
                                 className={({ isActive }) =>
                                     `nav-item flex-1 flex flex-col items-center justify-center gap-0.5 min-h-[44px] min-w-[44px] py-2 rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/50 focus-visible:ring-offset-2 focus-visible:ring-offset-navy-950 active:bg-navy-800/50 ${isActive ? 'active' : ''}`
                                 }

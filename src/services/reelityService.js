@@ -11,6 +11,15 @@ if (!getData(STORIES_KEY)) {
 }
 if (!getData(FEED_KEY)) {
     updateData(FEED_KEY, () => mockFeedItems);
+} else {
+    // Keep historical local feed but hydrate any newly shipped seed items by id.
+    updateData(FEED_KEY, (existing = []) => {
+        const byId = new Map(existing.map((item) => [item.id, item]));
+        mockFeedItems.forEach((seed) => {
+            if (!byId.has(seed.id)) byId.set(seed.id, seed);
+        });
+        return Array.from(byId.values());
+    });
 }
 
 const simulateNetwork = (data) =>

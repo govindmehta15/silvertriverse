@@ -5,7 +5,6 @@ function KeyedProfilePage() {
   const { userId } = useParams();
   return <ProfilePage key={userId || 'own'} />;
 }
-import HomePage from './pages/HomePage';
 import ProfilePage from './pages/ProfilePage';
 import LeaderboardPage from './pages/LeaderboardPage';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -41,7 +40,10 @@ import AIProducerHubPage from './pages/AIProducerHubPage';
 import AIProducerTopUpPage from './pages/AIProducerTopUpPage';
 import AIProducerWorkflowPage from './pages/AIProducerWorkflowPage';
 import LandMarketplacePage from './pages/LandMarketplacePage';
+import LandWorldPage from './pages/LandWorldPage';
 import SplashScreen from './components/SplashScreen';
+import DemoMode from './components/DemoMode';
+
 import { AnimatePresence } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -63,7 +65,8 @@ const queryClient = new QueryClient({
 // Initialize fake background activity loop
 initSimulation();
 
-export default function App() {
+export default function App({ demoModeOverride = false }) {
+
   const [showSplash, setShowSplash] = useState(true);
 
   useEffect(() => {
@@ -86,7 +89,7 @@ export default function App() {
                 <Router>
                   <Routes>
                     <Route element={<MainLayout />}>
-                      <Route path="/" element={<HomePage />} />
+                      <Route path="/" element={<Navigate to="/reelity" replace />} />
                       <Route path="/reelity" element={<ReelityLayout />}>
                         <Route index element={<ReelityFeedPage />} />
                         <Route path="stories" element={<ReelityStoriesPage />} />
@@ -146,6 +149,14 @@ export default function App() {
                       <Route path="/profile/:userId" element={<KeyedProfilePage />} />
                       <Route path="/leaderboard" element={<LeaderboardPage />} />
                       <Route path="/land" element={<LandMarketplacePage />} />
+                      <Route
+                        path="/land-world"
+                        element={
+                          <ProtectedRoute>
+                            <LandWorldPage />
+                          </ProtectedRoute>
+                        }
+                      />
                       {/* Legacy FCU URLs -> Collectible Units */}
                       <Route path="/fcu" element={<Navigate to="/collectible-units" replace />} />
                       <Route path="/fcu/explore" element={<Navigate to="/collectible-units/explore" replace />} />
@@ -179,6 +190,7 @@ export default function App() {
                       </Route>
                     </Route>
                   </Routes>
+                  {demoModeOverride && <DemoMode autostart={true} />}
                 </Router>
               </CreditsProvider>
             </CartProvider>

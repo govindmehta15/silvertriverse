@@ -1,9 +1,9 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import { plotsService } from '../services/plotsService';
-import { getData } from '../utils/storageService';
+import { getData, setData } from '../utils/storageService';
 import { PRICE_PER_PLOT, COLS, ROWS, indexToRowCol } from '../data/plotsData';
 import { mockUsers } from '../mock/mockUsers';
 import Land3D from '../components/Land3D';
@@ -14,20 +14,76 @@ const MAX_ZOOM = 1.5;
 
 function getTierLabel(count) {
   if (count >= 10) return { label: 'Tycoon', color: '#f59e0b', emoji: '🏆' };
-  if (count >= 5)  return { label: 'Collector', color: '#06b6d4', emoji: '💎' };
-  if (count >= 1)  return { label: 'Landholder', color: '#22c55e', emoji: '🗺️' };
+  if (count >= 5) return { label: 'Collector', color: '#06b6d4', emoji: '💎' };
+  if (count >= 1) return { label: 'Landholder', color: '#22c55e', emoji: '🗺️' };
   return null;
 }
 
 // House type legend data
 const HOUSE_LEGEND = [
-  { emoji: '🏡', name: 'Classic Cottage',  desc: 'Default',         color: '#f59e0b' },
-  { emoji: '🏢', name: 'Modern Villa',     desc: 'Default (alt)',    color: '#3b82f6' },
-  { emoji: '🔮', name: 'Crystal Tower',    desc: '1+ cards',         color: '#06b6d4' },
-  { emoji: '⛩️', name: 'Pagoda',           desc: '3+ cards',         color: '#ef4444' },
-  { emoji: '🚀', name: 'Floating Cube',    desc: '5+ cards',         color: '#8b5cf6' },
-  { emoji: '🌌', name: 'Cosmic Pyramid',   desc: '10+ cards',        color: '#f97316' },
+  { emoji: '🏡', name: 'Classic Cottage', desc: 'Default', color: '#f59e0b' },
+  { emoji: '🏢', name: 'Modern Villa', desc: 'Default (alt)', color: '#3b82f6' },
+  { emoji: '🔮', name: 'Crystal Tower', desc: '1+ cards', color: '#06b6d4' },
+  { emoji: '⛩️', name: 'Pagoda', desc: '3+ cards', color: '#ef4444' },
+  { emoji: '🚀', name: 'Floating Cube', desc: '5+ cards', color: '#8b5cf6' },
+  { emoji: '🌌', name: 'Cosmic Pyramid', desc: '10+ cards', color: '#f97316' },
 ];
+
+const ITEM_IMAGE_MAP = {
+  y1: '/images/bomber_jacket.png',
+  y2: '/images/diamond_ring.png',
+  y3: '/images/diamond_necklace.png',
+  y4: '/images/scifi_weapon.png',
+  y5: '/images/ancient_book.png',
+  y6: '/images/scifi_weapon.png',
+  y7: '/images/bomber_jacket.png',
+  y8: '/images/scifi_weapon.png',
+  y9: '/images/scifi_weapon.png',
+  y10: '/images/scifi_weapon.png',
+  o1: '/images/leather_jacket.png',
+  o2: '/images/bomber_jacket.png',
+  o3: '/images/elegant_dress.png',
+  o4: '/images/leather_jacket.png',
+  o5: '/images/elegant_dress.png',
+  o6: '/images/leather_jacket.png',
+  o7: '/images/bomber_jacket.png',
+  o8: '/images/elegant_dress.png',
+  o9: '/images/leather_jacket.png',
+  o10: '/images/bomber_jacket.png',
+};
+
+const RELIC_IMAGE_MAP = {
+  1: '/images/scifi_weapon.png',
+  2: '/images/film_thriller.png',
+  3: '/images/film_scifi.png',
+  4: '/images/post_bts.png',
+  5: '/images/post_casting.png',
+};
+
+function getPlotProgress(index) {
+  const saved = getData(`land_plot_progress_${index}`);
+  return saved || 0;
+}
+
+function calculateUserPowerPool(ownerUser) {
+  if (!ownerUser) return { total: 0, available: 0, used: 0 };
+  const tCards = (ownerUser.ownedCards?.length || 0) * 2;
+  const tAssets = (ownerUser.purchasedItems?.length || 0) * 3;
+  const tRelics = (ownerUser.ownedRelics?.length || 0) * 5;
+  const total = tCards + tAssets + tRelics;
+
+  // Calculate used power: sum of all plot progress for this user
+  // (In a real app, you'd fetch this from the backend)
+  const ownershipMap = getData('land_ownership') || {};
+  let used = 0;
+  Object.entries(ownershipMap).forEach(([idx, p]) => {
+    if (p.ownerId === ownerUser.id) {
+      used += getPlotProgress(idx);
+    }
+  });
+
+  return { total, used, available: Math.max(0, total - used) };
+}
 
 export default function LandMarketplacePage() {
   const navigate = useNavigate();
@@ -38,6 +94,7 @@ export default function LandMarketplacePage() {
   const [purchasing, setPurchasing] = useState(false);
   const [scale, setScale] = useState(0.85);
   const [legendOpen, setLegendOpen] = useState(false);
+  const [searchVal, setSearchVal] = useState('');
 
   const usersById = useMemo(() => {
     const saved = getData('users');
@@ -65,14 +122,46 @@ export default function LandMarketplacePage() {
   const handlePlotClick = (index) => {
     const { row, col } = indexToRowCol(index);
     const owner = ownershipMap[index];
-    const ownerUser = owner ? usersById[owner.ownerId] : null;
+    const ownerId = owner?.ownerId;
+    const ownerUser = owner ? usersById[ownerId] : null;
+
+    // Collect wall item images
+    const wallItems = [];
+    if (ownerUser) {
+      for (const i of (ownerUser.purchasedItems || [])) {
+        if (ITEM_IMAGE_MAP[i]) wallItems.push(ITEM_IMAGE_MAP[i]);
+        if (wallItems.length >= 3) break;
+      }
+      if (wallItems.length < 3) {
+        for (const r of (ownerUser.ownedRelics || [])) {
+          if (RELIC_IMAGE_MAP[r]) wallItems.push(RELIC_IMAGE_MAP[r]);
+          if (wallItems.length >= 3) break;
+        }
+      }
+    }
+
     setSelectedPlot({
       index, row, col,
-      ownerId: owner?.ownerId ?? null,
+      ownerId: ownerId ?? null,
       ownerName: owner?.ownerName ?? null,
       ownerAvatar: ownerUser?.avatar ?? null,
       ownerCardCount: ownerUser?.ownedCards?.length ?? 0,
+      wallItems: [...new Set(wallItems)].slice(0, 3),
+      progress: getPlotProgress(index)
     });
+  };
+
+  const handleAllocatePower = (index, amount) => {
+    if (powerPool.available < amount) return;
+    const current = getPlotProgress(index);
+    if (current >= 100) return;
+
+    const newProgress = Math.min(100, current + amount);
+    setData(`land_plot_progress_${index}`, newProgress);
+
+    // Update local state for immediate feedback
+    setSelectedPlot(prev => prev && prev.index === index ? { ...prev, progress: newProgress } : prev);
+    setOwnershipMap({ ...ownershipMap }); // Trigger re-memo
   };
 
   const handlePurchase = async () => {
@@ -83,10 +172,11 @@ export default function LandMarketplacePage() {
     if (res.success) { loadOwnership(); setSelectedPlot(null); }
   };
 
-  const myPlotCount = useMemo(
-    () => Object.entries(ownershipMap).filter(([, v]) => v.ownerId === user?.id).length,
-    [ownershipMap, user?.id]
-  );
+  const myPlots = Object.values(ownershipMap).filter((p) => p.ownerId === user?.id);
+  const myPlotCount = myPlots.length;
+
+  const powerPool = useMemo(() => calculateUserPowerPool(user), [user, ownershipMap]);
+
   const myCardCount = user ? (usersById[user.id]?.ownedCards?.length ?? 0) : 0;
   const tierInfo = getTierLabel(myPlotCount);
   const totalOwned = Object.keys(ownershipMap).length;
@@ -176,6 +266,64 @@ export default function LandMarketplacePage() {
           </div>
         </div>
 
+        {/* ── Power Pool Dashboard ─────────────────────────── */}
+        {isAuthenticated && (
+          <div className="mb-4 p-4 rounded-2xl bg-gradient-to-r from-navy-900 to-indigo-950 border border-navy-700/50 shadow-2xl flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="w-10 h-10 rounded-full bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400">
+                ⚡
+              </div>
+              <div>
+                <p className="text-[10px] text-gray-500 uppercase tracking-widest leading-none mb-1">Global Power Pool</p>
+                <p className="text-lg font-bold text-white leading-none">
+                  {powerPool.available}<span className="text-xs text-gray-400 font-normal"> / {powerPool.total}% Available</span>
+                </p>
+              </div>
+            </div>
+            <div className="flex gap-4 text-right">
+              <div>
+                <p className="text-[9px] text-gray-500 uppercase">Allocated</p>
+                <p className="text-xs font-medium text-gray-300">{powerPool.used}%</p>
+              </div>
+              <div>
+                <p className="text-[9px] text-gray-500 uppercase">Reserves</p>
+                <p className="text-xs font-medium text-cyan-400">{powerPool.available}%</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ── Search & Jump ─────────────────────────────────── */}
+        <div className="flex flex-wrap items-center gap-3 mb-4">
+          <div className="relative flex-1 min-w-[200px]">
+            <input
+              type="text"
+              placeholder="Find Plot # (e.g. 42)..."
+              value={searchVal}
+              onChange={(e) => setSearchVal(e.target.value)}
+              className="w-full bg-navy-900/60 border border-navy-600/40 rounded-xl px-4 py-2.5 text-sm text-gray-200 focus:outline-none focus:border-gold/40 placeholder:text-gray-600"
+            />
+            <button
+              onClick={() => { if (searchVal) handlePlotClick(parseInt(searchVal)); }}
+              className="absolute right-2 top-1.5 px-3 py-1 bg-gold/10 text-gold text-xs font-bold rounded-lg border border-gold/20"
+            >
+              Go
+            </button>
+          </div>
+
+          {isAuthenticated && myPlotCount > 0 && (
+            <button
+              onClick={() => {
+                const firstMine = Object.entries(ownershipMap).find(([, v]) => v.ownerId === user.id);
+                if (firstMine) handlePlotClick(parseInt(firstMine[0]));
+              }}
+              className="px-4 py-2.5 rounded-xl border border-cyan-500/30 bg-cyan-900/20 text-cyan-300 text-sm font-medium hover:bg-cyan-900/30 transition-all flex items-center gap-2"
+            >
+              🚀 Jump to My Plot
+            </button>
+          )}
+        </div>
+
         {/* ── My Estate Strip ────────────────────────────────── */}
         {isAuthenticated && (
           <motion.div
@@ -203,9 +351,9 @@ export default function LandMarketplacePage() {
               <p className="font-mono text-sm font-bold text-violet-300">
                 {myCardCount >= 10 ? '🌌 Cosmic Pyramid'
                   : myCardCount >= 5 ? '🚀 Floating Cube'
-                  : myCardCount >= 3 ? '⛩️ Pagoda'
-                  : myCardCount >= 1 ? '🔮 Crystal Tower'
-                  : myPlotCount % 2 === 0 ? '🏡 Cottage' : '🏢 Villa'}
+                    : myCardCount >= 3 ? '⛩️ Pagoda'
+                      : myCardCount >= 1 ? '🔮 Crystal Tower'
+                        : myPlotCount % 2 === 0 ? '🏡 Cottage' : '🏢 Villa'}
               </p>
             </div>
             <div className="w-px h-8 bg-white/10" />
@@ -214,6 +362,37 @@ export default function LandMarketplacePage() {
               <p className="font-mono text-sm font-bold text-emerald-300">
                 {((totalOwned / totalCells) * 100).toFixed(1)}%
               </p>
+            </div>
+            <div className="w-px h-8 bg-white/10" />
+
+            {/* NEW: Equipped Decor Preview */}
+            <div className="flex items-center gap-2">
+              <p className="text-[10px] text-gray-500 uppercase tracking-widest mr-1">Collectible units with utility power </p>
+              <div className="flex -space-x-2">
+                {(user?.purchasedItems?.slice(0, 3) || []).map((id, i) => (
+                  <div key={id} className="relative w-9 h-9 rounded-full border border-navy-600 bg-navy-900 overflow-hidden shadow-lg group" style={{ zIndex: 10 - i }}>
+                    <img src={ITEM_IMAGE_MAP[id] || '/images/scifi_weapon.png'} alt="" className="w-full h-full object-cover" />
+                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                      <span className="text-[7px] font-bold text-gold">+10%</span>
+                    </div>
+                  </div>
+                ))}
+                {(user?.ownedCards?.slice(0, 3) || []).map((id, i) => (
+                  <div key={i} className="relative w-9 h-9 rounded-full border border-cyan-600/50 bg-navy-900 overflow-hidden shadow-lg group" style={{ zIndex: 5 - i }}>
+                    <div className="w-full h-full bg-gradient-to-br from-cyan-900 to-navy-900 flex items-center justify-center text-[10px] text-cyan-400 font-serif">
+                      C
+                    </div>
+                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                      <span className="text-[7px] font-bold text-cyan-400">+5%</span>
+                    </div>
+                  </div>
+                ))}
+                {(!user?.purchasedItems?.length && !user?.ownedCards?.length) && (
+                  <div className="w-8 h-8 rounded-full border border-dashed border-gray-700 flex items-center justify-center text-[10px] text-gray-600">
+                    +
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Legend toggle */}
@@ -258,8 +437,85 @@ export default function LandMarketplacePage() {
                     </div>
                   ))}
                 </div>
-                <p className="mt-3 text-[10px] text-gray-600 italic">
-                  House color reflects the owner's chosen profile theme. Colors change when the owner updates their theme.
+                <div className="mt-4 pt-4 border-t border-navy-700/50">
+                  <p className="text-[10px] text-gray-500 uppercase tracking-widest mb-3">Redefined Utility Power</p>
+                  <div className="grid grid-cols-3 gap-2 text-center text-[9px] text-gray-400">
+                    <div className="p-2 rounded-lg bg-navy-900/40 border border-navy-600">
+                      <p className="text-cyan-400 font-bold text-xs">+2%</p>
+                      <p>Per Card</p>
+                    </div>
+                    <div className="p-2 rounded-lg bg-navy-900/40 border border-navy-600">
+                      <p className="text-gold font-bold text-xs">+3%</p>
+                      <p>Per Asset</p>
+                    </div>
+                    <div className="p-2 rounded-lg bg-navy-900/40 border border-navy-600">
+                      <p className="text-violet-400 font-bold text-xs">+5%</p>
+                      <p>Per Relic</p>
+                    </div>
+                  </div>
+                  <p className="mt-3 text-[9px] text-gray-600 italic">
+                    Points are pooled. You can manually allocate them to any of your plots to speed up construction.
+                  </p>
+                </div>
+
+                <div className="mt-4 pt-4 border-t border-navy-700/50">
+                  <p className="text-[10px] text-gray-500 uppercase tracking-widest mb-3">Estate Power Management</p>
+                  <div className="flex items-center justify-between p-3 rounded-xl bg-cyan-900/10 border border-cyan-500/20 mb-3">
+                    <div>
+                      <p className="text-[10px] text-gray-400">Available Power Pool</p>
+                      <p className="text-xl font-bold text-cyan-400">{powerPool.available}%</p>
+                    </div>
+                    {powerPool.available > 0 && myPlotCount > 0 ? (
+                      <button
+                        onClick={() => {
+                          const myPlotIndices = Object.entries(ownershipMap)
+                            .filter(([, v]) => v.ownerId === user?.id)
+                            .map(([k]) => parseInt(k));
+
+                          // Distribute up to 10% to each plot if possible
+                          let remaining = powerPool.available;
+                          myPlotIndices.forEach(idx => {
+                            if (remaining <= 0) return;
+                            const current = getPlotProgress(idx);
+                            const toAdd = Math.min(10, remaining, 100 - current);
+                            if (toAdd > 0) {
+                              const newP = Math.min(100, current + toAdd);
+                              setData(`land_plot_progress_${idx}`, newP);
+                              remaining -= toAdd;
+                            }
+                          });
+                          loadOwnership(); // Reload to refresh power pool
+                        }}
+                        className="px-4 py-2 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-xs font-bold text-white shadow-lg shadow-cyan-900/20 transition-all"
+                      >
+                        ⚡ Bulk Allocate Power
+                      </button>
+                    ) : (
+                      <p className="text-[10px] text-gray-500 italic">No power to allocate yet.</p>
+                    )}
+                  </div>
+                  <p className="text-[9px] text-gray-600 mb-4 px-1">
+                    Points are pooled from your collection. Bulk allocation distributes your reserves across all your plots automatically.
+                  </p>
+                </div>
+
+                <div className="mt-4 pt-4 border-t border-navy-700/50">
+                  <p className="text-[10px] text-gray-500 uppercase tracking-widest mb-3">Your Collection (Utility Power)</p>
+                  <div className="flex flex-wrap gap-2">
+                    {isAuthenticated && user?.purchasedItems?.length > 0 ? (
+                      user.purchasedItems.slice(0, 10).map((id, i) => (
+                        <div key={id} className="w-10 h-10 rounded-lg border border-navy-600 bg-navy-900/40 overflow-hidden shadow-sm" title={id}>
+                          <img src={ITEM_IMAGE_MAP[id] || '/images/scifi_weapon.png'} alt="" className="w-full h-full object-cover" />
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-[10px] text-gray-600 italic">No collectible cards or assets yet.</p>
+                    )}
+                  </div>
+                </div>
+
+                <p className="mt-4 text-[10px] text-gray-600 italic">
+                  House color reflects the owner's chosen profile theme. Collectibles (cards & assets) are displayed as high-tech frames on the outer walls of your buildings.
                 </p>
               </div>
             </motion.div>
@@ -284,7 +540,7 @@ export default function LandMarketplacePage() {
 
         {/* ── 3-D Canvas ─────────────────────────────────────── */}
         <div
-          className="relative overflow-hidden rounded-2xl select-none"
+          className="relative overflow-hidden rounded-2xl select-none bg-navy-950"
           style={{
             height: 'min(75vmin, 580px)',
             minHeight: 400,
@@ -292,19 +548,20 @@ export default function LandMarketplacePage() {
             border: '1px solid rgba(139,92,246,0.3)',
           }}
         >
-          {loading ? (
-            <div className="absolute inset-0 flex items-center justify-center text-gray-500 text-sm"
-              style={{ background: 'linear-gradient(135deg, #0f0c29, #1a1040)' }}>
-              <span className="animate-pulse">Loading world…</span>
+          <Suspense fallback={
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-900/50 backdrop-blur-xl text-white z-10 transition-opacity duration-1000">
+              <div className="w-12 h-12 border-2 border-blue-500/30 border-t-blue-500 rounded-full animate-spin mb-4" />
+              <p className="text-sm font-bold uppercase tracking-[0.2em] text-blue-400">Metropolis Initializing...</p>
+              <p className="text-[10px] text-slate-500 mt-2">Streaming 50x50 Metropolitan Grid</p>
             </div>
-          ) : (
+          }>
             <Land3D
               ownershipMap={ownershipMap}
               user={user}
               onPlotClick={handlePlotClick}
               selectedPlotIndex={selectedPlot?.index}
             />
-          )}
+          </Suspense>
         </div>
         <p className="text-gray-600 text-xs mt-2 italic">
           🖱 Drag to rotate · Scroll to zoom · Click a plot for details
@@ -356,23 +613,92 @@ export default function LandMarketplacePage() {
                       <p className="text-xs" style={{ color: '#a5b4fc' }}>
                         {selectedPlot.ownerCardCount >= 10 ? '🌌 Cosmic Pyramid'
                           : selectedPlot.ownerCardCount >= 5 ? '🚀 Floating Cube'
-                          : selectedPlot.ownerCardCount >= 3 ? '⛩️ Pagoda'
-                          : selectedPlot.ownerCardCount >= 1 ? '🔮 Crystal Tower'
-                          : '🏡 Classic / 🏢 Villa'}
+                            : selectedPlot.ownerCardCount >= 3 ? '⛩️ Pagoda'
+                              : selectedPlot.ownerCardCount >= 1 ? '🔮 Crystal Tower'
+                                : '🏡 Classic / 🏢 Villa'}
                         {'  ·  '}{selectedPlot.ownerCardCount} card{selectedPlot.ownerCardCount !== 1 ? 's' : ''}
                       </p>
                     </div>
                   </div>
-                  <button type="button"
-                    onClick={() => { setSelectedPlot(null); navigate(`/profile/${selectedPlot.ownerId}`); }}
-                    className="w-full py-2.5 rounded-xl font-medium text-sm transition-all"
-                    style={{
-                      background: 'rgba(139,92,246,0.15)',
-                      border: '1px solid rgba(139,92,246,0.4)',
-                      color: '#c4b5fd',
-                    }}>
-                    Visit Profile →
-                  </button>
+
+                  <div className="pt-2 px-1 rounded-xl border border-navy-700 bg-navy-900/40">
+                    <div className="flex justify-between items-center px-2 mb-2">
+                      <p className="text-[10px] text-gray-500 uppercase tracking-widest">Construction Progress</p>
+                      <p className="text-[11px] font-bold" style={{ color: selectedPlot.progress >= 100 ? '#4ade80' : '#60a5fa' }}>
+                        {selectedPlot.progress}%
+                      </p>
+                    </div>
+                    <div className="h-1.5 mx-2 mb-3 bg-black/40 rounded-full overflow-hidden">
+                      <div
+                        className="h-full transition-all duration-700"
+                        style={{
+                          width: `${selectedPlot.progress}%`,
+                          background: selectedPlot.progress >= 100
+                            ? 'linear-gradient(90deg, #10b981, #34d399)'
+                            : 'linear-gradient(90deg, #2563eb, #60a5fa)',
+                          boxShadow: '0 0 8px rgba(96,165,250,0.5)'
+                        }}
+                      />
+                    </div>
+
+                    {/* Manual Allocation Logic */}
+                    {selectedPlot.ownerId === user?.id && selectedPlot.progress < 100 && (
+                      <div className="flex flex-col gap-2 mx-2 mb-4">
+                        {powerPool.available > 0 ? (
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => handleAllocatePower(selectedPlot.index, 5)}
+                              disabled={powerPool.available < 5}
+                              className="flex-1 py-1.5 rounded-lg bg-cyan-600/20 border border-cyan-500/30 text-[10px] font-bold text-cyan-400 hover:bg-cyan-600/30 disabled:opacity-30 disabled:cursor-not-allowed"
+                            >
+                              Allocate 5% Power
+                            </button>
+                            <button
+                              onClick={() => handleAllocatePower(selectedPlot.index, 10)}
+                              disabled={powerPool.available < 10}
+                              className="flex-1 py-1.5 rounded-lg bg-indigo-600/20 border border-indigo-500/30 text-[10px] font-bold text-indigo-400 hover:bg-indigo-600/30 disabled:opacity-30 disabled:cursor-not-allowed"
+                            >
+                              Allocate 10% Power
+                            </button>
+                          </div>
+                        ) : (
+                          <button
+                            onClick={() => { setSelectedPlot(null); navigate('/collectibles'); }}
+                            className="w-full py-2 rounded-lg bg-red-600/10 border border-red-500/30 text-[10px] font-bold text-red-300 hover:bg-red-600/20 transition-all"
+                          >
+                            ⚠ Need Power! Collect more cards →
+                          </button>
+                        )}
+                      </div>
+                    )}
+
+                    <p className="text-[10px] text-gray-500 uppercase tracking-widest px-2 mb-2">Wall Collectibles</p>
+                    <div className="flex gap-2 p-2 pt-0">
+                      {selectedPlot.wallItems.map((img, i) => (
+                        <div key={i} className="w-12 h-12 rounded-lg overflow-hidden border border-navy-600 bg-black/40">
+                          <img src={img} alt="" className="w-full h-full object-cover" />
+                        </div>
+                      ))}
+                      {selectedPlot.wallItems.length === 0 && (
+                        <div className="w-full h-12 flex items-center justify-center border border-dashed border-gray-800 text-[10px] text-gray-600 rounded-lg">
+                          No items equipped
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {selectedPlot.ownerId !== user?.id && (
+                    <button type="button"
+                      onClick={() => { setSelectedPlot(null); navigate(`/profile/${selectedPlot.ownerId}`); }}
+                      className="w-full py-2.5 rounded-xl font-medium text-sm transition-all"
+                      style={{
+                        background: 'rgba(139,92,246,0.15)',
+                        border: '1px solid rgba(139,92,246,0.4)',
+                        color: '#c4b5fd',
+                      }}>
+                      Visit Profile →
+                    </button>
+                  )}
                 </div>
               ) : (
                 <div className="space-y-4">

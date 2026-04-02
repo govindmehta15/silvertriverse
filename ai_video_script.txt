@@ -1,0 +1,672 @@
+================================================================================
+  SILVERTRIVERSE — AI VIDEO GENERATION SCRIPT
+  For Use with AI Video Creators (Sora / Runway / Pika / Kling / HeyGen)
+  Format: Scene-by-scene visual briefs + voiceover + motion notes
+  Duration: ~5 Minutes | Style: Dark Luxury, Cinematic, Tech-Premium
+================================================================================
+
+GLOBAL VISUAL STYLE GUIDE (Apply to Every Scene)
+--------------------------------------------------
+COLOR PALETTE:
+  • Background    : Deep navy / midnight blue (#070d1f, #0a1128)
+  • Accent Gold   : Warm amber gold (#f59e0b, #fcd34d) — glows on hover/select
+  • Text Primary  : Pure white (#ffffff)
+  • Text Secondary: Cold gray (#94a3b8)
+  • Glow Purple   : Violet (#a78bfa, #7c3aed) — used for Land / collectibles
+  • Teal          : #22d3ee — rare items, verified badges
+  • Success Green : #4ade80 — confirmations, votes
+
+TYPOGRAPHY STYLE:
+  • Headings : Serif font (Playfair Display or Cormorant Garamond style)
+              — Large, bold, letter-spaced, white with faint text-shadow glow
+  • Body     : Clean sans-serif (Inter style), gray, small tracking
+  • Labels   : ALL-CAPS, micro tracking (0.2em–0.4em), gold or teal tint
+
+UI ELEMENT STYLE:
+  • Cards     : Rounded corners (16px), semi-transparent dark glass surface
+               — border 1px partially opaque (border-navy, border-gold/30)
+               — subtle inner shadow or gradient overlay
+  • Buttons   : Gold fill with dark text for primary
+               — Ghost/outline (border gold, gold text) for secondary
+  • Glow FX   : Items glow with their colour on hover (amber, purple, teal)
+  • Animations: Smooth, spring-based — elements fade+slide up into view
+
+CAMERA / MOTION NOTES:
+  • Prefer slow, smooth camera glides — no jarky cuts
+  • Use shallow depth-of-field on close-up UI elements
+  • Transitions: Dissolve cross-fade or fast cinematic wipe (left to right)
+  • Lighting: Imagine a dark studio with coloured LED ambient lighting
+              matching each section's accent colour
+
+CHARACTERS ON SCREEN:
+  Use stylised digital avatars or silhouettes, not real people.
+  The PRIMARY USER is a young creative woman — dark studio setting,
+  looking at a glowing ultra-wide monitor showing the app interface.
+  She has tasteful creative attire (dark tones, minimal gold jewellery).
+
+
+================================================================================
+SCENE 01 — LOGO REVEAL / COLD OPEN                          [0:00 – 0:20]
+================================================================================
+
+VISUAL BRIEF:
+  • Pure black screen, total silence for 1 second.
+  • A single gold particle of light appears at screen center.
+  • It expands outward slowly — like a star being born.
+  • The SilverTriverse logo materialises from this light:
+      — An ornate shield or S-monogram shape, gold, with subtle filigree detail
+      — Below it: "SilverTriverse" in a large serif font, letter-spacing 0.3em
+      — Below that: "ENTERTAINMENT" in micro-caps, cold gray, track 0.5em
+  • A soft golden lens-flare sweeps across the logo once.
+  • The logo gently pulses with a breathing glow (scale 1.00 → 1.02 → 1.00).
+  • Tagline appears below logo, one word at a time, fading in:
+    "Where  Films  Live  Forever."
+
+CAMERA: Static, centered. Slow imperceptible zoom-in (2% over 15 seconds).
+LIGHTING: Single point light from behind logo — deep midnight backdrop.
+MUSIC: Silence → low cinematic string swell begins at 0:05 → builds slowly.
+
+VOICEOVER (0:08):
+  "In a world where entertainment and technology converge —
+   one platform dares to build something greater."
+
+
+================================================================================
+SCENE 02 — THE PLATFORM OVERVIEW / HOME SCREEN              [0:20 – 0:48]
+================================================================================
+
+VISUAL BRIEF:
+  • Cinematic reveal: the logo dissolves into the full app interface.
+  • Show a wide-angle render of the SilverTriverse home screen on a giant
+    curved monitor in a dark luxury room.
+  • The home screen features an animated GRID of 10 feature cards.
+  • Each card appears one by one with a stagger effect (0.1s delay each):
+      Card 1 — "Reelity"          → teal glow, 📰 icon
+      Card 2 — "Relics"           → gold glow, 🏛️ icon
+      Card 3 — "Collectible Units"→ gold glow, 🎬 icon
+      Card 4 — "Societies"        → indigo glow, 👥 icon
+      Card 5 — "Merchandise"      → rose glow, 🛍️ icon
+      Card 6 — "AI Writer"        → amber glow, ✒️ icon
+      Card 7 — "AI Producer"      → teal glow, 📋 icon
+      Card 8 — "Rankings"         → gold glow, 🏆 icon
+      Card 9 — "Land"             → emerald glow, 🗺️ icon
+      Card 10 — "Profile"         → subtle gold, 👤 icon
+  • As the camera slowly glides right, each card glows when "hovered" —
+    a warm pulsing aura surrounds it followed by a small scale-up (1.02×).
+  • Left sidebar is visible:
+      Logo at top → navigation items listed vertically
+      → User avatar with name "Natalie Portman" and "Creator" role at bottom
+
+CAMERA: Slow tracking shot, moving right-to-left across the grid.
+        Pull back slightly to show full grid, then stop.
+MOTION: Cards animate in with upward drift + opacity fade (0→1, y: 20→0).
+LIGHTING: Soft purple-blue ambient room light. Gold glows from card hover.
+
+VOICEOVER (0:22):
+  "SilverTriverse is an all-in-one entertainment super-app —
+   built for fans, creators, and industry professionals alike.
+   Every feature, connected. Every experience, curated."
+
+
+================================================================================
+SCENE 03 — IDENTITY & PROFILE                               [0:48 – 1:18]
+================================================================================
+
+VISUAL BRIEF:
+  PART A — Login (0:48 – 0:56):
+  • Close-up on the bottom-left sidebar user card.
+  • A smooth animated dropdown opens upward — a list of user avatars.
+  • The cursor (stylised gold arrow) glides and selects "Natalie Portman".
+  • A ripple effect confirms selection. The user card updates with her name
+    and "Creator" role badge in gold.
+
+  PART B — Own Profile Page (0:56 – 1:18):
+  • Screen transitions to the Profile page via a smooth cross-dissolve.
+  • TOP SECTION — Cover Banner:
+      — Full-width cinematic banner (think deep blue + gold bokeh effect)
+      — A subtle animated gradient overlay pulsing slowly
+      — A parallax scroll effect as camera drifts down slightly
+  • AVATAR:
+      — Rounded square portrait (Natalie Portman avatar — illustrated style)
+      — Bottom-right: a glowing blue verified checkmark badge (Creator role)
+      — The avatar has a gold border glow
+  • NAME + DETAILS row:
+      — "Natalie Portman" in large serif white
+      — @natalie_p in small gray sans-serif
+      — Bio text: "Award-winning actress and director. Exploring new narratives in sci-fi."
+      — A gold badge: ✦ GOLD RANK
+      — Prestige score bar (88% filled)
+  • STATS ROW — four glowing stat cards animate in horizontally:
+      👥 120,500  Followers
+      ⭐ 950      Participation Score
+      🏛️ 3        Relics Owned
+      🛍️ 4        Orders
+  • TABS:
+      — "Shelf | Posts | Activity | Themes" tab bar highlights "Shelf"
+  • SHELF TAB CONTENT:
+      — Premium items grid: leather jacket, sci-fi suit, rare prop — each with
+        a card showing item image, name, Serial Number, and Digital Twin ID
+      — Daily items below in a smaller grid
+  • THEMES TAB (show briefly):
+      — A beautiful grid of profile themes — each a coloured card:
+        "Midnight Gold", "Crimson Noir", "Emerald Prestige", "Violet Haze"
+      — Some marked 🔒 (premium — requires Land ownership)
+      — Natalie selects "Emerald" theme → the page background shifts to
+        a deep emerald-tinted gradient in real-time
+
+CAMERA: Starts wide on full page, slowly zooms into stats row.
+        Then tilts up to show profile banner, cross-fades to Theme grid.
+MOTION: Stats counter-up animation (0 → 120,500 over 0.8s). Stagger in.
+LIGHTING: Profile page background shifts colour with each theme shown.
+
+VOICEOVER (0:52):
+  "Your profile is more than a page — it's your identity.
+   Your rank. Your collection. Your world, personalised to you."
+
+
+================================================================================
+SCENE 04 — REELITY: THE SOCIAL LAYER                        [1:18 – 1:50]
+================================================================================
+
+VISUAL BRIEF:
+  PART A — Feed (1:18 – 1:35):
+  • Full-screen show of the Reelity feed — like a premium Instagram/Twitter.
+  • Social posts scroll upward slowly in the frame, each styled as:
+      — Dark glass card, 16px radius
+      — Author avatar (circular) + name + timestamp in top-left
+      — Post image (cinematic still — could be a film still or behind-the-scenes)
+      — Caption text in clean sans-serif white
+      — Action row: ❤️ count | 💬 count
+  • One post gets a "like" interaction — the heart icon fills red with a
+    small burst particle effect, the counter increments with a pop animation.
+  • A comment is typed and submitted — it appears at the bottom of the post
+    with a smooth expand animation.
+  • A click on the author "Elias Vance" — the camera transitions to Scene 05.
+
+  PART B — Film Battle (1:35 – 1:50):
+  • Scroll reveals a wide BATTLE SECTION:
+      — Full-width dark panel with VS text centered in a glowing gold circle
+      — LEFT: Film poster "Nebula's Edge" — cool blue tones, sci-fi title card
+      — RIGHT: Film poster "Midnight Protocol" — deep crimson, thriller style
+      — Below each: a "Vote Now" button — white outline glass style
+      — At top: a glowing red countdown timer: ⏱ 02:14:38 LEFT (blinking dot)
+  • The cursor clicks "Vote Now" on left film →
+      Button turns gold → "✓ Voted" text
+      Right film dims to 50% opacity + slight grayscale
+      "+50 Points" floats up from the button in gold text with a pop animation
+
+CAMERA: Feed scrolls with a smooth auto-scroll camera motion.
+        Battle section: camera splits wide to show both films in frame.
+MOTION: Like burst = radial particles. Vote confirmation = spring bounce.
+LIGHTING: Battle section has red-to-blue gradient split lighting behind.
+
+VOICEOVER (1:22):
+  "Reelity is the social pulse of the platform.
+   Post, discover, engage — and in live film battles,
+   your vote shapes what the community watches next."
+
+
+================================================================================
+SCENE 05 — VISITING ANOTHER USER'S PROFILE                  [1:50 – 2:05]
+================================================================================
+
+VISUAL BRIEF:
+  • Click transition from Elias Vance's name in the feed →
+    A smooth slide-left page transition reveals his public profile.
+  • URL bar shown briefly: "silvertriverse.com/profile/elias_vance"
+  • His profile page:
+      — Cover: dark, moody — deep charcoal with purple bokeh
+      — Avatar: stylised illustration of a male screenwriter (hooded, artistic)
+      — Name: "Elias Vance" in serif white
+      — Role badge: CREATOR (blue outlined)
+      — Rank badge: SILVER — silver metallic shimmer
+      — Bio: "Screenwriter & Thriller Director. Shadows tell stories."
+      — Stats: 85,200 Followers | 820 Score | 2 Relics
+  • Shelf tab shows his purchased items — 5 items in a grid
+  • A COLLABORATION BELL 🔔 appears at top-right of profile header:
+      — It glows gold on hover
+      — On click: a toast notification slides in from bottom-right:
+        "✓ Collaboration request sent to Elias Vance!"
+
+CAMERA: Slides left into the new page. Slow zoom on profile header.
+MOTION: Toast slides in from bottom-right with spring bounce.
+TEXT: "PUBLIC PROFILE — No Login Required" badge briefly shown as overlay.
+
+VOICEOVER (1:52):
+  "Every creator, fan, and professional has a public profile.
+   Click any name — anywhere in the app — and their world opens instantly.
+   Connect. Collaborate. Discover."
+
+
+================================================================================
+SCENE 06 — RELICS: THE AUCTION HOUSE                        [2:05 – 2:30]
+================================================================================
+
+VISUAL BRIEF:
+  • Full-page render of the Relics page:
+      — Header: "RELICS" in giant serif gold lettering
+      — Below: A row of 4–6 relic cards in a grid layout
+      — Each card styled like an museum exhibit:
+          Dark background, faint inner glow border (amber/teal depending on rarity)
+          Item image: a glowing ancient book prop, a sci-fi weapon replica,
+                      a vintage film reel, an ornate dagger costume piece
+          Card text: Relic name, current bid price (₹ Indian Rupee format),
+                     a rarity star badge (⭐⭐⭐ RARE or 💎 LEGENDARY)
+  • Hover on one relic → border glow intensifies, card lifts slightly.
+  • Click on "The Starpath Codex" relic → detail page:
+      — Full-width dark screen with the relic image centered
+      — Glowing artifact effect (subtle aura emanating from item)
+      — Info panel on right:
+          Relic name in large serif
+          Description: "A prop used in the 2023 sci-fi epic. Hand-crafted."
+          Current Highest Bid: ₹12,400 (updating live)
+          Bid History: 4 bids listed with timestamps and bidder names
+      — Bid input field: clean dark text input, placeholder "Enter your bid..."
+      — "Place Bid" button: gold fill, bold text
+  • The bid is entered (₹13,000) → "Place Bid" clicked →
+      A confirmation toast: "✓ Bid placed successfully! ₹13,000"
+      The bid history adds a new row with an entrance animation (slide-down)
+
+CAMERA: Wide establishing shot of relic grid, then zoom into selected card.
+MOTION: Bid history row slides down into the list. Toast confirms.
+LIGHTING: Amber museum-light effect surrounding the relic item in detail view.
+
+VOICEOVER (2:08):
+  "Relics are rare digital artefacts from real film productions.
+   Every item has a story. Every bid is a claim to cinema history."
+
+
+================================================================================
+SCENE 07 — COLLECTIBLE UNITS                                [2:30 – 3:00]
+================================================================================
+
+VISUAL BRIEF:
+  PART A — Browse + Film Card (2:30 – 2:45):
+  • Collectible Units browse page — a grid of collectible cards.
+    Each card looks like a premium trading card:
+      — Holographic shimmer effect on hover (subtle rainbow on card surface)
+      — Film title in serif font
+      — Director name below
+      — Genre pill badge (THRILLER / SCI-FI / DRAMA)
+      — Collector rank icon (Gold / Silver / Legendary)
+      — Rarity indicator in corner (star rating)
+  • Click on a card → Film Detail page opens:
+      — Full-bleed cinematic banner at top (movie poster style)
+        Dark + dramatic, moody film still aesthetic
+      — Title, director, genre, year in a floating glass info card
+      — Synopsis in italic serif
+      — Box Office section: ₹ numbers with upward chart indicator
+      — "COLLECT" button (gold) and "Add to Watchlist" (ghost)
+
+  PART B — Role Switching (2:45 – 3:00):
+  • A smooth user-switch effect — the sidebar user badge transitions from
+    "Natalie Portman / Creator" to "Marcus Thorne / Professional"
+  • The sidebar now shows a NEW item glowing: "Talent Pipeline" (teal)
+  • Click it → Professional-only page appears:
+      — Clean list layout: talent submission cards
+      — Each card: creator name, profile thumbnail, role, submission score
+      — "Review", "Shortlist", "Flag" action buttons
+  • Switch back to Natalie → Creator view:
+      — "Create Post" option visible — takes her to a rich post creation page
+
+CAMERA: Bird's eye tilt-down onto the card grid, then zoom into one card.
+        Role switch: animated horizontal split-wipe between old/new user.
+MOTION: Card holographic shimmer = CSS holo gradient animated on hover.
+LIGHTING: Each genre has a colour — sci-fi (teal), thriller (red), drama (gold).
+
+VOICEOVER (2:33):
+  "Collectible Units turn film discovery into a game.
+   Fans collect. Creators publish. Studio professionals screen talent —
+   powered by the same platform, unlocked by role."
+
+
+================================================================================
+SCENE 08 — MERCHANDISE SHOP                                 [3:00 – 3:25]
+================================================================================
+
+VISUAL BRIEF:
+  PART A — Product Grid (3:00 – 3:10):
+  • Merchandise page: two sections visible — PREMIUM and DAILY
+  • Premium section header glows gold, daily is softer white.
+  • Product cards in a 3-column grid:
+      — Square product image: a leather jacket, a limited-edition hoodie,
+        a collectible badge set, a cosmic-theme print
+      — Product name in serif below
+      — Price in bold: ₹3,999 / ₹499
+      — "PREMIUM" or "DAILY" pill badge in corner
+      — Limited availability shown: "Only 12 left" in red for premium items
+  • Hover effect: card lifts, a warm glow surrounds it.
+
+  PART B — Product Detail + Purchase (3:10 – 3:25):
+  • Click "Nomad Leather Series" jacket → Product Detail page:
+      — Large product image gallery: 3 images, slide between them
+      — Right panel: Name, price ₹11,999, description
+      — Serial Number: "ST-Y-001-2026" in monospace gold font
+      — Digital Twin ID: "DT#9f3a..." — blockchain proof badge
+      — Colour/Size selector pills (S / M / L / XL)
+      — "Add to Cart" → button pulses gold; top-bar cart icon increments +1
+      — Checkout animation: cart flies to top-right corner (arc trajectory)
+  • Navigate to Profile > Shelf:
+      — The jacket card appears with a "NEW" badge — entrance animation
+      — Serial number and Digital Twin ID visible on the shelf card
+
+CAMERA: Close-up shallow-DOF on product texture. Pull back to show full card.
+MOTION: Cart item launch arc (like Amazon add-to-cart animation).
+LIGHTING: Product images lit like editorial fashion photography — light studio.
+
+VOICEOVER (3:03):
+  "Official merchandise — premium and daily drops — each piece
+   digitally authenticated with a Serial Number and a Digital Twin ID.
+   Your collection is provably yours."
+
+
+================================================================================
+SCENE 09 — SOCIETIES & LIVE SYNC ROOM                       [3:25 – 3:50]
+================================================================================
+
+VISUAL BRIEF:
+  PART A — Clubs Page (3:25 – 3:35):
+  • Societies page: two-column layout.
+    LEFT: Club cards in a grid — each with club name, member count, description.
+    RIGHT: "Cultural Architects" global leaderboard sidebar (sticky):
+      — Ranked list #1 through #5
+      — Gold medal for #1, silver for #2, bronze for #3
+      — Each row shows name + post count
+  • Hover a club card → border glows gold.
+  • A "Found a Society" button glows for Creators/Professionals.
+
+  PART B — Society Interior (3:35 – 3:45):
+  • Click "The Kubrick Collective" → Society Detail page:
+      — Full cinematic hero banner (director-aesthetic — film texture overlay)
+      — Society name in giant serif: "The Kubrick Collective"
+      — Description in italic serif, indented like a literary passage
+      — Member count badge, EST. 2026 tag
+      — "Request Induction" button (gold fill) in top-right
+  • Click Request Induction → button changes to "Rescind Membership" (red outline)
+  • The discourse feed unlocks:
+      — Community posts in a dark literary style
+      — Post author links click through to their profile
+      — Comment input with a paper-plane send icon
+  • Society leaderboard sidebar shows Participant Scores in real-time.
+
+  PART C — Live Sync Room (3:45 – 3:50):
+  • "Enter Sync Room" button (blue, pulsing dot indicator) is clicked.
+  • A full-overlay room appears:
+      — Dark immersive panel, blue ambient glow
+      — "LIVE" red badge in top-left
+      — Member activity tiles — small avatars with "watching..." status
+      — Live chat rail on the right side
+      — A synced timer showing the same timestamp for all members
+
+CAMERA: Wide shot of the clubs page, then zoom into Society detail.
+        Sync Room: camera pushes in slowly through a virtual doorway effect.
+MOTION: Induction button: morphs from gold-fill to red-outline with spring.
+LIGHTING: Society interior = warm amber reading-room vibe. Sync Room = cool blue.
+
+VOICEOVER (3:28):
+  "Societies are deep communities bound by shared obsession.
+   Join the discourse. And when the moment comes —
+   enter the Sync Room and watch together, in perfect sync."
+
+
+================================================================================
+SCENE 10 — AI WRITER & AI PRODUCER                          [3:50 – 4:15]
+================================================================================
+
+VISUAL BRIEF:
+  PART A — AI Writer (3:50 – 4:02):
+  • App page shows "AI Writer" hub — a dark page with tool cards:
+      Each tool card shows: icon (quill, clapperboard, character silhouette),
+      tool name, and a 1-line description.
+      Examples: "Screenplay Generator", "Character Bio Builder",
+                "Dialogue Polish", "Scene Breakdown"
+  • Click "Screenplay Generator" → Workflow page:
+      — Left panel: Input fields:
+          Genre (dropdown: Thriller), Tone (dropdown: Noir),
+          Logline text area (user types a logline)
+      — Right panel: empty dark surface (will receive output)
+      — "Generate" button (gold, full width)
+  • Click Generate → a streaming text animation: the screenplay output
+    types itself onto the page line by line (like a typewriter effect)
+    — Scene headings in gold bold, action lines in white, dialogue indented.
+  • History page: A list of previous generations — each row shows
+    tool name, date, and a snippet of the output. Click to expand.
+
+  PART B — AI Producer (4:02 – 4:15):
+  • Tab over to "AI Producer" hub — a more studio-focused aesthetic:
+      — Blue-tinted cards (professional, clinical feel)
+      — Tools: "Script Analyser", "Market Fit Scorer",
+               "Casting Suggestion Engine", "Budget Estimator"
+  • Click "Market Fit Scorer" → Workflow page:
+      — Upload area (script file or paste text)
+      — Scoring output: five gauge dials animate up to their scores:
+        Originality: 78%, Commercial Appeal: 85%, Audience Fit: 72%...
+  • Credits / Top-Up page shown briefly:
+      — Credit balance displayed (100 Credits remaining)
+      — Top-up packages: 500 / 1000 / 2500 credits with pricing
+
+CAMERA: Slow drift across tool cards. Zoom into the typewriter output.
+        AI Producer: a more clinical, overhead flat-lay camera angle.
+MOTION: Typewriter streaming text effect. Gauge dials animate with spring.
+LIGHTING: AI Writer = warm amber (creative). AI Producer = cool steel blue.
+
+VOICEOVER (3:53):
+  "The AI suite brings the creative process inside the platform.
+   Writers have a co-pilot. Studios have a smart screening suite.
+   Intelligence — built into every workflow."
+
+
+================================================================================
+SCENE 11 — THE LAND MARKETPLACE (3D WORLD)                 [4:15 – 4:45]
+================================================================================
+
+VISUAL BRIEF — THIS IS THE WOW SCENE:
+  OPENING AERIAL (4:15 – 4:22):
+  • The screen dissolves from the AI page into a vast three-dimensional
+    landscape — rendered in full 3D, not flat UI.
+  • Aerial view from high above: a 24×24 grid of glowing plots stretches
+    out below like a futuristic city seen from a helicopter.
+  • Every owned plot glows its owner's theme colour from the ground:
+      — Some plots glow amber gold
+      — Some glow violet purple
+      — Some glow emerald green
+      — Some glow cyan blue
+  • Houses of different sizes and shapes dot the landscape.
+  • The sky above is a deep sunset/cosmos — stars twinkling, a warm sun orb
+    casting long shadows across the plots.
+  • Slow camera descent from above → closer to ground level.
+
+  ESTATE STRIP (4:22 – 4:25):
+  • At the top of screen, a black glass strip shows:
+      "MY PLOTS: 4   |   MY CARDS: 2   |   HOUSE TYPE: Crystal Tower   |   WORLD FILL: 2.4%"
+  • Each value is in gold mono-font.
+
+  HOUSE SHOWCASE (4:25 – 4:38):
+  • Camera glides slowly between different house types — each labeled with
+    floating gold text as camera passes:
+
+    ① CLASSIC COTTAGE (0 cards):
+       Small dark-terracotta coloured house with 4-sided pyramid roof.
+       Warm yellow window glows. Tiny chimney with smoke particle effect.
+       Gold-bordered picture frames visible on front wall — collectible images.
+
+    ② MODERN VILLA (0 cards, alternate):
+       Sleek flat-roof architecture. Glass front facade — blue semi-transparent.
+       A horizontal light strip glows the owner's colour.
+       Cantilever overhang extending behind.
+
+    ③ CRYSTAL TOWER (1+ cards):
+       Tall 6-sided hexagonal structure. Upward tapered toward a glowing
+       octahedron crystal at the top. 3 golden ring bands around the shaft.
+       Frames orbit around it with collectible art.
+
+    ④ PAGODA (3+ cards):
+       3-tiered Asian pagoda structure in the owner's theme colour.
+       Each tier has a small curved roof edge. Golden spire at top.
+       Two glowing lanterns hang at mid-height.
+       Collectible frames mounted on front faces.
+
+    ⑤ FLOATING CUBE (5+ cards):
+       A metallic cube hovering 0.4m above its plot. It bobs up and down.
+       Three glowing wire-frame rings wrap around it (X / Y / Z axis).
+       A holographic ring disc below it. Collectible frames on each face.
+
+    ⑥ COSMIC PYRAMID (10+ cards):
+       A 4-faced pyramid in the owner's colour with metallic shimmer.
+       Two rings orbit it at different angles — slowly rotating.
+       A bright star orb at the apex.
+       Collectible frames orbit around its base.
+
+  HOUSE WALL ART (4:38 – 4:42):
+  • Camera zooms in close to a Modern Villa wall.
+  • 3 gold-bordered picture frames visible on the wall.
+  • Inside each frame: actual collectible item images (leather jacket, relic).
+  • A soft spotlight illuminates each frame.
+  • Text overlay: "Your collectibles. Displayed on your house walls."
+
+  PLOT PURCHASE (4:42 – 4:45):
+  • Camera floats over a dark empty plot.
+  • A click registers → plot detail modal slides up from bottom:
+      — Dark glass card: "Plot #142 — Available"
+      — Price: ₹200
+      — "Purchase Plot" gold button
+  • Click → Confirmation ripple on the plot.
+  • The plot instantly illuminates in the buyer's theme colour.
+  • A new Crystal Tower house rises from the ground with a brief build animation.
+
+CAMERA: Slow aerial descent → ground-level glide between houses.
+        House showcase: gentle arc tracking shots around each building.
+MOTION: Houses have gentle idle animations (cube bobs, rings orbit).
+LIGHTING: Each plot's ground tile glows in its owner's theme colour.
+          Stars twinkle above. Warm sunset skybox ambiance.
+
+VOICEOVER (4:18):
+  "The Land Marketplace is a living, breathing 3D world.
+   Your house reflects your rank, your cards, your theme colour.
+   Your collectibles hang on your walls for all to see.
+   Own a plot — and unlock your place in the SilverTriverse universe."
+
+
+================================================================================
+SCENE 12 — LEADERBOARD & RANKINGS                           [4:45 – 4:52]
+================================================================================
+
+VISUAL BRIEF:
+  • Rankings page — three tall columns in the frame:
+      Left:   "Top Fans"        — purple-tinted column header
+      Center: "Top Collectors"  — gold-tinted column header
+      Right:  "Top Creators"    — teal-tinted column header
+  • Each column: 5 ranked entries.
+      #1: large gold medal icon, bold name, large score number
+      #2: silver medal
+      #3: bronze medal
+      #4–5: smaller, darker treatment
+  • Small rank-change arrows on the right:
+      ▲ green for rising, ▼ red for falling, — for neutral
+  • Numbers count up: scores animate from 0 to final value on entry.
+  • Click #1 in "Top Creators" → page slides to their public profile.
+
+CAMERA: Wide on all three columns, slowly zooming in to #1 center.
+MOTION: Score counters animate up. Medals have a subtle golden shimmer.
+LIGHTING: Columns have their own subtle colour wash from overhead.
+
+VOICEOVER (4:46):
+  "The rankings update live. Every interaction earns you points.
+   Everyone can see where they stand — and everyone can climb."
+
+
+================================================================================
+SCENE 13 — FINALE & CALL TO ACTION                          [4:52 – 5:00]
+================================================================================
+
+VISUAL BRIEF:
+  • The 3D land scene slowly rises back to aerial view — the full world visible.
+  • Slowly pull back even further — the entire grid shrinks to a glowing dot.
+  • The dot becomes the SilverTriverse logo again — full circle.
+  • Logo pulses once — then the tagline fades in below:
+
+        "SilverTriverse"
+        [serif, large, gold shimmer]
+
+        "Entertainment"
+        [micro-caps, gray, letter-spaced]
+
+        "Where Films Live Forever."
+        [italic serif, white, fading in last]
+
+  • Three social/web details appear at bottom:
+        🌐  silvertriverse.com
+        📸  @SilverTriverse
+        ✉️   hello@silvertriverse.com
+
+  • Screen fades slowly to black. Music finishes on a held note.
+  • Final 2 seconds: pure black. Silence.
+
+CAMERA: Epic pull-back from 3D world → tight logo close-up.
+MOTION: Logo breathing pulse. Text staggered fade-in.
+MUSIC: Full swell at 4:52 → single held string note → silence at 5:00.
+
+VOICEOVER (4:53):
+  "SilverTriverse — where every fan has a home,
+   every creator has a stage, and every collector has a story.
+
+   [pause]
+
+   Join the universe."
+
+
+================================================================================
+TOTAL SCENE SUMMARY
+================================================================================
+
+  Scene 01  Logo Reveal                        0:00 – 0:20   [ 20s ]
+  Scene 02  Home Page Overview                 0:20 – 0:48   [ 28s ]
+  Scene 03  Profile & Identity                 0:48 – 1:18   [ 30s ]
+  Scene 04  Reelity — Social + Battle          1:18 – 1:50   [ 32s ]
+  Scene 05  Visiting Another Profile           1:50 – 2:05   [ 15s ]
+  Scene 06  Relics — Auction House             2:05 – 2:30   [ 25s ]
+  Scene 07  Collectible Units                  2:30 – 3:00   [ 30s ]
+  Scene 08  Merchandise + Shelf                3:00 – 3:25   [ 25s ]
+  Scene 09  Societies + Sync Room              3:25 – 3:50   [ 25s ]
+  Scene 10  AI Writer + AI Producer            3:50 – 4:15   [ 25s ]
+  Scene 11  Land Marketplace 3D               4:15 – 4:45   [ 30s ]
+  Scene 12  Rankings                           4:45 – 4:52   [  7s ]
+  Scene 13  Finale + CTA                       4:52 – 5:00   [  8s ]
+            ───────────────────────────────────────────────────────
+            TOTAL                                              5:00
+
+
+================================================================================
+AI VIDEO GENERATION NOTES (Platform-Specific)
+================================================================================
+
+FOR SORA / RUNWAY / KLING:
+  - Generate each scene as a separate 10–30 second clip.
+  - Use the visual brief as the text prompt for each scene.
+  - Stitch scenes together in a video editor (Premiere / DaVinci Resolve).
+  - Describe the UI as "a premium dark luxury app on a curved OLED monitor
+    in a moody studio, photorealistic lighting."
+
+FOR HEYGEN (AI PRESENTER):
+  - Use this script as the teleprompter script for an AI avatar presenter.
+  - Place the avatar in bottom-left or bottom-right corner (talking head).
+  - Merge with UI renders or 3D renders behind the avatar.
+
+FOR MIDJOURNEY / IDEOGRAM (Static Frames):
+  - Generate still images for each scene using the visual brief.
+  - Animate stills using Runway Gen-2 "image-to-video" feature.
+  - Add motion: slow zoom, pan, parallax depth effect.
+
+COLOUR CODES FOR AI PROMPTS:
+  Background navy  : #070d1f
+  Gold accent      : #f59e0b
+  Purple/violet    : #7c3aed
+  Teal             : #22d3ee
+  Card glass       : rgba(15, 23, 42, 0.85)
+
+
+================================================================================
+  END OF AI VIDEO GENERATION SCRIPT
+  SilverTriverse — Premium Entertainment Platform
+  Script Version 1.0 | April 2026
+================================================================================

@@ -5,8 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { mockUsers } from '../mock/mockUsers';
 
 const navItems = [
-  { to: '/', label: 'Home', end: true },
-  { to: '/reelity', label: 'Reelity' },
+  { to: '/reelity', label: 'Reelity Home', end: true },
   { to: '/relics', label: 'Relics' },
   { to: '/collectible-units', label: 'Collectible Units' },
   { to: '/reelity/clubs', label: 'Societies' },
@@ -15,6 +14,7 @@ const navItems = [
   { to: '/ai-producer', label: 'AI Producer' },
   { to: '/leaderboard', label: 'Rankings' },
   { to: '/land', label: 'Land' },
+  { to: '/land-world', label: 'Land World' },
   { to: '/profile', label: 'Profile' },
 ];
 

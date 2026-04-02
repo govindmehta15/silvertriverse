@@ -1,14 +1,34 @@
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { useCredits } from '../context/CreditsContext';
+import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 
 const TOPUP_OPTIONS = [
-    { amount: 1000, credits: 1000, label: 'Starter' },
-    { amount: 5000, credits: 6000, label: 'Professional', popular: true },
-    { amount: 10000, credits: 15000, label: 'Studio' },
+    { amount: 1000, credits: 25000, label: 'Starter' },
+    { amount: 5000, credits: 150000, label: 'Professional', popular: true },
+    { amount: 10000, credits: 400000, label: 'Studio' },
+    { amount: 25000, credits: 1200000, label: 'Enterprise' },
 ];
 
 export default function AIProducerTopUpPage() {
     const navigate = useNavigate();
+    const { addCredits } = useCredits();
+    const { user } = useAuth();
+    const { addToast } = useToast();
+
+    const handleTopUp = async (option) => {
+        if (!user?.id) {
+            addToast('Please login to top up credits.', 'error');
+            return;
+        }
+        const res = await addCredits(option.credits, user.id);
+        if (res.success) {
+            addToast(`Added ${option.credits.toLocaleString()} credits successfully.`, 'success');
+            return;
+        }
+        addToast(res.error || 'Top-up failed. Please try again.', 'error');
+    };
 
     return (
         <div className="max-w-4xl mx-auto py-8 px-4">
@@ -27,7 +47,7 @@ export default function AIProducerTopUpPage() {
                 <p className="text-gray-400">Add credits to your account to process more submissions.</p>
             </div>
 
-            <div className="grid gap-6 md:grid-cols-3">
+            <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
                 {TOPUP_OPTIONS.map((opt) => (
                     <motion.div
                         key={opt.amount}
@@ -47,7 +67,11 @@ export default function AIProducerTopUpPage() {
                         </div>
                         <p className="text-emerald-400 font-bold mb-6 text-xl">₹{opt.amount.toLocaleString()}</p>
 
-                        <button className="w-full py-3 rounded-xl bg-gold text-navy-950 font-bold hover:bg-gold-shimmer transition-all shadow-md mt-auto">
+                        <button
+                            type="button"
+                            onClick={() => handleTopUp(opt)}
+                            className="w-full py-3 rounded-xl bg-gold text-navy-950 font-bold hover:bg-gold-shimmer transition-all shadow-md mt-auto"
+                        >
                             Select Plan
                         </button>
                     </motion.div>

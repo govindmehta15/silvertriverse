@@ -124,8 +124,8 @@ const FloatingCube = memo(({ color, index, wallTextures }) => {
           <meshStandardMaterial color="#fff" emissive={color} emissiveIntensity={3} />
         </Torus>
       ))}
-      <Torus args={[0.52, 0.04, 6, 20]} position={[0, -0.42, 0]} rotation={[Math.PI / 2, 0, 0]}>
-        <meshStandardMaterial color={color} emissive={color} emissiveIntensity={4} transparent opacity={0.7} />
+      <Torus args={[0.52, 0.04, 4, 12]} position={[0, -0.42, 0]} rotation={[Math.PI / 2, 0, 0]}>
+        <meshStandardMaterial color={color} emissive={color} emissiveIntensity={5} transparent opacity={0.6} />
       </Torus>
       {/* Frames on cube faces */}
       {wallTextures?.slice(0, 3).map((tex, i) => {
@@ -161,8 +161,8 @@ const CosmicPyramid = memo(({ color, index, wallTextures }) => {
         </Torus>
       </group>
       <group ref={ring2} rotation={[1.1, 0, 0]}>
-        <Torus args={[0.55, 0.025, 6, 22]}>
-          <meshStandardMaterial color={color} emissive={color} emissiveIntensity={4} transparent opacity={0.6} />
+        <Torus args={[0.55, 0.025, 4, 12]}>
+          <meshStandardMaterial color={color} emissive={color} emissiveIntensity={5} transparent opacity={0.5} />
         </Torus>
       </group>
       <Sphere args={[0.1, 6, 6]} position={[0, 1.15, 0]}>
@@ -267,8 +267,8 @@ const Pagoda = memo(({ color, wallTextures }) => (
   </group>
 ));
 
-// ── House selector ────────────────────────────────────────────────────────────
-const HouseModel = memo(({ seed, colors, cardCount, wallTextures, index }) => {
+// ── House selector with Construction Progress ─────────────────────────────────
+const HouseModel = memo(({ seed, colors, cardCount, wallTextures, index, progress = 100 }) => {
   const type = useMemo(() => {
     if (cardCount >= 10) return 5;
     if (cardCount >= 5)  return 4;
@@ -278,15 +278,21 @@ const HouseModel = memo(({ seed, colors, cardCount, wallTextures, index }) => {
   }, [cardCount, seed]);
 
   const c = colors.house;
+  const isComplete = progress >= 100;
+  const scaleY = 0.15 + (progress / 100) * 0.85;
+  const opacity = 0.35 + (progress / 100) * 0.65;
+
   return (
-    <>
-      {type === 0 && <ClassicCottage color={c} wallTextures={wallTextures} />}
-      {type === 1 && <ModernVilla    color={c} wallTextures={wallTextures} />}
-      {type === 2 && <CrystalTower  color={c} wallTextures={wallTextures} />}
-      {type === 3 && <Pagoda        color={c} wallTextures={wallTextures} />}
-      {type === 4 && <FloatingCube  color={c} index={index} wallTextures={wallTextures} />}
-      {type === 5 && <CosmicPyramid color={c} index={index} wallTextures={wallTextures} />}
-    </>
+    <group scale={[1, scaleY, 1]}>
+      <group>
+          {type === 0 && <ClassicCottage color={c} wallTextures={wallTextures} />}
+          {type === 1 && <ModernVilla    color={c} wallTextures={wallTextures} />}
+          {type === 2 && <CrystalTower  color={c} wallTextures={wallTextures} />}
+          {type === 3 && <Pagoda        color={c} wallTextures={wallTextures} />}
+          {type === 4 && <FloatingCube  color={c} index={index} wallTextures={wallTextures} />}
+          {type === 5 && <CosmicPyramid color={c} index={index} wallTextures={wallTextures} />}
+      </group>
+    </group>
   );
 });
 
@@ -297,9 +303,11 @@ function Plot3D({
   onClick,
   ownerThemeAccent,
   ownerCardCount,
-  wallTextures,   // pre-loaded THREE.Texture[] from Land3D — no texture loading here
+  wallTextures,
+  progress = 100, // Construction completeness 0-100
+  x, z,
+  showHouse = true, // Render-distance optimization
 }) {
-  // Refs for per-frame animation (no setState in useFrame)
   const houseGroupRef = useRef();
   const [hovered, setHovered] = useState(false);
 
@@ -308,10 +316,10 @@ function Plot3D({
   const cardCount = ownerCardCount ?? 0;
   const isOwned   = !!owner;
   const initial   = owner?.ownerName ? owner.ownerName.trim().charAt(0).toUpperCase() : '';
-  const needsSimpleAnim = isOwned && cardCount < 4; // FloatingCube/CosmicPyramid animate themselves
-
-  const x = col - 11.5;
-  const z = row - 11.5;
+  
+  // Animation: Only animate if in view AND (isOwned/isMine/isSelected/hovered)
+  // To keep it simple and performance-friendly, we only animate the "Hero" plots + hovered
+  const needsSimpleAnim = isOwned && (isMine || isSelected || hovered || index % 5 === 0);
 
   // Only boxy houses get float+spin from here — uses ref, NO setState
   useFrame(({ clock }) => {
@@ -328,50 +336,28 @@ function Plot3D({
   const plotEmInt    = isOwned ? 0.55 : (hovered ? 0.25 : 0);
 
   return (
-    <group position={[x * 1.3, 0, z * 1.3]}>
-
-      {/* Ground plate */}
-      <Box
-        args={[1.1, 0.18, 1.1]}
+    <group position={[x, 0, z]}>
+      {/* Ground plate logic removed (now in InstancedBases) */}
+      <group
         onPointerOver={() => setHovered(true)}
         onPointerOut={() => setHovered(false)}
         onClick={(e) => { e.stopPropagation(); onClick(index); }}
-        castShadow receiveShadow
-      >
-        <meshStandardMaterial
-          color={plotColor}
-          emissive={plotEmissive}
-          emissiveIntensity={plotEmInt}
-          roughness={0.28}
-          metalness={0.4}
-        />
-      </Box>
+      />
 
-      {/* Glowing border accents on owned plots */}
+      {/* Glowing border accents on owned plots (simplified to dots) */}
       {isOwned && (
         <>
-          {[[-0.48, 0, -0.48], [0.48, 0, -0.48], [-0.48, 0, 0.48], [0.48, 0, 0.48]].map(([cx, , cz], i) => (
-            <Box key={i} args={[0.07, 0.22, 0.07]} position={[cx, 0, cz]}>
-              <meshStandardMaterial color={colors.glow} emissive={colors.glow} emissiveIntensity={1.1}
-                roughness={0.2} metalness={0.6} />
-            </Box>
-          ))}
-          {[
-            [[0.88, 0.04, 0.04], [0, 0.09, -0.52]],
-            [[0.88, 0.04, 0.04], [0, 0.09,  0.52]],
-            [[0.04, 0.04, 0.88], [-0.52, 0.09, 0]],
-            [[0.04, 0.04, 0.88], [ 0.52, 0.09, 0]],
-          ].map(([size, pos], i) => (
-            <Box key={`e${i}`} args={size} position={pos}>
-              <meshStandardMaterial color={colors.glow} emissive={colors.glow}
-                emissiveIntensity={1.6} transparent opacity={0.72} />
-            </Box>
+          {[[-0.52, 0, -0.52], [0.52, 0, -0.52], [-0.52, 0, 0.52], [0.52, 0, 0.52]].map(([cx, , cz], i) => (
+            <mesh key={i} position={[cx, 0, cz]}>
+              <boxGeometry args={[0.06, 0.2, 0.06]} />
+              <meshStandardMaterial color={colors.glow} emissive={colors.glow} emissiveIntensity={0.8} />
+            </mesh>
           ))}
         </>
       )}
 
-      {/* House + collectible wall art */}
-      {isOwned && (
+      {/* House + collectible wall art — only show if owned AND in view radius */}
+      {(isOwned && showHouse) && (
         <group ref={houseGroupRef}>
           <HouseModel
             seed={houseSeed}
@@ -379,36 +365,46 @@ function Plot3D({
             cardCount={cardCount}
             wallTextures={wallTextures}
             index={index}
+            progress={progress}
           />
-          <Text
-            position={[0, 2.05, 0]}
-            fontSize={0.33}
-            color="white"
-            anchorX="center"
-            anchorY="middle"
-            outlineWidth={0.055}
-            outlineColor="#000"
-          >
-            {initial}
-          </Text>
-          <pointLight
-            color={isMine ? '#f59e0b' : colors.glow}
-            intensity={2.4}
-            distance={3.5}
-            position={[0, 0.4, 0]}
-          />
+          {/* Construction progress bar: only show for Mine/Selected/Hover to save memory/draw calls */}
+          {(progress < 100 && (isMine || isSelected || hovered)) && (
+            <group position={[0, 1.45, 0]}>
+              <Box args={[0.8, 0.05, 0.02]}>
+                <meshBasicMaterial color="#0f172a" />
+              </Box>
+              <Box args={[(progress / 100) * 0.78, 0.035, 0.022]} position={[-(1 - progress / 100) * 0.39, 0, 0]}>
+                <meshBasicMaterial color="#3b82f6" />
+              </Box>
+            </group>
+          )}
+          {/* Initial: only show for Mine/Selected/Hover to save memory/draw calls */}
+          {(isMine || isSelected || hovered) && (
+             <Text
+               position={[0, 2.05, 0]}
+               fontSize={0.33}
+               color="white"
+               anchorX="center"
+               anchorY="middle"
+               outlineWidth={0.055}
+               outlineColor="#000"
+             >
+               {initial}
+             </Text>
+          )}
+          {/* Only show point light for important plots to save WebGL resources */}
+          {(isMine || isSelected || hovered) && (
+            <pointLight
+              color={isMine ? '#f59e0b' : colors.glow}
+              intensity={2.8}
+              distance={4}
+              position={[0, 0.5, 0]}
+            />
+          )}
         </group>
       )}
 
-      {/* Hover / selection ring */}
-      {(hovered || isSelected) && (
-        <Cylinder args={[0.65, 0.65, 0.04, 16]} position={[0, -0.05, 0]}>
-          <meshBasicMaterial
-            color={isSelected ? colors.glow : '#60a5fa'}
-            transparent opacity={0.38}
-          />
-        </Cylinder>
-      )}
+      {/* Hover / selection ring logic removed (now in MoveableSelection) */}
     </group>
   );
 }

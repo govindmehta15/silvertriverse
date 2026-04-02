@@ -62,11 +62,19 @@ export default function ProfilePage() {
 
     const viewedUser = useMemo(() => {
         if (!viewingUserId) return null;
-        return allUsers.find(u => u.id === viewingUserId) || null;
-    }, [viewingUserId, allUsers]);
+        const saved = getData('users') || mockUsers;
+        return saved.find(u => u.id === viewingUserId) || null;
+    }, [viewingUserId]);
 
-    const profileUser = viewedUser || user;
-    const isOwnProfile = !viewedUser || viewedUser?.id === user?.id;
+    const isOwnProfile = !viewingUserId || viewingUserId === user?.id;
+    const profileUser = isOwnProfile ? user : viewedUser;
+
+    const [isRefreshing, setIsRefreshing] = useState(false);
+    useEffect(() => {
+        setIsRefreshing(true);
+        const t = setTimeout(() => setIsRefreshing(false), 50); // Minimal blink to clear state
+        return () => clearTimeout(t);
+    }, [viewingUserId]);
 
     // Theme: eligibility (sponsor = owns ≥1 plot, winner = isWinner)
     const ownershipList = getData('silvertriverse_plots_ownership') || [];
@@ -99,11 +107,17 @@ export default function ProfilePage() {
     };
 
     useEffect(() => {
+        // Reset scroll for rapid navigation
+        window.scrollTo(0, 0);
+
+        // Load specific user data
         const storedOrders = JSON.parse(localStorage.getItem('user_orders') || '[]');
         setOrders(storedOrders);
         const storedCoins = JSON.parse(localStorage.getItem('user_coins') || '[]');
         setCoins(storedCoins);
-    }, []);
+        setBellRung(false); // Reset bell for new profile
+        setActiveTab('Shelf'); // Reset to default tab for consistency
+    }, [viewingUserId]);
 
     const stats = [
         { label: 'Followers', value: profileUser?.followers || 0, icon: '👥' },
@@ -223,47 +237,12 @@ export default function ProfilePage() {
         return () => window.removeEventListener('scroll', onScroll);
     }, []);
 
-    const { login } = useAuth();
     const overlayOpacity = 1 - (coverScroll / 120) * 0.4;
 
-    if (!profileUser) {
+    if (isRefreshing || !profileUser) {
         return (
-            <div className="min-h-screen flex items-center justify-center p-6 text-center bg-navy-950">
-                <motion.div
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    className="card-luxury p-8 max-w-sm w-full border border-navy-700 shadow-2xl"
-                >
-                    <div className="w-20 h-20 rounded-full bg-gradient-to-br from-teal-800 to-navy-700 mx-auto flex items-center justify-center text-3xl mb-6 shadow-glow-rare border border-gold/20">
-                        👤
-                    </div>
-                    <h2 className="font-serif text-2xl font-bold text-white mb-2 tracking-wide">GUEST PROFILE</h2>
-                    <p className="text-gray-400 text-sm mb-8 leading-relaxed">Access Collectible Units and the wider SilverTriverse by selecting a profile below.</p>
-
-                    <div className="space-y-3">
-                        {mockUsers.map(u => (
-                            <button
-                                key={u.id}
-                                onClick={() => login(u.id)}
-                                className="w-full flex items-center gap-3 px-4 py-3 bg-navy-800/80 border border-navy-700/50 rounded-xl hover:border-gold/30 hover:bg-navy-800 transition-all text-left group"
-                            >
-                                <div className="w-10 h-10 rounded-full border border-gold/10 group-hover:border-gold/30 flex items-center justify-center text-lg bg-navy-900 transition-colors">{u.avatar}</div>
-                                <div>
-                                    <p className="text-sm font-bold text-gray-200 group-hover:text-gold transition-colors">{u.name}</p>
-                                    <p className="text-[10px] text-gold uppercase tracking-widest opacity-80">{u.role}</p>
-                                </div>
-                            </button>
-                        ))}
-                    </div>
-
-                    <Link
-                        to="/"
-                        className="block mt-8 text-gray-500 hover:text-white text-xs font-bold uppercase tracking-widest transition-colors flex items-center justify-center gap-2"
-                    >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
-                        Return Home
-                    </Link>
-                </motion.div>
+            <div className="min-h-screen flex items-center justify-center bg-navy-950">
+                <div className="w-10 h-10 border-2 border-gold/20 border-t-gold rounded-full animate-spin" />
             </div>
         );
     }

@@ -183,5 +183,17 @@ export const communityService = {
                 resolve({ success: true, data: leaderboard });
             }, 300);
         });
+    },
+    advanceMissionProgress: (groupId, progress) => {
+        updateData(COM_KEY, (groups) => {
+            const idx = groups.findIndex(g => g.id === groupId);
+            if (idx > -1 && groups[idx].mission) {
+                groups[idx].mission.currentProgress = Math.min(
+                    groups[idx].mission.target,
+                    (groups[idx].mission.currentProgress || 0) + progress
+                );
+            }
+            return groups;
+        });
     }
 };

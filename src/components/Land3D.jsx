@@ -1,16 +1,19 @@
-import { Suspense, useMemo, useRef, memo } from 'react';
-import { Canvas, useFrame } from '@react-three/fiber';
+import React, { Suspense, useMemo, useRef, memo, useState, useLayoutEffect } from 'react';
+import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import {
-    OrbitControls, PerspectiveCamera, Stars,
+    MapControls, PerspectiveCamera, Stars,
     ContactShadows, Grid, Sky, useTexture
 } from '@react-three/drei';
+import * as THREE from 'three';
 import Plot3D from './Plot3D';
+import TownshipSurroundings from './TownshipSurroundings';
+import Roads from './Roads';
+
 import { COLS, ROWS, indexToRowCol } from '../data/plotsData';
 import { getData } from '../utils/storageService';
 import { mockUsers } from '../mock/mockUsers';
 import { getThemeById } from '../data/profileThemes';
 
-// ── All collectible image paths used by the app ───────────────────────────────
 export const ALL_COLLECTIBLE_IMAGES = [
     '/images/bomber_jacket.png',
     '/images/diamond_ring.png',
@@ -28,7 +31,21 @@ export const ALL_COLLECTIBLE_IMAGES = [
     '/images/diamond_bracelet.png',
 ];
 
+const LAND_ASSETS = [...ALL_COLLECTIBLE_IMAGES, '/images/grass_texture.png'];
+
 // ── Data helpers ──────────────────────────────────────────────────────────────
+
+function calculateSunPosition() {
+    // Force a dramatic sunset/golden hour for the WOW factor
+    const hours = 18.5; // 6:30 PM
+    const progress = (hours - 6) / 12;
+    const angle = progress * Math.PI;
+    const x = Math.cos(angle) * 100;
+    const y = Math.sin(angle) * 100;
+    const z = -40; // Slight depth for better shadows
+    return [x, y, z];
+}
+
 function buildUsersById() {
     const saved = getData('users');
     const all = (saved && saved.length > 0) ? saved : mockUsers;
@@ -94,18 +111,154 @@ const SunOrb = memo(() => {
     );
 });
 
+// ── Error Boundary for 3D Stability ──────────────────────────────────────────
+class MetropolisErrorBoundary extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = { hasError: false };
+    }
+    static getDerivedStateFromError(error) { return { hasError: true }; }
+    render() {
+        if (this.state.hasError) {
+            return (
+                <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-900 text-white z-50 p-8 text-center">
+                    <div className="w-16 h-16 bg-blue-500/20 rounded-full flex items-center justify-center mb-4">
+                        <span className="text-2xl">🏙️</span>
+                    </div>
+                    <h2 className="text-xl font-bold mb-2">Metropolis Baseline Stabilized</h2>
+                    <p className="text-slate-400 max-w-xs mb-6">The 50x50 metropolitan grid encountered a WebGL timeout. We've paused rendering to protect your hardware.</p>
+                    <button 
+                        onClick={() => window.location.reload()}
+                        className="px-6 py-2 bg-blue-600 hover:bg-blue-500 rounded-lg font-medium transition-colors"
+                    >
+                        Re-initialize City
+                    </button>
+                </div>
+            );
+        }
+        return this.props.children;
+    }
+}
+
 // ── MemoizedPlot ──────────────────────────────────────────────────────────────
 const MemoPlot = memo(Plot3D);
 
+// ── Selection Highlight: One mesh to represent the active selection ──────────
+const SelectionHighlight = memo(({ targetIndex, halfSizeX, halfSizeZ }) => {
+    const meshRef = useRef();
+    useFrame(() => {
+        if (!meshRef.current || targetIndex === null) {
+            if (meshRef.current) meshRef.current.visible = false;
+            return;
+        }
+        meshRef.current.visible = true;
+        const { row, col } = indexToRowCol(targetIndex);
+        const SPACING = 1.3, ROAD_WIDTH = 1.3;
+        const colOffset = Math.floor(col / 4) * ROAD_WIDTH;
+        const rowOffset = Math.floor(row / 4) * ROAD_WIDTH;
+        const tx = (col * SPACING) + colOffset - halfSizeX + (SPACING / 2);
+        const tz = (row * SPACING) + rowOffset - halfSizeZ + (SPACING / 2);
+
+        // Smoothly glide the selection ring
+        meshRef.current.position.x += (tx - meshRef.current.position.x) * 0.15;
+        meshRef.current.position.z += (tz - meshRef.current.position.z) * 0.15;
+        meshRef.current.rotation.y += 0.02;
+    });
+
+    return (
+        <mesh ref={meshRef} position={[0, 0.04, 0]}>
+            <cylinderGeometry args={[0.66, 0.66, 0.06, 32]} />
+            <meshBasicMaterial color="#60a5fa" transparent opacity={0.4} />
+        </mesh>
+    );
+});
+
+// ── Camera Controller: Animates to selected plot ──────────────────────────────
+const CameraController = memo(({ targetIndex, halfSizeX, halfSizeZ }) => {
+    const { controls } = useThree();
+    useFrame(() => {
+        if (!controls || targetIndex === null) return;
+        const { row, col } = indexToRowCol(targetIndex);
+        const SPACING = 1.3, ROAD_WIDTH = 1.3;
+        const colOffset = Math.floor(col / 4) * ROAD_WIDTH;
+        const rowOffset = Math.floor(row / 4) * ROAD_WIDTH;
+        const tx = (col * SPACING) + colOffset - halfSizeX + (SPACING / 2);
+        const tz = (row * SPACING) + rowOffset - halfSizeZ + (SPACING / 2);
+
+        // Smoothly lerp the controls target
+        const lerpFactor = 0.08;
+        controls.target.x += (tx - controls.target.x) * lerpFactor;
+        controls.target.y += (0 - controls.target.y) * lerpFactor;
+        controls.target.z += (tz - controls.target.z) * lerpFactor;
+    });
+    return null;
+});
+
 // ── Inner scene: textures loaded ONCE here, shared across all plots ───────────
+function getPlotProgress(index) {
+    const saved = getData(`land_plot_progress_${index}`);
+    return saved || 0;
+}
+
+// ── Instanced Ground Bases: 1 Draw Call for 2500 plots with Grass ────────────
+const InstancedBases = memo(({ ownershipMap, user, spacing, roadWidth, halfSizeX, halfSizeZ, onPlotClick, grassTexture }) => {
+    const meshRef = useRef();
+
+    useLayoutEffect(() => {
+        if (!meshRef.current) return;
+        const tempObj = new THREE.Object3D();
+        const tempColor = new THREE.Color();
+
+        for (let i = 0; i < COLS * ROWS; i++) {
+            const { row, col } = indexToRowCol(i);
+            const colOffset = Math.floor(col / 4) * roadWidth;
+            const rowOffset = Math.floor(row / 4) * roadWidth;
+            const px = (col * spacing) + colOffset - halfSizeX + (spacing / 2);
+            const pz = (row * spacing) + rowOffset - halfSizeZ + (spacing / 2);
+
+            tempObj.position.set(px, -0.15, pz);
+            tempObj.updateMatrix();
+            meshRef.current.setMatrixAt(i, tempObj.matrix);
+
+            const owner = ownershipMap[i];
+            if (owner) {
+                const isMine = owner.ownerId === user?.id;
+                tempColor.set(isMine ? '#92400e' : '#1e1b4b');
+            } else {
+                tempColor.set('#064e3b'); // Dark Forest Green for unowned
+            }
+            meshRef.current.setColorAt(i, tempColor);
+        }
+        meshRef.current.instanceMatrix.needsUpdate = true;
+        if (meshRef.current.instanceColor) meshRef.current.instanceColor.needsUpdate = true;
+    }, [ownershipMap, user, spacing, roadWidth, halfSizeX, halfSizeZ]);
+
+    return (
+        <instancedMesh ref={meshRef} args={[null, null, COLS * ROWS]} onPointerDown={(e) => { e.stopPropagation(); onPlotClick(e.instanceId); }}>
+            <boxGeometry args={[1.2, 0.2, 1.2]} />
+            <meshStandardMaterial map={grassTexture} color="#2d5a27" roughness={0.8} />
+        </instancedMesh>
+    );
+});
+
 function Scene({ ownershipMap, user, onPlotClick, selectedPlotIndex }) {
     const usersById = useMemo(() => buildUsersById(), []);
+    const grassTexture = useTexture('/images/grass_texture.png');
+    
+    useLayoutEffect(() => {
+        if (grassTexture) {
+            grassTexture.wrapS = grassTexture.wrapT = THREE.RepeatWrapping;
+            grassTexture.repeat.set(120, 120); // Tile for infinite feel
+        }
+    }, [grassTexture]);
 
-    // Load ALL collectible textures in one call — shared across all plots
-    const loadedTextures = useTexture(ALL_COLLECTIBLE_IMAGES);
+    // Load ALL collectible textures + grass (using static array to avoid infinite re-renders)
+    const loadedTextures = useTexture(LAND_ASSETS);
     const textureMap = useMemo(() => {
         const map = {};
-        ALL_COLLECTIBLE_IMAGES.forEach((path, i) => { map[path] = loadedTextures[i]; });
+        LAND_ASSETS.forEach((path, i) => {
+            map[path] = loadedTextures[i];
+        });
         return map;
     }, [loadedTextures]);
 
@@ -141,6 +294,8 @@ function Scene({ ownershipMap, user, onPlotClick, selectedPlotIndex }) {
         5: '/images/post_casting.png',
     }), []);
 
+    const sunPos = useMemo(() => calculateSunPosition(), []);
+
     // Build wall textures list for a user (deduplicated, max 3)
     const buildWallTextures = (ownerUser) => {
         if (!ownerUser) return [];
@@ -160,62 +315,85 @@ function Scene({ ownershipMap, user, onPlotClick, selectedPlotIndex }) {
         return paths.slice(0, 3).map(p => textureMap[p]).filter(Boolean);
     };
 
+    const SPACING = 1.3;
+    const ROAD_WIDTH = 1.3;
+    const totalColSpan = (COLS * SPACING) + (Math.floor((COLS - 1) / 4) * ROAD_WIDTH);
+    const totalRowSpan = (ROWS * SPACING) + (Math.floor((ROWS - 1) / 4) * ROAD_WIDTH);
+    const halfSizeX = totalColSpan / 2;
+    const halfSizeZ = totalRowSpan / 2;
+
     const plots = useMemo(() => {
         const items = [];
-        for (let i = 0; i < COLS * ROWS; i++) {
-            const { row, col } = indexToRowCol(i);
-            const owner = ownershipMap[i];
-            const ownerId = owner?.ownerId;
-            const ownerUser = ownerId ? usersById[ownerId] : null;
-            const wallTextures = buildWallTextures(ownerUser);
+        const radiusSq = 60 * 60; 
 
-            items.push(
-                <MemoPlot
-                    key={i}
-                    index={i}
-                    row={row}
-                    col={col}
-                    owner={owner}
-                    isMine={ownerId === user?.id}
-                    isSelected={selectedPlotIndex === i}
-                    onClick={onPlotClick}
-                    ownerThemeAccent={getOwnerThemeAccent(ownerId, usersById)}
-                    ownerCardCount={ownerUser?.ownedCards?.length ?? 0}
-                    wallTextures={wallTextures}
-                />
-            );
+        // Current view-point
+        const currentIdx = selectedPlotIndex ?? 0;
+        const { row: tr, col: tc } = indexToRowCol(currentIdx);
+        const colOffT = Math.floor(tc / 4) * ROAD_WIDTH;
+        const rowOffT = Math.floor(tr / 4) * ROAD_WIDTH;
+        const targetX = (tc * SPACING) + colOffT - halfSizeX + (SPACING / 2);
+        const targetZ = (tr * SPACING) + rowOffT - halfSizeZ + (SPACING / 2);
+
+        for (let i = 0; i < COLS * ROWS; i++) {
+            const owner = ownershipMap[i];
+            const isMine = owner?.ownerId === user?.id;
+            const isSelected = selectedPlotIndex === i;
+
+            // Calculate position for culling
+            const { row, col } = indexToRowCol(i);
+            const colOffset = Math.floor(col / 4) * ROAD_WIDTH;
+            const rowOffset = Math.floor(row / 4) * ROAD_WIDTH;
+            const px = (col * SPACING) + colOffset - halfSizeX + (SPACING / 2);
+            const pz = (row * SPACING) + rowOffset - halfSizeZ + (SPACING / 2);
+
+            const distSq = Math.pow(px - targetX, 2) + Math.pow(pz - targetZ, 2);
+
+            // Re-enable rendering for nearby houses OR owned houses
+            if (isMine || isSelected || distSq < radiusSq) {
+                const ownerId = owner?.ownerId;
+                const ownerUser = ownerId ? usersById[ownerId] : null;
+
+                items.push(
+                    <MemoPlot
+                        key={i}
+                        index={i}
+                        row={row}
+                        col={col}
+                        x={px}
+                        z={pz}
+                        owner={owner}
+                        isMine={isMine}
+                        isSelected={isSelected}
+                        onClick={onPlotClick}
+                        ownerThemeAccent={getOwnerThemeAccent(ownerId, usersById)}
+                        ownerCardCount={ownerUser?.ownedCards?.length ?? 0}
+                        wallTextures={buildWallTextures(ownerUser)}
+                        progress={getPlotProgress(i)}
+                    />
+                );
+            }
         }
         return items;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [ownershipMap, user, onPlotClick, selectedPlotIndex, usersById, textureMap]);
+    }, [ownershipMap, user, onPlotClick, selectedPlotIndex, usersById, textureMap, halfSizeX, halfSizeZ, SPACING, ROAD_WIDTH]);
 
     return (
         <>
             <PerspectiveCamera makeDefault position={[0, 38, 50]} fov={36} />
 
             {/* Sky */}
-            <Sky
-                sunPosition={[60, 35, -60]}
-                inclination={0.48}
-                azimuth={0.28}
-                turbidity={10}
-                rayleigh={1.8}
-                mieDirectionalG={0.85}
-                mieCoefficient={0.004}
-            />
+            <Sky sunPosition={sunPos} />
+            <SunOrb /> 
 
-            {/* Stars */}
-            <Stars radius={150} depth={50} count={4000} factor={4} saturation={1} fade speed={0.6} />
 
-            {/* Lighting — warm sun + cool fill */}
-            <ambientLight intensity={1.4} color="#fef3c7" />
+            {/* Lighting — matching working LandWorld settings */}
+            <ambientLight intensity={1.25} color="#fef3c7" />
             <directionalLight
-                position={[50, 50, -40]}
-                intensity={3}
+                position={sunPos}
+                intensity={2.6}
                 color="#fde68a"
                 castShadow
-                shadow-mapSize={[1024, 1024]}
-                shadow-camera-far={120}
+                shadow-mapSize={[256, 256]}
+                shadow-camera-far={150}
                 shadow-camera-left={-40}
                 shadow-camera-right={40}
                 shadow-camera-top={40}
@@ -223,40 +401,66 @@ function Scene({ ownershipMap, user, onPlotClick, selectedPlotIndex }) {
             />
             <directionalLight position={[-35, 25, 35]} intensity={0.9} color="#bfdbfe" />
 
-            <SunOrb />
+            <mesh position={sunPos}>
+                <sphereGeometry args={[4, 16, 16]} />
+                <meshStandardMaterial color="#fef3c7" emissive="#fde68a" emissiveIntensity={3} />
+            </mesh>
 
-            {/* Grid world */}
+            {/* World: Plots + Roads (Simplified Ground) */}
             <group>
-                <Grid
-                    infiniteGrid
-                    fadeDistance={110}
-                    fadeStrength={5}
-                    cellSize={1.3}
-                    sectionSize={6.5}
-                    sectionThickness={1.5}
-                    sectionColor="#334155"
-                    cellColor="#1e293b"
-                    position={[0, -0.12, 0]}
+                <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.15, 0]} receiveShadow>
+                    <planeGeometry args={[180, 180]} />
+                    <meshStandardMaterial
+                        color="#123512"
+                        roughness={0.85}
+                        metalness={0.1}
+                    />
+                </mesh>
+
+                {/* Infinite Grass World Foundation */}
+                <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.25, 0]} receiveShadow>
+                    <planeGeometry args={[1200, 1200]} />
+                    <meshStandardMaterial map={grassTexture} color="#1d4d1a" roughness={0.9} />
+                </mesh>
+
+                {/* Distant Water/Ocean */}
+                <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.28, -550]} receiveShadow>
+                    <planeGeometry args={[2000, 400]} />
+                    <meshStandardMaterial color="#0c4a6e" roughness={0.1} metalness={0.8} />
+                </mesh>
+
+                <Roads cols={COLS} rows={ROWS} spacing={SPACING} roadWidth={ROAD_WIDTH} />
+                <group position={[0, -5, -320]}>
+                    <TownshipSurroundings />
+                </group>
+                
+                <InstancedBases 
+                    ownershipMap={ownershipMap}
+                    user={user}
+                    spacing={SPACING}
+                    roadWidth={ROAD_WIDTH}
+                    halfSizeX={halfSizeX}
+                    halfSizeZ={halfSizeZ}
+                    onPlotClick={onPlotClick}
+                    grassTexture={grassTexture}
                 />
+
+                <SelectionHighlight targetIndex={selectedPlotIndex} halfSizeX={halfSizeX} halfSizeZ={halfSizeZ} />
+                
                 {plots}
-                <Decorations />
             </group>
 
-            <ContactShadows
-                position={[0, -0.12, 0]}
-                opacity={0.45}
-                scale={60}
-                blur={2}
-                far={10}
-            />
 
-            <OrbitControls
+            <CameraController targetIndex={selectedPlotIndex} halfSizeX={halfSizeX} halfSizeZ={halfSizeZ} />
+
+            <MapControls
                 enableDamping
                 dampingFactor={0.06}
                 maxPolarAngle={Math.PI / 2.15}
-                minDistance={14}
-                maxDistance={100}
-                target={[0, 0, 0]}
+                minDistance={10}
+                maxDistance={Math.max(120, totalColSpan * 1.5)}
+                panSpeed={1.2}
+                rotateSpeed={0.8}
             />
         </>
     );
@@ -266,21 +470,24 @@ function Scene({ ownershipMap, user, onPlotClick, selectedPlotIndex }) {
 export default function Land3D({ ownershipMap, user, onPlotClick, selectedPlotIndex }) {
     return (
         <div style={{ width: '100%', height: '100%', cursor: 'move' }}>
-            <Canvas
-                shadows
-                dpr={Math.min(window.devicePixelRatio, 1.5)}
-                gl={{ antialias: true, powerPreference: 'high-performance' }}
-                frameloop="demand"
-            >
-                <Suspense fallback={null}>
-                    <Scene
-                        ownershipMap={ownershipMap}
-                        user={user}
-                        onPlotClick={onPlotClick}
-                        selectedPlotIndex={selectedPlotIndex}
-                    />
-                </Suspense>
-            </Canvas>
+            <MetropolisErrorBoundary>
+                <Canvas
+                    shadows
+                    onCreated={({ gl }) => {
+                        gl.powerPreference = 'high-performance';
+                        gl.shadowMap.type = THREE.PCFSoftShadowMap;
+                    }}
+                >
+                    <Suspense fallback={null}>
+                        <Scene 
+                            ownershipMap={ownershipMap} 
+                            user={user} 
+                            onPlotClick={onPlotClick} 
+                            selectedPlotIndex={selectedPlotIndex}
+                        />
+                    </Suspense>
+                </Canvas>
+            </MetropolisErrorBoundary>
         </div>
     );
 }
