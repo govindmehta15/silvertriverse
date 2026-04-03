@@ -17,7 +17,7 @@ const item = { hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } };
 const APP_FEATURE_SPOTLIGHTS = [
     {
         id: 'spotlight-land',
-        title: 'Metropolis Grid',
+        title: 'Metropolis Land',
         message: 'Own virtual plots in our massive 50x50 township.',
         icon: '🗺️',
         link: '/land',
@@ -27,7 +27,7 @@ const APP_FEATURE_SPOTLIGHTS = [
     },
     {
         id: 'spotlight-relics',
-        title: 'Relic Arena',
+        title: 'Relics Arena',
         message: 'Bid on premium artifacts with live momentum.',
         icon: '🏺',
         link: '/relics',
@@ -37,7 +37,7 @@ const APP_FEATURE_SPOTLIGHTS = [
     },
     {
         id: 'spotlight-ai',
-        title: 'AI Lab',
+        title: 'Avatar',
         message: 'Generate stories with advanced producers.',
         icon: '🤖',
         link: '/ai-writer',

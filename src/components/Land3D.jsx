@@ -35,15 +35,50 @@ const LAND_ASSETS = [...ALL_COLLECTIBLE_IMAGES, '/images/grass_texture.png'];
 
 // ── Data helpers ──────────────────────────────────────────────────────────────
 
-function calculateSunPosition() {
-    // Force a dramatic sunset/golden hour for the WOW factor
-    const hours = 18.5; // 6:30 PM
-    const progress = (hours - 6) / 12;
-    const angle = progress * Math.PI;
-    const x = Math.cos(angle) * 100;
-    const y = Math.sin(angle) * 100;
-    const z = -40; // Slight depth for better shadows
-    return [x, y, z];
+function getDayNightProfile() {
+    const now = new Date();
+    const hour = now.getHours() + (now.getMinutes() / 60);
+    const dayStart = 6;
+    const sunsetStart = 18;
+    const sunsetEnd = 19.5;
+    const sunriseStart = 4.75;
+    const sunriseEnd = 6.25;
+    const isNight = hour >= sunsetEnd || hour < sunriseStart;
+    let dayMix = 1;
+    if (isNight) {
+        dayMix = 0;
+    } else if (hour >= sunsetStart && hour < sunsetEnd) {
+        dayMix = 1 - ((hour - sunsetStart) / (sunsetEnd - sunsetStart));
+    } else if (hour >= sunriseStart && hour < sunriseEnd) {
+        dayMix = (hour - sunriseStart) / (sunriseEnd - sunriseStart);
+    }
+    const daylightProgress = Math.max(0, Math.min(1, (hour - dayStart) / 12));
+    const sunArc = daylightProgress * Math.PI;
+    return {
+        isNight,
+        dayMix,
+        sunPosition: [
+            Math.cos(sunArc) * 100,
+            Math.max(6, Math.sin(sunArc) * 90),
+            -45,
+        ],
+        moonPosition: [
+            -Math.cos(sunArc) * 86,
+            Math.max(20, 56 - Math.sin(sunArc) * 34),
+            34,
+        ],
+        sky: {
+            // Day: lighter blue sky, Night: softer darker atmosphere.
+            turbidity: 3.8 - (1.8 * dayMix),
+            rayleigh: 0.3 + (2.9 * dayMix),
+            mieDirectionalG: 0.95 - (0.15 * dayMix),
+            mieCoefficient: 0.01 - (0.0075 * dayMix),
+        },
+        starsCount: Math.round(7500 - (6800 * dayMix)),
+        ambient: { intensity: 0.34 + (1.15 * dayMix), color: dayMix > 0.45 ? '#fff7d6' : '#9fb8ff' },
+        sun: { intensity: 0.12 + (3.08 * dayMix), color: dayMix > 0.3 ? '#ffe7a7' : '#94a3b8' },
+        moon: { intensity: 1.08 - (0.8 * dayMix), color: '#dbe7ff' },
+    };
 }
 
 function buildUsersById() {
@@ -97,17 +132,68 @@ const Decorations = memo(() => {
 });
 
 // ── Pulsing SunOrb ────────────────────────────────────────────────────────────
-const SunOrb = memo(() => {
+const SunOrb = memo(({ position = [55, 55, -40], isNight = false }) => {
     const ref = useRef();
     useFrame(({ clock }) => {
         if (ref.current)
-            ref.current.material.emissiveIntensity = 1.0 + Math.sin(clock.elapsedTime * 0.7) * 0.4;
+            ref.current.material.emissiveIntensity = (isNight ? 0.8 : 1.0) + Math.sin(clock.elapsedTime * 0.7) * 0.25;
     });
     return (
-        <mesh ref={ref} position={[55, 55, -40]}>
+        <mesh ref={ref} position={position}>
             <sphereGeometry args={[3, 10, 10]} />
-            <meshStandardMaterial color="#fde68a" emissive="#f97316" emissiveIntensity={1.2} />
+            <meshStandardMaterial
+                color={isNight ? '#e8efff' : '#fde68a'}
+                emissive={isNight ? '#c5d2ff' : '#f97316'}
+                emissiveIntensity={isNight ? 0.9 : 1.2}
+            />
         </mesh>
+    );
+});
+
+const LightCloudLayer = memo(({ visible = true, strength = 1 }) => {
+    const groupRef = useRef();
+    const clouds = useMemo(() => {
+        const items = [];
+        for (let i = 0; i < 10; i++) {
+            const angle = (i / 10) * Math.PI * 2;
+            const dist = 95 + ((i % 3) * 18);
+            items.push({
+                key: `lc-${i}`,
+                // Lift cloud deck to a more natural mid-sky altitude.
+                pos: [Math.cos(angle) * dist, 35 + (i % 3) * 3.2, Math.sin(angle) * dist],
+                size: 5.8 + (i % 2) * 1.6,
+            });
+        }
+        return items;
+    }, []);
+
+    useFrame(({ clock }) => {
+        if (!groupRef.current || !visible) return;
+        groupRef.current.rotation.y = Math.sin(clock.elapsedTime * 0.025) * 0.18;
+    });
+
+    if (!visible) return null;
+
+    const opacity = 0.26 + (0.32 * strength);
+    return (
+        <group ref={groupRef}>
+            {clouds.map((c) => (
+                <group key={c.key} position={c.pos}>
+                    <mesh>
+                        <sphereGeometry args={[c.size, 14, 14]} />
+                        <meshStandardMaterial color="#f8fbff" transparent opacity={opacity} roughness={1} />
+                    </mesh>
+                    <mesh position={[c.size * 0.72, -0.35, 0]}>
+                        <sphereGeometry args={[c.size * 0.78, 14, 14]} />
+                        <meshStandardMaterial color="#f8fbff" transparent opacity={opacity * 0.95} roughness={1} />
+                    </mesh>
+                    <mesh position={[-c.size * 0.68, -0.25, 0.2]}>
+                        <sphereGeometry args={[c.size * 0.7, 14, 14]} />
+                        <meshStandardMaterial color="#f8fbff" transparent opacity={opacity * 0.9} roughness={1} />
+                    </mesh>
+                </group>
+            ))}
+        </group>
     );
 });
 
@@ -294,7 +380,8 @@ function Scene({ ownershipMap, user, onPlotClick, selectedPlotIndex }) {
         5: '/images/post_casting.png',
     }), []);
 
-    const sunPos = useMemo(() => calculateSunPosition(), []);
+    const dayNight = useMemo(() => getDayNightProfile(), []);
+    const sunPos = dayNight.sunPosition;
 
     // Build wall textures list for a user (deduplicated, max 3)
     const buildWallTextures = (ownerUser) => {
@@ -381,16 +468,28 @@ function Scene({ ownershipMap, user, onPlotClick, selectedPlotIndex }) {
             <PerspectiveCamera makeDefault position={[0, 38, 50]} fov={36} />
 
             {/* Sky */}
-            <Sky sunPosition={sunPos} />
-            <SunOrb /> 
+            <Sky
+                sunPosition={sunPos}
+                turbidity={dayNight.sky.turbidity}
+                rayleigh={dayNight.sky.rayleigh}
+                mieDirectionalG={dayNight.sky.mieDirectionalG}
+                mieCoefficient={dayNight.sky.mieCoefficient}
+            />
+            <LightCloudLayer visible={!dayNight.isNight} strength={dayNight.dayMix} />
+            <Stars radius={210} depth={70} count={dayNight.starsCount} factor={3.2} saturation={1} fade speed={dayNight.isNight ? 0.3 : 0.1} />
+            {dayNight.isNight ? (
+                <SunOrb position={dayNight.moonPosition} isNight />
+            ) : (
+                <SunOrb position={sunPos} />
+            )}
 
 
             {/* Lighting — matching working LandWorld settings */}
-            <ambientLight intensity={1.25} color="#fef3c7" />
+            <ambientLight intensity={dayNight.ambient.intensity} color={dayNight.ambient.color} />
             <directionalLight
                 position={sunPos}
-                intensity={2.6}
-                color="#fde68a"
+                intensity={dayNight.sun.intensity}
+                color={dayNight.sun.color}
                 castShadow
                 shadow-mapSize={[256, 256]}
                 shadow-camera-far={150}
@@ -399,12 +498,7 @@ function Scene({ ownershipMap, user, onPlotClick, selectedPlotIndex }) {
                 shadow-camera-top={40}
                 shadow-camera-bottom={-40}
             />
-            <directionalLight position={[-35, 25, 35]} intensity={0.9} color="#bfdbfe" />
-
-            <mesh position={sunPos}>
-                <sphereGeometry args={[4, 16, 16]} />
-                <meshStandardMaterial color="#fef3c7" emissive="#fde68a" emissiveIntensity={3} />
-            </mesh>
+            <directionalLight position={dayNight.moonPosition} intensity={dayNight.moon.intensity} color={dayNight.moon.color} />
 
             {/* World: Plots + Roads (Simplified Ground) */}
             <group>

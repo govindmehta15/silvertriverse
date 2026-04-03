@@ -4,7 +4,14 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import { plotsService } from '../services/plotsService';
 import { getData, setData } from '../utils/storageService';
-import { PRICE_PER_PLOT, COLS, ROWS, indexToRowCol } from '../data/plotsData';
+import {
+  MIN_PLOT_PRICE,
+  MAX_PLOT_PRICE,
+  COLS,
+  ROWS,
+  indexToRowCol,
+  getCurrentPlotPrice,
+} from '../data/plotsData';
 import { mockUsers } from '../mock/mockUsers';
 import Land3D from '../components/Land3D';
 
@@ -94,6 +101,7 @@ export default function LandMarketplacePage() {
   const [purchasing, setPurchasing] = useState(false);
   const [scale, setScale] = useState(0.85);
   const [legendOpen, setLegendOpen] = useState(false);
+  const [showMoreCards, setShowMoreCards] = useState(false);
   const [searchVal, setSearchVal] = useState('');
 
   const usersById = useMemo(() => {
@@ -178,9 +186,15 @@ export default function LandMarketplacePage() {
   const powerPool = useMemo(() => calculateUserPowerPool(user), [user, ownershipMap]);
 
   const myCardCount = user ? (usersById[user.id]?.ownedCards?.length ?? 0) : 0;
+  const shouldShowViewMore = myCardCount > 5;
+  const visiblePurchasedItems = (user?.purchasedItems || []).slice(0, 3);
+  const visibleCardIds = showMoreCards
+    ? (user?.ownedCards || []).slice(0, 8)
+    : (user?.ownedCards || []).slice(0, 3);
   const tierInfo = getTierLabel(myPlotCount);
   const totalOwned = Object.keys(ownershipMap).length;
   const totalCells = COLS * ROWS;
+  const currentPlotPrice = getCurrentPlotPrice(totalOwned, totalCells);
 
   return (
     <div className="min-h-screen pb-24 relative -mt-4 md:-mt-6 overflow-hidden">
@@ -225,7 +239,7 @@ export default function LandMarketplacePage() {
               ✦ Land Marketplace
             </h1>
             <p className="text-gray-400 text-xs mt-0.5">
-              ₹{PRICE_PER_PLOT} per plot · Own land to unlock premium profile themes
+              Dynamic pricing ₹{MIN_PLOT_PRICE}-₹{MAX_PLOT_PRICE} · Current ₹{currentPlotPrice}
             </p>
           </div>
           <div className="flex items-center gap-2 flex-wrap">
@@ -329,83 +343,101 @@ export default function LandMarketplacePage() {
           <motion.div
             initial={{ opacity: 0, y: -8 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mb-4 rounded-2xl border px-5 py-3 flex flex-wrap gap-5 items-center"
+            className="mb-4 rounded-2xl border px-5 py-3"
             style={{
               background: 'linear-gradient(135deg, rgba(139,92,246,0.12), rgba(6,182,212,0.10))',
               borderColor: 'rgba(139,92,246,0.3)',
               boxShadow: '0 0 24px rgba(139,92,246,0.12)',
             }}
           >
-            <div className="text-center">
-              <p className="text-[10px] text-gray-500 uppercase tracking-widest">My Plots</p>
-              <p className="font-mono text-xl font-bold text-yellow-300">{myPlotCount}</p>
-            </div>
-            <div className="w-px h-8 bg-white/10" />
-            <div className="text-center">
-              <p className="text-[10px] text-gray-500 uppercase tracking-widest">My Cards</p>
-              <p className="font-mono text-xl font-bold text-cyan-300">{myCardCount}</p>
-            </div>
-            <div className="w-px h-8 bg-white/10" />
-            <div className="text-center">
-              <p className="text-[10px] text-gray-500 uppercase tracking-widest">House Type</p>
-              <p className="font-mono text-sm font-bold text-violet-300">
-                {myCardCount >= 10 ? '🌌 Cosmic Pyramid'
-                  : myCardCount >= 5 ? '🚀 Floating Cube'
-                    : myCardCount >= 3 ? '⛩️ Pagoda'
-                      : myCardCount >= 1 ? '🔮 Crystal Tower'
-                        : myPlotCount % 2 === 0 ? '🏡 Cottage' : '🏢 Villa'}
-              </p>
-            </div>
-            <div className="w-px h-8 bg-white/10" />
-            <div className="text-center">
-              <p className="text-[10px] text-gray-500 uppercase tracking-widest">World Fill</p>
-              <p className="font-mono text-sm font-bold text-emerald-300">
-                {((totalOwned / totalCells) * 100).toFixed(1)}%
-              </p>
-            </div>
-            <div className="w-px h-8 bg-white/10" />
+            <div className="flex w-full flex-col gap-4">
+              <div className="flex w-full flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                <div className="flex flex-wrap items-center gap-5">
+                  <div className="text-center">
+                    <p className="text-[10px] text-gray-500 uppercase tracking-widest">My Plots</p>
+                    <p className="font-mono text-xl font-bold text-yellow-300">{myPlotCount}</p>
+                  </div>
+                  <div className="w-px h-8 bg-white/10" />
+                  <div className="text-center">
+                    <p className="text-[10px] text-gray-500 uppercase tracking-widest">My Cards</p>
+                    <p className="font-mono text-xl font-bold text-cyan-300">{myCardCount}</p>
+                  </div>
+                  <div className="w-px h-8 bg-white/10" />
+                  <div className="text-center">
+                    <p className="text-[10px] text-gray-500 uppercase tracking-widest">House Type</p>
+                    <p className="font-mono text-sm font-bold text-violet-300">
+                      {myCardCount >= 10 ? '🌌 Cosmic Pyramid'
+                        : myCardCount >= 5 ? '🚀 Floating Cube'
+                          : myCardCount >= 3 ? '⛩️ Pagoda'
+                            : myCardCount >= 1 ? '🔮 Crystal Tower'
+                              : myPlotCount % 2 === 0 ? '🏡 Cottage' : '🏢 Villa'}
+                    </p>
+                  </div>
+                  <div className="w-px h-8 bg-white/10" />
+                  <div className="text-center">
+                    <p className="text-[10px] text-gray-500 uppercase tracking-widest">World Fill</p>
+                    <p className="font-mono text-sm font-bold text-emerald-300">
+                      {((totalOwned / totalCells) * 100).toFixed(1)}%
+                    </p>
+                  </div>
+                </div>
 
-            {/* NEW: Equipped Decor Preview */}
-            <div className="flex items-center gap-2">
-              <p className="text-[10px] text-gray-500 uppercase tracking-widest mr-1">Collectible units with utility power </p>
-              <div className="flex -space-x-2">
-                {(user?.purchasedItems?.slice(0, 3) || []).map((id, i) => (
-                  <div key={id} className="relative w-9 h-9 rounded-full border border-navy-600 bg-navy-900 overflow-hidden shadow-lg group" style={{ zIndex: 10 - i }}>
-                    <img src={ITEM_IMAGE_MAP[id] || '/images/scifi_weapon.png'} alt="" className="w-full h-full object-cover" />
-                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                      <span className="text-[7px] font-bold text-gold">+10%</span>
-                    </div>
+                {/* Right side: text on top + collectibles below */}
+                <div className="lg:min-w-[360px]">
+                  <p className="mb-2 text-[10px] text-right text-gray-500 uppercase tracking-widest">
+                    Collectible units with utility power
+                  </p>
+                  <div className="flex justify-end -space-x-5">
+                    {visiblePurchasedItems.map((id, i) => (
+                      <div key={id} className="relative w-20 h-20 rounded-full border border-navy-600 bg-navy-900 overflow-hidden shadow-lg group" style={{ zIndex: 10 - i }}>
+                        <img src={ITEM_IMAGE_MAP[id] || '/images/scifi_weapon.png'} alt="" className="w-full h-full object-cover" />
+                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                          <span className="text-[10px] font-bold text-gold">+10%</span>
+                        </div>
+                      </div>
+                    ))}
+                    {visibleCardIds.map((id, i) => (
+                      <div key={i} className="relative w-20 h-20 rounded-full border border-cyan-600/50 bg-navy-900 overflow-hidden shadow-lg group" style={{ zIndex: 5 - i }}>
+                        <div className="w-full h-full bg-gradient-to-br from-cyan-900 to-navy-900 flex items-center justify-center text-[15px] text-cyan-400 font-serif">
+                          C
+                        </div>
+                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                          <span className="text-[10px] font-bold text-cyan-400">+5%</span>
+                        </div>
+                      </div>
+                    ))}
+                    {(!visiblePurchasedItems.length && !visibleCardIds.length) && (
+                      <div className="w-16 h-16 rounded-full border border-dashed border-gray-700 flex items-center justify-center text-sm text-gray-600">
+                        +
+                      </div>
+                    )}
                   </div>
-                ))}
-                {(user?.ownedCards?.slice(0, 3) || []).map((id, i) => (
-                  <div key={i} className="relative w-9 h-9 rounded-full border border-cyan-600/50 bg-navy-900 overflow-hidden shadow-lg group" style={{ zIndex: 5 - i }}>
-                    <div className="w-full h-full bg-gradient-to-br from-cyan-900 to-navy-900 flex items-center justify-center text-[10px] text-cyan-400 font-serif">
-                      C
+                  {shouldShowViewMore && (
+                    <div className="mt-2 flex justify-end">
+                      <button
+                        type="button"
+                        onClick={() => setShowMoreCards((v) => !v)}
+                        className="rounded-md border border-cyan-500/30 bg-cyan-500/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-cyan-300 hover:bg-cyan-500/20"
+                      >
+                        {showMoreCards ? 'View Less' : `View More (+${myCardCount - 3})`}
+                      </button>
                     </div>
-                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                      <span className="text-[7px] font-bold text-cyan-400">+5%</span>
-                    </div>
-                  </div>
-                ))}
-                {(!user?.purchasedItems?.length && !user?.ownedCards?.length) && (
-                  <div className="w-8 h-8 rounded-full border border-dashed border-gray-700 flex items-center justify-center text-[10px] text-gray-600">
-                    +
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
-            </div>
 
-            {/* Legend toggle */}
-            <button type="button"
-              onClick={() => setLegendOpen(v => !v)}
-              className="ml-auto text-xs font-bold uppercase tracking-widest px-3 py-1.5 rounded-lg border transition-all"
-              style={{
-                color: legendOpen ? '#fcd34d' : '#94a3b8',
-                borderColor: legendOpen ? 'rgba(252,211,77,0.4)' : 'rgba(255,255,255,0.12)',
-                background: legendOpen ? 'rgba(252,211,77,0.08)' : 'rgba(255,255,255,0.04)',
-              }}>
-              {legendOpen ? '✕ Close' : '🏠 House Guide'}
-            </button>
+              {/* House guide moved to left side below */}
+              <button type="button"
+                onClick={() => setLegendOpen(v => !v)}
+                className="w-fit text-xs font-bold uppercase tracking-widest px-3 py-1.5 rounded-lg border transition-all"
+                style={{
+                  color: legendOpen ? '#fcd34d' : '#94a3b8',
+                  borderColor: legendOpen ? 'rgba(252,211,77,0.4)' : 'rgba(255,255,255,0.12)',
+                  background: legendOpen ? 'rgba(252,211,77,0.08)' : 'rgba(255,255,255,0.04)',
+                }}>
+                {legendOpen ? '✕ Close' : '🏠 House Guide'}
+              </button>
+            </div>
           </motion.div>
         )}
 
@@ -704,7 +736,7 @@ export default function LandMarketplacePage() {
                 <div className="space-y-4">
                   <p className="text-gray-400 text-sm">Available for purchase</p>
                   <p className="font-serif text-2xl font-bold" style={{ color: '#fcd34d' }}>
-                    ₹{PRICE_PER_PLOT}
+                    ₹{currentPlotPrice}
                   </p>
                   {!isAuthenticated
                     ? <p className="text-gray-500 text-sm">Log in to purchase a plot.</p>

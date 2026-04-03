@@ -18,7 +18,7 @@ import { createEnginePayload, ENGINE_TYPES, getEngineProfile } from '../landWorl
 import ExteriorDesignPanel from '../components/landWorld/ExteriorDesignPanel';
 import HouseManagementPanel from '../components/landWorld/HouseManagementPanel';
 import LandWorldUnified3D from '../components/landWorld/LandWorldUnified3D';
-import { PRICE_PER_PLOT } from '../data/plotsData';
+import { getCurrentPlotPrice, MIN_PLOT_PRICE, MAX_PLOT_PRICE } from '../data/plotsData';
 import { premiumMerchandise, dailyMerchandise } from '../data/merchandiseData';
 import relicsData from '../data/relicsData';
 
@@ -88,6 +88,9 @@ export default function LandWorldPage() {
     if (!total) return '0.0';
     return ((Object.keys(ownershipMap).length / total) * 100).toFixed(1);
   }, [layout, ownershipMap]);
+  const worldTotalPlots = layout?.activePlotIndices?.length || 1;
+  const worldOwnedPlots = Object.keys(ownershipMap).length;
+  const currentWorldPlotPrice = getCurrentPlotPrice(worldOwnedPlots, worldTotalPlots);
 
   const cardCount = user?.ownedCards?.length ?? 0;
   const collectibleInventory = useMemo(() => buildInventory(user), [user]);
@@ -238,6 +241,9 @@ export default function LandWorldPage() {
         <p className="mt-1 text-[11px] text-gray-500">
           One unified mode: free roam camera with no center lock. Drag/scroll/pinch to move anywhere.
         </p>
+        <p className="mt-1 text-[11px] text-gray-500">
+          Plot pricing: ₹{MIN_PLOT_PRICE} to ₹{MAX_PLOT_PRICE} based on land fill · Current ₹{currentWorldPlotPrice}
+        </p>
       </div>
       <div className="absolute inset-0 p-4 pt-32">
         <div
@@ -332,7 +338,7 @@ export default function LandWorldPage() {
             ) : (
               <>
                 <p className="text-gray-300">Available for purchase</p>
-                <p className="mt-1 text-xl font-bold text-gold">₹{PRICE_PER_PLOT}</p>
+                <p className="mt-1 text-xl font-bold text-gold">₹{currentWorldPlotPrice}</p>
                 <button
                   type="button"
                   onClick={handlePurchasePlot}

@@ -1,5 +1,5 @@
 import { getData, setData, updateData, simulateApi } from './storageService';
-import { TOTAL_PLOTS, PRICE_PER_PLOT, indexToRowCol, rowColToIndex } from '../data/plotsData';
+import { TOTAL_PLOTS, getCurrentPlotPrice, indexToRowCol, rowColToIndex } from '../data/plotsData';
 import { getPremiumThemeForPlotCount } from '../data/profileThemes';
 
 const THEME_KEY_PREFIX = 'silvertriverse_profile_theme_';
@@ -23,7 +23,7 @@ export const plotsService = {
         col,
         ownerId: record?.ownerId ?? null,
         ownerName: record?.ownerName ?? null,
-        price: PRICE_PER_PLOT,
+        price: getCurrentPlotPrice(list.length, TOTAL_PLOTS),
       };
     });
   },
@@ -64,6 +64,7 @@ export const plotsService = {
       const taken = list.some((r) => r.plotIndex === plotIndex);
       if (taken) throw new Error('Plot already owned');
       if (plotIndex < 0 || plotIndex >= TOTAL_PLOTS) throw new Error('Invalid plot');
+      const purchasePrice = getCurrentPlotPrice(list.length, TOTAL_PLOTS);
       const newRecord = {
         plotIndex,
         ownerId: userId,
@@ -80,7 +81,7 @@ export const plotsService = {
         setData(themeKey, themeId);
       }
 
-      return { success: true, plotIndex, ownerId: userId, themeAssigned: !!themeId };
+      return { success: true, plotIndex, ownerId: userId, themeAssigned: !!themeId, purchasePrice };
     });
   },
 };

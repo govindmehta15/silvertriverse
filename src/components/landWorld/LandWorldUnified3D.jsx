@@ -23,6 +23,62 @@ const SPACING = 1.65;
 const ROAD_WIDTH = 1.65;
 const PLOT_SCALE = 1.15;
 
+function getDayNightProfile() {
+  const now = new Date();
+  const hour = now.getHours() + (now.getMinutes() / 60);
+  const dayStart = 6;
+  const sunsetStart = 18;
+  const sunsetEnd = 19.5;
+  const sunriseStart = 4.75;
+  const sunriseEnd = 6.25;
+  const isNight = hour >= sunsetEnd || hour < sunriseStart;
+  let dayMix = 1;
+  if (isNight) {
+    dayMix = 0;
+  } else if (hour >= sunsetStart && hour < sunsetEnd) {
+    dayMix = 1 - ((hour - sunsetStart) / (sunsetEnd - sunsetStart));
+  } else if (hour >= sunriseStart && hour < sunriseEnd) {
+    dayMix = (hour - sunriseStart) / (sunriseEnd - sunriseStart);
+  }
+
+  const daylightProgress = Math.max(0, Math.min(1, (hour - dayStart) / 12));
+  const sunArc = daylightProgress * Math.PI;
+  const sunPosition = [
+    Math.cos(sunArc) * 95,
+    Math.max(6, Math.sin(sunArc) * 88),
+    -54,
+  ];
+  const moonPosition = [
+    -Math.cos(sunArc) * 82,
+    Math.max(18, 54 - Math.sin(sunArc) * 32),
+    36,
+  ];
+  return {
+    isNight,
+    sunPosition,
+    moonPosition,
+    sky: {
+      turbidity: 2.2 + (4.5 * dayMix),
+      rayleigh: 0.25 + (2.25 * dayMix),
+      mieDirectionalG: 0.95 - (0.13 * dayMix),
+      mieCoefficient: 0.011 - (0.006 * dayMix),
+    },
+    starsCount: Math.round(7000 - (6400 * dayMix)),
+    ambient: {
+      intensity: 0.32 + (1.1 * dayMix),
+      color: dayMix > 0.45 ? '#fff7db' : '#9fb8ff',
+    },
+    sun: {
+      intensity: 0.12 + (3.0 * dayMix),
+      color: dayMix > 0.3 ? '#ffe7a7' : '#94a3b8',
+    },
+    moon: {
+      intensity: 1.0 - (0.72 * dayMix),
+      color: '#dbe7ff',
+    },
+  };
+}
+
 function buildUsersById() {
   const saved = getData('users');
   const all = saved && saved.length > 0 ? saved : mockUsers;
@@ -46,6 +102,7 @@ function Scene({
   decorTextureByKey,
 }) {
   const usersById = useMemo(() => buildUsersById(), []);
+  const dayNight = useMemo(() => getDayNightProfile(), []);
   const grassTexture = useTexture('/images/grass_texture.png');
   const collectibleTexturePaths = useMemo(() => {
     const unique = new Set();
@@ -142,21 +199,29 @@ function Scene({
       <PerspectiveCamera makeDefault position={[0, 34, 48]} fov={40} />
 
       <Sky
-        sunPosition={[60, 35, -60]}
+        sunPosition={dayNight.sunPosition}
         inclination={0.48}
         azimuth={0.28}
-        turbidity={10}
-        rayleigh={1.8}
-        mieDirectionalG={0.85}
-        mieCoefficient={0.004}
+        turbidity={dayNight.sky.turbidity}
+        rayleigh={dayNight.sky.rayleigh}
+        mieDirectionalG={dayNight.sky.mieDirectionalG}
+        mieCoefficient={dayNight.sky.mieCoefficient}
       />
-      <Stars radius={worldRadius + 80} depth={60} count={4500} factor={4} saturation={1} fade speed={0.5} />
+      <Stars
+        radius={worldRadius + 80}
+        depth={60}
+        count={dayNight.starsCount}
+        factor={4}
+        saturation={1}
+        fade
+        speed={dayNight.isNight ? 0.35 : 0.12}
+      />
 
-      <ambientLight intensity={1.25} color="#fef3c7" />
+      <ambientLight intensity={dayNight.ambient.intensity} color={dayNight.ambient.color} />
       <directionalLight
-        position={[50, 50, -40]}
-        intensity={2.6}
-        color="#fde68a"
+        position={dayNight.sunPosition}
+        intensity={dayNight.sun.intensity}
+        color={dayNight.sun.color}
         castShadow
         shadow-mapSize={[1024, 1024]}
         shadow-camera-far={150}
@@ -165,7 +230,17 @@ function Scene({
         shadow-camera-top={60}
         shadow-camera-bottom={-60}
       />
-      <directionalLight position={[-35, 25, 35]} intensity={0.9} color="#bfdbfe" />
+      <directionalLight
+        position={dayNight.moonPosition}
+        intensity={dayNight.moon.intensity}
+        color={dayNight.moon.color}
+      />
+      {dayNight.isNight && (
+        <mesh position={dayNight.moonPosition}>
+          <sphereGeometry args={[3.4, 20, 20]} />
+          <meshStandardMaterial color="#e5edff" emissive="#cad8ff" emissiveIntensity={0.65} />
+        </mesh>
+      )}
 
       <group>
         <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.15, 0]} receiveShadow>
