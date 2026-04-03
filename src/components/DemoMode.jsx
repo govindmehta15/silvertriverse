@@ -17,6 +17,9 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
+import { plotsService } from '../services/plotsService';
+import { getData, setData } from '../utils/storageService';
+import { mockUsers } from '../mock/mockUsers';
 
 // ─── Scene Definitions ───────────────────────────────────────────────────────
 // Each scene: { id, title, route, duration (ms), voiceover, note }
@@ -154,7 +157,109 @@ const SCENES = [
   },
 ];
 
-const TOTAL_DURATION = SCENES.reduce((sum, s) => sum + s.duration, 0); // ~5 minutes
+const AUDIO_3MIN_SCENES = [
+  {
+    id: 1,
+    title: 'Scene 01 — Citizen Entry',
+    route: '/reelity',
+    duration: 20000,
+    loginAs: 'u1',
+    voiceover:
+      'What if your digital presence wasn’t just a profile… but a space you truly own? Welcome to Silvertriverse — a new kind of digital ecosystem where identity, ownership, and entertainment come together. Every user who enters this world begins as a Citizen. And from the very beginning… they are not limited.',
+    note: 'Enter Reelity and reveal portal cards.',
+    accentColor: '#22d3ee',
+  },
+  {
+    id: 2,
+    title: 'Scene 02 — Ecosystem Movement',
+    route: '/collectible-units',
+    duration: 18000,
+    voiceover:
+      'Citizens can move seamlessly across the ecosystem — exploring advanced civilizations, experiencing innovative creations, and discovering new possibilities. They can also enter Collectible Units — to explore, understand, and unlock their utility.',
+    note: 'Scroll collectibles page to show active exploration.',
+    accentColor: '#a78bfa',
+  },
+  {
+    id: 3,
+    title: 'Scene 03 — Reelity Social Layer',
+    route: '/reelity',
+    duration: 20000,
+    voiceover:
+      'At the heart of Silvertriverse lies Reelity — the social engine of the entire experience. Reelity is where everything connects. From your personal actions… to the activity across the entire platform, everything is visible, interactive, and alive. It brings users together, drives engagement, and creates a truly immersive social layer.',
+    note: 'Scroll feed and highlight live hub activity.',
+    accentColor: '#22d3ee',
+  },
+  {
+    id: 4,
+    title: 'Scene 04 — Land Identity',
+    route: '/land',
+    duration: 22000,
+    voiceover:
+      'In Silvertriverse, profiles don’t exist the way you know them. Instead… you own digital land. This land becomes your identity — a space where you build, grow, and showcase your journey. But not all land is the same.',
+    note: 'Open Land and perform one real plot purchase.',
+    accentColor: '#4ade80',
+  },
+  {
+    id: 5,
+    title: 'Scene 05 — Advanced Civilization Land',
+    route: '/land-world',
+    duration: 20000,
+    voiceover:
+      'To unlock advanced capabilities like construction, expansion, and enhanced systems, users can upgrade to Advanced Civilization Land — where true transformation begins.',
+    note: 'Show Land World camera movement and build ambiance.',
+    accentColor: '#818cf8',
+  },
+  {
+    id: 6,
+    title: 'Scene 06 — Avatar Assistants',
+    route: '/ai-producer',
+    duration: 18000,
+    voiceover:
+      'And you’re not building alone. Every land owner is supported by expert AI agents — called Avatars. These Avatars are intelligent, task-focused assistants designed to support you across multiple domains. They help you learn, execute, and optimize your work… assist in business and operational tasks… and guide you in growing your digital presence. Your Avatar evolves with you — making your journey more efficient, strategic, and powerful.',
+    note: 'Show AI Producer then jump to AI Writer briefly.',
+    accentColor: '#f59e0b',
+  },
+  {
+    id: 7,
+    title: 'Scene 07 — Collectible Utility',
+    route: '/collectible-units',
+    duration: 20000,
+    voiceover:
+      'Now, step into the core driver of this ecosystem — Collectible Units. From films… to sports… to global brands and entertainment, these collectibles exist as digital assets — and for iconic items, even as physical counterparts, connected through a digital twin. But here’s what makes them different… They are not just collectibles. They carry utility.',
+    note: 'Simulate collectible acquisition and scroll detail-rich cards.',
+    accentColor: '#fcd34d',
+  },
+  {
+    id: 8,
+    title: 'Scene 08 — Utility-Powered Economy',
+    route: '/land',
+    duration: 22000,
+    voiceover:
+      'Each collectible holds power — power that can be used to build and develop your land into dynamic townships. With the support of your Avatars, this becomes a strategic experience. The right collectibles unlock the right possibilities. Users who act early, build intelligently, and use their resources effectively can unlock significant rewards. This creates an ecosystem that is interactive, competitive, and constantly evolving.',
+    note: 'Return to Land and show utility strip + purchased growth.',
+    accentColor: '#4ade80',
+  },
+  {
+    id: 9,
+    title: 'Scene 09 — Tradable Value Finale',
+    route: '/relics',
+    duration: 20000,
+    voiceover:
+      'Because of this utility, collectibles are no longer valuable just for rarity… They become functional assets. Tradable. Usable. Valuable. Land itself becomes part of this economy — where users can develop, enhance, and trade based on activity, progress, and demand. Silvertriverse is not just a platform. It’s a shift — from passive profiles to intelligent, evolving ownership. From static collectibles to utility-driven assets. From exploration to creation. From working alone to building alongside AI. This is where identity evolves… where value is created… and where the future of digital interaction begins. Welcome to Silvertriverse.',
+    note: 'Open relic market and finish on confident close.',
+    accentColor: '#f59e0b',
+  },
+];
+
+function getActiveScenes() {
+  if (typeof window === 'undefined') return SCENES;
+  const script = new URLSearchParams(window.location.search).get('demoScript');
+  if (script === 'audio3min' || script === '3min') return AUDIO_3MIN_SCENES;
+  return SCENES;
+}
+
+const ACTIVE_SCENES = getActiveScenes();
+const TOTAL_DURATION = ACTIVE_SCENES.reduce((sum, s) => sum + s.duration, 0);
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 function formatTime(ms) {
@@ -162,6 +267,51 @@ function formatTime(ms) {
   const m = Math.floor(totalSec / 60);
   const s = totalSec % 60;
   return `${m}:${String(s).padStart(2, '0')}`;
+}
+
+const AUTH_KEY = 'silvertriverse_auth_session';
+
+function smoothScrollTo(top) {
+  try {
+    window.scrollTo({ top, behavior: 'smooth' });
+  } catch {
+    window.scrollTo(0, top);
+  }
+}
+
+function getCurrentDemoUser() {
+  return getData(AUTH_KEY, mockUsers[0]);
+}
+
+function ensureUsersStore() {
+  const users = getData('users');
+  if (!Array.isArray(users) || users.length === 0) setData('users', mockUsers);
+}
+
+function grantCollectibleToUser(userId, itemId = 'y2', cardId = 'c5') {
+  ensureUsersStore();
+  const users = getData('users', []);
+  const idx = users.findIndex((u) => u.id === userId);
+  if (idx < 0) return;
+  const next = { ...users[idx] };
+  next.purchasedItems = Array.isArray(next.purchasedItems) ? [...next.purchasedItems] : [];
+  next.ownedCards = Array.isArray(next.ownedCards) ? [...next.ownedCards] : [];
+  if (!next.purchasedItems.includes(itemId)) next.purchasedItems.push(itemId);
+  if (!next.ownedCards.includes(cardId)) next.ownedCards.push(cardId);
+  users[idx] = next;
+  setData('users', users);
+  if (next.id === userId) setData(AUTH_KEY, next);
+}
+
+async function purchaseOneAvailablePlot() {
+  const user = getCurrentDemoUser();
+  const ownership = plotsService.getOwnershipMapSync();
+  let target = null;
+  for (let i = 0; i < 625; i += 1) {
+    if (!ownership[i]) { target = i; break; }
+  }
+  if (target === null) return;
+  await plotsService.purchasePlot(user.id, user.name, target);
 }
 
 // ─── Scene Overlay ────────────────────────────────────────────────────────────
@@ -324,6 +474,7 @@ export default function DemoMode({ autostart = false }) {
 
   const sceneTimerRef = useRef(null);
   const tickRef = useRef(null);
+  const actionTimersRef = useRef([]);
   const startTimeRef = useRef(null);
   const sceneStartRef = useRef(null);
 
@@ -331,6 +482,8 @@ export default function DemoMode({ autostart = false }) {
   const cleanup = useCallback(() => {
     clearTimeout(sceneTimerRef.current);
     clearInterval(tickRef.current);
+    actionTimersRef.current.forEach((t) => clearTimeout(t));
+    actionTimersRef.current = [];
   }, []);
 
   const stopDemo = useCallback(() => {
@@ -344,13 +497,13 @@ export default function DemoMode({ autostart = false }) {
   // ── Advance to scene ───────────────────────────────────────────────
   const goToScene = useCallback(
     (index) => {
-      if (index >= SCENES.length) {
+      if (index >= ACTIVE_SCENES.length) {
         cleanup();
         setStatus('finished');
         return;
       }
 
-      const scene = SCENES[index];
+      const scene = ACTIVE_SCENES[index];
       setSceneIndex(index);
       setSceneElapsed(0);
       sceneStartRef.current = Date.now();
@@ -362,6 +515,55 @@ export default function DemoMode({ autostart = false }) {
 
       // Navigate to the scene's route
       navigate(scene.route);
+
+      // Automated in-scene actions for the 3-min audio script
+      actionTimersRef.current.forEach((t) => clearTimeout(t));
+      actionTimersRef.current = [];
+      const queueAction = (delay, fn) => {
+        const t = setTimeout(fn, delay);
+        actionTimersRef.current.push(t);
+      };
+
+      const script = new URLSearchParams(window.location.search).get('demoScript');
+      const isAudio3 = script === 'audio3min' || script === '3min';
+      if (isAudio3) {
+        if (scene.id === 1) {
+          queueAction(1200, () => smoothScrollTo(120));
+          queueAction(5200, () => smoothScrollTo(420));
+        } else if (scene.id === 2) {
+          queueAction(900, () => smoothScrollTo(260));
+          queueAction(5200, () => smoothScrollTo(980));
+        } else if (scene.id === 3) {
+          queueAction(1200, () => smoothScrollTo(520));
+          queueAction(7800, () => smoothScrollTo(60));
+        } else if (scene.id === 4) {
+          queueAction(1900, async () => { await purchaseOneAvailablePlot(); });
+          queueAction(7200, () => {
+            const guide = Array.from(document.querySelectorAll('button')).find((b) => b.textContent?.includes('House Guide'));
+            guide?.click();
+          });
+        } else if (scene.id === 5) {
+          queueAction(2200, () => smoothScrollTo(460));
+          queueAction(9200, () => smoothScrollTo(70));
+        } else if (scene.id === 6) {
+          queueAction(8200, () => navigate('/ai-writer'));
+        } else if (scene.id === 7) {
+          queueAction(1800, () => grantCollectibleToUser(getCurrentDemoUser().id));
+          queueAction(4200, () => smoothScrollTo(860));
+          queueAction(9800, () => smoothScrollTo(90));
+        } else if (scene.id === 8) {
+          queueAction(2500, async () => { await purchaseOneAvailablePlot(); });
+          queueAction(7200, () => {
+            const jumpBtn = Array.from(document.querySelectorAll('button')).find((b) => b.textContent?.includes('Jump to My Plot'));
+            jumpBtn?.click();
+          });
+        } else if (scene.id === 9) {
+          queueAction(4200, () => {
+            const firstRelic = document.querySelector('a[href^="/relics/"]');
+            if (firstRelic) firstRelic.click();
+          });
+        }
+      }
 
       // Schedule next scene
       clearTimeout(sceneTimerRef.current);
@@ -422,7 +624,7 @@ export default function DemoMode({ autostart = false }) {
   // ── Cleanup on unmount ────────────────────────────────────────────
   useEffect(() => () => cleanup(), [cleanup]);
 
-  const currentScene = SCENES[sceneIndex];
+  const currentScene = ACTIVE_SCENES[sceneIndex];
 
   // ── Finished screen ────────────────────────────────────────────────
   if (status === 'finished') {
@@ -433,7 +635,7 @@ export default function DemoMode({ autostart = false }) {
       >
         <div className="text-6xl mb-4">🎬</div>
         <h2 className="font-serif text-3xl text-white font-bold mb-2">Demo Complete!</h2>
-        <p className="text-gray-400 text-sm mb-8">All 13 scenes have played. Stop your recording.</p>
+        <p className="text-gray-400 text-sm mb-8">All {ACTIVE_SCENES.length} scenes have played. Stop your recording.</p>
         <button
           onClick={stopDemo}
           className="px-6 py-3 rounded-xl font-bold text-sm"
@@ -507,7 +709,7 @@ export default function DemoMode({ autostart = false }) {
               className="w-2 h-2 rounded-full animate-pulse"
               style={{ background: '#ef4444' }}
             />
-            REC &nbsp;·&nbsp; Scene {currentScene.id} of {SCENES.length} &nbsp;·&nbsp;{' '}
+            REC &nbsp;·&nbsp; Scene {currentScene.id} of {ACTIVE_SCENES.length} &nbsp;·&nbsp;{' '}
             {formatTime(TOTAL_DURATION - totalElapsed)} left
           </div>
         </motion.div>

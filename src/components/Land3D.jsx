@@ -68,16 +68,17 @@ function getDayNightProfile() {
             34,
         ],
         sky: {
-            // Day: lighter blue sky, Night: softer darker atmosphere.
-            turbidity: 3.8 - (1.8 * dayMix),
-            rayleigh: 0.3 + (2.9 * dayMix),
-            mieDirectionalG: 0.95 - (0.15 * dayMix),
-            mieCoefficient: 0.01 - (0.0075 * dayMix),
+            // Day should look truly sky-blue (less milky white haze).
+            turbidity: 3.5 - (1.4 * dayMix),
+            rayleigh: 0.2 + (2.8 * dayMix),
+            mieDirectionalG: 0.82 - (0.08 * dayMix),
+            mieCoefficient: 0.009 - (0.0081 * dayMix),
         },
         starsCount: Math.round(7500 - (6800 * dayMix)),
-        ambient: { intensity: 0.34 + (1.15 * dayMix), color: dayMix > 0.45 ? '#fff7d6' : '#9fb8ff' },
-        sun: { intensity: 0.12 + (3.08 * dayMix), color: dayMix > 0.3 ? '#ffe7a7' : '#94a3b8' },
+        ambient: { intensity: 0.3 + (0.86 * dayMix), color: dayMix > 0.45 ? '#eef6ff' : '#9fb8ff' },
+        sun: { intensity: 0.1 + (2.35 * dayMix), color: dayMix > 0.3 ? '#ffe9b6' : '#94a3b8' },
         moon: { intensity: 1.08 - (0.8 * dayMix), color: '#dbe7ff' },
+        background: dayMix > 0.45 ? '#63C5DA' : '#0b1226',
     };
 }
 
@@ -149,6 +150,17 @@ const SunOrb = memo(({ position = [55, 55, -40], isNight = false }) => {
         </mesh>
     );
 });
+
+const SkyTintDome = memo(({ isNight = false }) => (
+    <mesh>
+        <sphereGeometry args={[900, 24, 24]} />
+        <meshBasicMaterial
+            color={isNight ? '#0b1226' : '#63C5DA'}
+            side={THREE.BackSide}
+            depthWrite={false}
+        />
+    </mesh>
+));
 
 const LightCloudLayer = memo(({ visible = true, strength = 1 }) => {
     const groupRef = useRef();
@@ -465,9 +477,11 @@ function Scene({ ownershipMap, user, onPlotClick, selectedPlotIndex }) {
 
     return (
         <>
+            <color attach="background" args={[dayNight.background]} />
             <PerspectiveCamera makeDefault position={[0, 38, 50]} fov={36} />
 
             {/* Sky */}
+            <SkyTintDome isNight={dayNight.isNight} />
             <Sky
                 sunPosition={sunPos}
                 turbidity={dayNight.sky.turbidity}
@@ -511,16 +525,22 @@ function Scene({ ownershipMap, user, onPlotClick, selectedPlotIndex }) {
                     />
                 </mesh>
 
-                {/* Infinite Grass World Foundation */}
+                {/* Outer World Foundation (ocean-like far zone) */}
                 <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.25, 0]} receiveShadow>
                     <planeGeometry args={[1200, 1200]} />
-                    <meshStandardMaterial map={grassTexture} color="#1d4d1a" roughness={0.9} />
+                    <meshStandardMaterial
+                        color="#0f4f68"
+                        emissive="#0a3446"
+                        emissiveIntensity={0.12}
+                        roughness={0.22}
+                        metalness={0.68}
+                    />
                 </mesh>
 
                 {/* Distant Water/Ocean */}
                 <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.28, -550]} receiveShadow>
                     <planeGeometry args={[2000, 400]} />
-                    <meshStandardMaterial color="#0c4a6e" roughness={0.1} metalness={0.8} />
+                    <meshStandardMaterial color="#0b4f6c" roughness={0.2} metalness={0.7} />
                 </mesh>
 
                 <Roads cols={COLS} rows={ROWS} spacing={SPACING} roadWidth={ROAD_WIDTH} />

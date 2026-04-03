@@ -55,27 +55,29 @@ function getDayNightProfile() {
   ];
   return {
     isNight,
+    dayMix,
     sunPosition,
     moonPosition,
     sky: {
-      turbidity: 2.2 + (4.5 * dayMix),
-      rayleigh: 0.25 + (2.25 * dayMix),
-      mieDirectionalG: 0.95 - (0.13 * dayMix),
-      mieCoefficient: 0.011 - (0.006 * dayMix),
+      turbidity: 3.4 - (1.35 * dayMix),
+      rayleigh: 0.28 + (2.5 * dayMix),
+      mieDirectionalG: 0.86 - (0.08 * dayMix),
+      mieCoefficient: 0.0095 - (0.0075 * dayMix),
     },
     starsCount: Math.round(7000 - (6400 * dayMix)),
     ambient: {
-      intensity: 0.32 + (1.1 * dayMix),
-      color: dayMix > 0.45 ? '#fff7db' : '#9fb8ff',
+      intensity: 0.45 + (0.95 * dayMix),
+      color: dayMix > 0.45 ? '#edf6ff' : '#9fb8ff',
     },
     sun: {
-      intensity: 0.12 + (3.0 * dayMix),
+      intensity: 0.2 + (2.6 * dayMix),
       color: dayMix > 0.3 ? '#ffe7a7' : '#94a3b8',
     },
     moon: {
-      intensity: 1.0 - (0.72 * dayMix),
+      intensity: 0.95 - (0.75 * dayMix),
       color: '#dbe7ff',
     },
+    background: dayMix > 0.45 ? '#63C5DA' : '#0b1226',
   };
 }
 
@@ -174,6 +176,7 @@ function Scene({
             ownerThemeAccent={getOwnerThemeAccent(ownerId)}
             ownerCardCount={ownerUser?.ownedCards?.length ?? 0}
             wallTextures={wallTextures}
+            showBasePlate
           />
         </group>
       );
@@ -196,6 +199,7 @@ function Scene({
 
   return (
     <>
+      <color attach="background" args={[dayNight.background]} />
       <PerspectiveCamera makeDefault position={[0, 34, 48]} fov={40} />
 
       <Sky
@@ -247,8 +251,8 @@ function Scene({
           <planeGeometry args={[worldRadius * 2.4, worldRadius * 2.4]} />
           <meshStandardMaterial
             map={grassTexture}
-            color="#1a2f1a"
-            roughness={0.92}
+            color={dayNight.dayMix > 0.45 ? '#4c9a4f' : '#254834'}
+            roughness={0.86}
             metalness={0.06}
           />
         </mesh>
@@ -261,8 +265,8 @@ function Scene({
           cellSize={SPACING}
           sectionSize={SPACING * 5}
           sectionThickness={1.5}
-          sectionColor="#334155"
-          cellColor="#0f1a2b"
+          sectionColor="#4b647f"
+          cellColor="#3d6f46"
           position={[0, -0.12, 0]}
         />
         {plots}
@@ -270,7 +274,7 @@ function Scene({
 
       <ContactShadows
         position={[0, -0.12, 0]}
-        opacity={0.45}
+        opacity={0.3}
         scale={Math.max(110, worldRadius * 1.25)}
         blur={2}
         far={Math.max(20, worldRadius * 0.28)}
@@ -282,8 +286,8 @@ function Scene({
         enableRotate
         enablePan
         panSpeed={0.9}
-        rotateSpeed={0.8}
-        zoomSpeed={0.95}
+        rotateSpeed={0.78}
+        zoomSpeed={1.1}
         mouseButtons={{
           LEFT: THREE.MOUSE.PAN,
           MIDDLE: THREE.MOUSE.DOLLY,
@@ -294,8 +298,8 @@ function Scene({
           TWO: THREE.TOUCH.DOLLY_ROTATE,
         }}
         maxPolarAngle={Math.PI / 2.05}
-        minDistance={10}
-        maxDistance={Math.max(220, worldRadius * 2.6)}
+        minDistance={6}
+        maxDistance={Math.max(180, worldRadius * 2.2)}
       />
     </>
   );
@@ -316,7 +320,7 @@ export default function LandWorldUnified3D({
         shadows
         dpr={Math.min(window.devicePixelRatio, 1.5)}
         gl={{ antialias: true, powerPreference: 'high-performance' }}
-        frameloop="demand"
+        frameloop="always"
       >
         <Suspense fallback={null}>
           <Scene

@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { motion } from 'framer-motion';
+import { useEffect, useState } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate, Link } from 'react-router-dom';
 import { reelityService } from '../services/reelityService';
@@ -37,13 +37,13 @@ const APP_FEATURE_SPOTLIGHTS = [
     },
     {
         id: 'spotlight-ai',
-        title: 'Avatar',
-        message: 'Generate stories with advanced producers.',
+        title: 'AI Avatars',
+        message: 'Enter biometric AI command center for Writer, Producer, and more agents.',
         icon: '🤖',
-        link: '/ai-writer',
+        link: '/ai-avatars',
         accent: 'from-violet-600/20 to-indigo-900/40',
         borderColor: 'border-violet-500/30',
-        stats: 'Active Gen'
+        stats: 'Future Access'
     },
 ];
 
@@ -74,6 +74,8 @@ export default function ReelityFeedPage() {
     const [showPostForm, setShowPostForm] = useState(false);
     const [postCaption, setPostCaption] = useState('');
     const [commentText, setCommentText] = useState({});
+    const [portalFx, setPortalFx] = useState(null);
+    const [portalStepIndex, setPortalStepIndex] = useState(0);
 
     const { data: feedRes, isLoading } = useQuery({
         queryKey: ['reelityFeed'],
@@ -158,6 +160,71 @@ export default function ReelityFeedPage() {
     };
     const interleavedFeed = buildFeedWithClubsAndSpotlights();
 
+    useEffect(() => {
+        if (!portalFx?.link) return undefined;
+
+        setPortalStepIndex(0);
+        let stepIdx = 0;
+        const steps = portalFx.steps || [];
+        const interval = setInterval(() => {
+            stepIdx += 1;
+            if (stepIdx < steps.length) {
+                setPortalStepIndex(stepIdx);
+                return;
+            }
+            clearInterval(interval);
+            setTimeout(() => {
+                navigate(portalFx.link);
+                setPortalFx(null);
+                setPortalStepIndex(0);
+            }, 280);
+        }, 420);
+
+        return () => clearInterval(interval);
+    }, [portalFx, navigate]);
+
+    const getPortalSteps = (spot) => {
+        if (spot.link === '/land') {
+            return [
+                'Syncing land registry',
+                'Calibrating skyline and terrain',
+                'Preparing plot controls',
+                'Entering Metropolis Land',
+            ];
+        }
+        if (spot.link === '/relics') {
+            return [
+                'Scanning live relic auctions',
+                'Connecting bid momentum stream',
+                'Preparing vault insights',
+                'Entering Relics Arena',
+            ];
+        }
+        if (spot.link === '/ai-avatars') {
+            return [
+                'Scanning biometric signature',
+                'Loading avatar command matrix',
+                'Syncing writer and producer nodes',
+                'Entering AI Avatars',
+            ];
+        }
+        return [
+            'Initializing destination',
+            'Loading modules',
+            'Syncing session',
+            `Entering ${spot.title}`,
+        ];
+    };
+
+    const triggerPortalTravel = (spot) => {
+        setPortalFx({
+            link: spot.link,
+            title: spot.title,
+            icon: spot.icon,
+            steps: getPortalSteps(spot),
+        });
+    };
+
     if (isLoading) {
         return <div className="space-y-4"><SkeletonCard /><SkeletonCard /><SkeletonCard /></div>;
     }
@@ -174,7 +241,7 @@ export default function ReelityFeedPage() {
                             <motion.button
                                 key={spot.id}
                                 whileHover={{ scale: 1.02, y: -4 }}
-                                onClick={() => navigate(spot.link)}
+                                onClick={() => triggerPortalTravel(spot)}
                                 className={`relative overflow-hidden group p-5 rounded-2xl border ${spot.borderColor} bg-gradient-to-br ${spot.accent} text-left transition-all`}
                             >
                                 <div className="flex justify-between items-start mb-3">
@@ -221,7 +288,7 @@ export default function ReelityFeedPage() {
                                         key={spot.id}
                                         variants={item}
                                         whileHover={{ y: -3, scale: 1.01 }}
-                                        onClick={() => navigate(spot.link)}
+                                        onClick={() => triggerPortalTravel(spot)}
                                         className={`relative w-full overflow-hidden rounded-2xl border ${spot.borderColor} bg-gradient-to-br ${spot.accent} p-5 text-left`}
                                     >
                                         <div className="mb-3 flex items-center justify-between">
@@ -428,6 +495,65 @@ export default function ReelityFeedPage() {
                     </div>
                 </div>
             )}
+
+            <AnimatePresence>
+                {portalFx && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="pointer-events-none fixed inset-0 z-[120] flex items-center justify-center bg-black/40 backdrop-blur-[1px]"
+                    >
+                        <div className="relative w-72 h-72">
+                            <motion.div
+                                initial={{ scale: 0.45, rotate: 0, opacity: 0.2 }}
+                                animate={{ scale: 1.2, rotate: 280, opacity: 1 }}
+                                exit={{ scale: 1.5, opacity: 0 }}
+                                transition={{ duration: 0.58, ease: 'easeOut' }}
+                                className="absolute inset-0 rounded-full border-4 border-orange-300/80 shadow-[0_0_60px_rgba(251,146,60,0.8)]"
+                            />
+                            <motion.div
+                                initial={{ scale: 0.35, rotate: 0, opacity: 0.1 }}
+                                animate={{ scale: 1.06, rotate: -220, opacity: 0.95 }}
+                                exit={{ scale: 1.35, opacity: 0 }}
+                                transition={{ duration: 0.62, ease: 'easeOut' }}
+                                className="absolute inset-4 rounded-full border-2 border-amber-300/80"
+                            />
+                            <motion.div
+                                initial={{ scale: 0.3, opacity: 0 }}
+                                animate={{ scale: 1, opacity: 0.88 }}
+                                exit={{ scale: 1.25, opacity: 0 }}
+                                transition={{ duration: 0.5 }}
+                                className="absolute inset-10 rounded-full bg-gradient-to-br from-orange-500/55 via-amber-300/45 to-transparent"
+                            />
+                            <motion.div
+                                initial={{ opacity: 0, y: 12 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -8 }}
+                                transition={{ duration: 0.35 }}
+                                className="absolute inset-0 flex flex-col items-center justify-center text-center"
+                            >
+                                <span className="text-4xl">{portalFx.icon}</span>
+                                <p className="mt-2 text-xs font-bold uppercase tracking-widest text-amber-200">
+                                    Opening Portal
+                                </p>
+                                <p className="text-sm font-semibold text-white">{portalFx.title}</p>
+                                <p className="mt-2 text-[11px] text-amber-100/90">
+                                    {portalFx.steps?.[portalStepIndex] || 'Initializing destination'}
+                                </p>
+                                <div className="mt-2 flex items-center gap-1.5">
+                                    {(portalFx.steps || []).map((step, idx) => (
+                                        <span
+                                            key={`${portalFx.link}-${step}`}
+                                            className={`h-1.5 w-5 rounded-full ${idx <= portalStepIndex ? 'bg-amber-300' : 'bg-white/25'}`}
+                                        />
+                                    ))}
+                                </div>
+                            </motion.div>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 }

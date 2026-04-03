@@ -307,6 +307,7 @@ function Plot3D({
   progress = 100, // Construction completeness 0-100
   x, z,
   showHouse = true, // Render-distance optimization
+  showBasePlate = false,
 }) {
   const houseGroupRef = useRef();
   const [hovered, setHovered] = useState(false);
@@ -337,12 +338,26 @@ function Plot3D({
 
   return (
     <group position={[x, 0, z]}>
-      {/* Ground plate logic removed (now in InstancedBases) */}
-      <group
-        onPointerOver={() => setHovered(true)}
-        onPointerOut={() => setHovered(false)}
-        onClick={(e) => { e.stopPropagation(); onClick(index); }}
-      />
+      {/* Optional base plate used by Land World to keep plots visible/clickable */}
+      {showBasePlate && (
+        <mesh
+          position={[0, 0.02, 0]}
+          onPointerOver={() => setHovered(true)}
+          onPointerOut={() => setHovered(false)}
+          onClick={(e) => { e.stopPropagation(); onClick(index); }}
+          castShadow={false}
+          receiveShadow
+        >
+          <boxGeometry args={[1.12, 0.05, 1.12]} />
+          <meshStandardMaterial
+            color={plotColor}
+            emissive={plotEmissive}
+            emissiveIntensity={plotEmInt}
+            roughness={0.75}
+            metalness={0.12}
+          />
+        </mesh>
+      )}
 
       {/* Glowing border accents on owned plots (simplified to dots) */}
       {isOwned && (

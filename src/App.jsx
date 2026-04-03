@@ -39,6 +39,8 @@ import AIProducerLayout from './layouts/AIProducerLayout';
 import AIProducerHubPage from './pages/AIProducerHubPage';
 import AIProducerTopUpPage from './pages/AIProducerTopUpPage';
 import AIProducerWorkflowPage from './pages/AIProducerWorkflowPage';
+import AIAvatarsPage from './pages/AIAvatarsPage';
+import AIAvatarAgentPage from './pages/AIAvatarAgentPage';
 import LandMarketplacePage from './pages/LandMarketplacePage';
 import LandWorldPage from './pages/LandWorldPage';
 import SplashScreen from './components/SplashScreen';
@@ -164,6 +166,8 @@ export default function App({ demoModeOverride = false }) {
                       <Route path="/fcu/create-post" element={<Navigate to="/collectible-units/create-post" replace />} />
                       <Route path="/fcu/submit-story" element={<Navigate to="/collectible-units/submit-story" replace />} />
                       <Route path="/fcu/pipeline" element={<Navigate to="/collectible-units/pipeline" replace />} />
+                      <Route path="/ai-avatars" element={<AIAvatarsPage />} />
+                      <Route path="/ai-avatars/agent/:agentId" element={<AIAvatarAgentPage />} />
                       <Route path="/ai-writer" element={<AIWriterLayout />}>
                         <Route index element={<AIWriterHubPage />} />
                         <Route path="history" element={<AIWriterHistoryPage />} />

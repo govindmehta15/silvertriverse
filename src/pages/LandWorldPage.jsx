@@ -225,7 +225,7 @@ export default function LandWorldPage() {
   }
 
   return (
-    <div className="relative h-[calc(100vh-0px)] min-h-[480px] w-full overflow-hidden bg-navy-950 lg:h-[calc(100vh-0px)]">
+    <div className="relative h-[calc(100vh-72px)] min-h-[520px] w-full overflow-hidden bg-navy-950 md:h-[calc(100vh-0px)]">
       <div className="absolute left-4 top-4 z-10 max-w-md rounded-xl border border-navy-600/40 bg-navy-950/85 px-4 py-3 text-left shadow-lg backdrop-blur-md">
         <h1 className="font-serif text-xl font-bold text-gold">Land World</h1>
         <p className="mt-1 text-xs text-gray-400">
@@ -245,7 +245,7 @@ export default function LandWorldPage() {
           Plot pricing: ₹{MIN_PLOT_PRICE} to ₹{MAX_PLOT_PRICE} based on land fill · Current ₹{currentWorldPlotPrice}
         </p>
       </div>
-      <div className="absolute inset-0 p-4 pt-32">
+      <div className="absolute inset-0 p-2 pt-32 md:p-4 md:pt-32">
         <div
           className="relative h-full w-full overflow-hidden rounded-2xl border border-violet-500/30 bg-navy-950"
           style={{ boxShadow: '0 0 48px rgba(139,92,246,0.22)' }}

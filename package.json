@@ -5,6 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "demo:audio3min": "vite --open \"/demo.html?demoScript=audio3min\"",
+    "demo:default": "vite --open \"/demo.html\"",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview"
